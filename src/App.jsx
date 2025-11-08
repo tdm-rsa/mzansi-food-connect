@@ -2044,12 +2044,6 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
 
   return (
     <div className="app">
-      {/* Floating Landing Page Button */}
-      <a href="/landing" target="_blank" rel="noopener noreferrer" className="floating-landing-btn">
-        <span>🌍</span>
-        <span>Landing Page</span>
-      </a>
-
       <Header />
       <main className="main">{renderView()}</main>
       
