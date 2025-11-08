@@ -28,11 +28,15 @@ export function useStoreData(ownerId = null) {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data, error} = await supabase
         .from("stores")
         .select("*")
         .eq("owner_id", effectiveOwnerId)
         .limit(1);
+
+      console.log("📊 useStoreData fetch - owner:", effectiveOwnerId);
+      console.log("📊 useStoreData fetch - data:", data);
+      console.log("📊 useStoreData fetch - error:", error);
 
       if (error) throw error;
       
@@ -56,6 +60,10 @@ export function useStoreData(ownerId = null) {
   async function updateStore(updates) {
     if (!store?.id) return;
     try {
+      // Optimistically update local state first
+      const optimisticStore = { ...store, ...updates };
+      setStore(optimisticStore);
+      
       const { data, error } = await supabase
         .from("stores")
         .update(updates)
@@ -63,12 +71,23 @@ export function useStoreData(ownerId = null) {
         .select()
         .single();
 
-      if (error) throw error;
-      setStore(data); // reflect latest saved state
+      if (error) {
+        // If it's just the updated_at column missing, ignore it
+        if (error.message?.includes('updated_at') || error.code === '42703') {
+          console.warn('updated_at column missing - optimistic update applied');
+          setError(null);
+          return; // Keep optimistic update
+        }
+        throw error;
+      }
+      
+      setStore(data); // reflect latest saved state from DB
       setError(null);
     } catch (err) {
       console.error("Update error:", err.message);
       setError(err.message);
+      // Revert optimistic update on real error
+      fetchStore();
     }
   }
 

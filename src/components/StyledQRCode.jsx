@@ -4,7 +4,9 @@ import { supabase } from "../supabaseClient";
 
 export default function StyledQRCode({ storeName }) {
   const ref = useRef(null);
+  const whatsappQrRef = useRef(null);
   const [qr, setQr] = useState(null);
+  const [whatsappQr, setWhatsappQr] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // 🎨 Customizable state
@@ -14,6 +16,7 @@ export default function StyledQRCode({ storeName }) {
   const [tagline, setTagline] = useState("Scan to order online 🍴");
   const [logoFile, setLogoFile] = useState(null);
   const [ownerWebsite, setOwnerWebsite] = useState("");
+  const [whatsappGroupLink, setWhatsappGroupLink] = useState("");
   const [storeId, setStoreId] = useState(null);
 
   // ✅ Load saved QR design from Supabase
@@ -28,6 +31,7 @@ export default function StyledQRCode({ storeName }) {
         setFrameStyle(data.qr_frame || "rounded");
         setTagline(data.qr_tagline || "Scan to order online 🍴");
         setOwnerWebsite(data.qr_custom_url || "");
+        setWhatsappGroupLink(data.whatsapp_group_link || "");
         setStoreId(data.id);
       }
       setLoading(false);
@@ -76,6 +80,50 @@ export default function StyledQRCode({ storeName }) {
     }
   }, [qr, color, bgColor, frameStyle, logoFile, storeUrl]);
 
+  // Initialize WhatsApp Group QR
+  useEffect(() => {
+    if (!whatsappGroupLink || loading) {
+      // Clear WhatsApp QR if no link
+      if (whatsappQrRef.current) {
+        whatsappQrRef.current.innerHTML = "";
+      }
+      setWhatsappQr(null);
+      return;
+    }
+
+    // Create WhatsApp QR code
+    const whatsappQrCode = new QRCodeStyling({
+      width: 200,
+      height: 200,
+      data: whatsappGroupLink,
+      margin: 8,
+      dotsOptions: {
+        color: "#25D366", // WhatsApp green
+        type: frameStyle,
+      },
+      backgroundOptions: {
+        color: bgColor,
+      },
+    });
+
+    setWhatsappQr(whatsappQrCode);
+    if (whatsappQrRef.current) {
+      whatsappQrRef.current.innerHTML = ""; // Clear previous
+      whatsappQrCode.append(whatsappQrRef.current);
+    }
+  }, [whatsappGroupLink, loading, frameStyle, bgColor]);
+
+  // Update WhatsApp QR when settings change
+  useEffect(() => {
+    if (whatsappQr && whatsappGroupLink) {
+      whatsappQr.update({
+        data: whatsappGroupLink,
+        dotsOptions: { color: "#25D366", type: frameStyle },
+        backgroundOptions: { color: bgColor },
+      });
+    }
+  }, [whatsappQr, whatsappGroupLink, frameStyle, bgColor]);
+
   const downloadQR = () => {
     qr.download({
       name: `${storeName}-QR`,
@@ -93,6 +141,7 @@ export default function StyledQRCode({ storeName }) {
         qr_frame: frameStyle,
         qr_tagline: tagline,
         qr_custom_url: ownerWebsite,
+        whatsapp_group_link: whatsappGroupLink,
       })
       .eq("id", storeId);
     if (error) alert("⚠️ Could not save design.");
@@ -224,6 +273,21 @@ export default function StyledQRCode({ storeName }) {
           />
         </div>
 
+        {/* WhatsApp Group Link */}
+        <div>
+          <label>WhatsApp Group Link (optional)</label>
+          <input
+            type="text"
+            className="design-select"
+            placeholder="https://chat.whatsapp.com/..."
+            value={whatsappGroupLink}
+            onChange={(e) => setWhatsappGroupLink(e.target.value)}
+          />
+          <small style={{ color: "#999", fontSize: "0.75rem", display: "block", marginTop: "0.25rem" }}>
+            Create a WhatsApp group, then get the invite link to add here
+          </small>
+        </div>
+
         {/* Logo Upload */}
         <div>
           <label>Upload Logo</label>
@@ -272,6 +336,62 @@ export default function StyledQRCode({ storeName }) {
         Scans to: <br />
         <strong style={{ color }}>{storeUrl}</strong>
       </p>
+
+      {/* WhatsApp Group QR Code */}
+      {whatsappGroupLink && (
+        <div style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+          <h3 style={{ marginBottom: "1rem", color: "#25D366" }}>📱 WhatsApp Group QR</h3>
+          <div
+            style={{
+              background: "#fff",
+              padding: "1rem",
+              display: "inline-block",
+              borderRadius: frameStyle === "rounded" ? "20px" : "0px",
+              boxShadow: "0 0 12px rgba(0,0,0,0.25)",
+            }}
+          >
+            <div ref={whatsappQrRef}></div>
+
+            <div
+              style={{
+                marginTop: "1rem",
+                background: "#fff",
+                padding: "0.5rem 0.8rem",
+                borderRadius: "8px",
+                border: "1px solid #25D366",
+              }}
+            >
+              <h4 style={{ color: "#25D366", margin: 0, fontSize: "1rem" }}>Join our WhatsApp Group</h4>
+              <p style={{ margin: 0, color: "#333", fontSize: "0.8rem" }}>
+                Get updates & special offers
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              if (whatsappQr) {
+                whatsappQr.download({
+                  name: `${storeName}-WhatsApp-Group-QR`,
+                  extension: "png",
+                });
+              }
+            }}
+            style={{
+              background: "#25D366",
+              border: "none",
+              padding: "0.7rem 1.4rem",
+              borderRadius: "8px",
+              cursor: "pointer",
+              color: "#fff",
+              fontWeight: "600",
+              marginTop: "1rem",
+            }}
+          >
+            ⬇️ Download WhatsApp QR
+          </button>
+        </div>
+      )}
     </div>
   );
 }

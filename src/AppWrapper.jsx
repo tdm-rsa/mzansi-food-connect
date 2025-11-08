@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import App from "./App.jsx";
 import Login from "./Login.jsx";
+import Signup from "./Signup.jsx";
 
 export default function AppWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSignup, setShowSignup] = useState(false);
 
   // ✅ Check session and watch for auth changes
   useEffect(() => {
@@ -27,7 +29,13 @@ export default function AppWrapper() {
   if (loading)
     return <p style={{ color: "#fff", textAlign: "center" }}>Checking session...</p>;
 
-  if (!user) return <Login onLogin={setUser} />;
+  // Show signup or login page when not authenticated
+  if (!user) {
+    if (showSignup) {
+      return <Signup onBack={() => setShowSignup(false)} />;
+    }
+    return <Login onLogin={setUser} onSwitchToSignup={() => setShowSignup(true)} />;
+  }
 
   // ✅ Only render dashboard when logged in
   return <App user={user} />;

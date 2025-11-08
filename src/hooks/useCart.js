@@ -1,6 +1,6 @@
 // src/hooks/useCart.js
-// ✅ Unified cart hook for templates and Designer preview
-import { useEffect, useMemo, useState } from "react";
+// Unified cart hook used by CustomerStore, CartSidebar, and Checkout
+import { useEffect, useMemo, useState, useCallback } from "react";
 
 /**
  * useCart
@@ -12,54 +12,83 @@ export const useCart = (storeId = null) => {
     [storeId]
   );
 
-  const [cart, setCart] = useState(() => {
+  // items: [{ id, name, price, qty }]
+  const [items, setItems] = useState(() => {
     try {
       const raw = localStorage.getItem(storageKey);
-      return raw ? JSON.parse(raw) : [];
+      const parsed = raw ? JSON.parse(raw) : [];
+      // Ensure qty exists
+      return Array.isArray(parsed)
+        ? parsed.map((it) => ({ ...it, qty: Math.max(1, Number(it.qty) || 1) }))
+        : [];
     } catch {
       return [];
     }
   });
 
-  // Persist to localStorage whenever cart changes
+  // Persist to localStorage whenever items change
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(cart));
+      localStorage.setItem(storageKey, JSON.stringify(items));
     } catch {
       /* no-op */
     }
-  }, [cart, storageKey]);
+  }, [items, storageKey]);
 
-  // Add an item (expects { id, name, price })
-  const addItem = (item) => {
+  // Add or increment an item
+  const addItem = useCallback((item) => {
     if (!item) return;
-    const normalized = {
-      id: item.id ?? crypto.randomUUID?.() ?? String(Date.now()),
-      name: item.name ?? "Item",
-      price: Number(item.price) || 0,
-    };
-    setCart((prev) => [...prev, normalized]);
-  };
+    const id = item.id ?? crypto.randomUUID?.() ?? String(Date.now());
+    const name = item.name ?? "Item";
+    const price = Number(item.price) || 0;
+    const qtyToAdd = Math.max(1, Number(item.qty) || 1);
+    const image_url = item.image_url ?? item.image ?? item.imageUrl ?? null;
 
-  // Remove by id (removes first match)
-  const removeItem = (id) => {
-    setCart((prev) => {
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => i.id === id);
+      if (idx !== -1) {
+        const copy = prev.slice();
+        copy[idx] = { ...copy[idx], qty: (copy[idx].qty || 1) + qtyToAdd };
+        return copy;
+      }
+      return [...prev, { id, name, price, qty: qtyToAdd, image_url }];
+    });
+  }, []);
+
+  // Decrement quantity by 1 (or qtyToRemove) and remove if reaches 0
+  const removeItem = useCallback((id, _priceIgnored, qtyToRemove = 1) => {
+    if (!id) return;
+    const dec = Math.max(1, Number(qtyToRemove) || 1);
+    setItems((prev) => {
       const idx = prev.findIndex((i) => i.id === id);
       if (idx === -1) return prev;
+      const current = prev[idx];
+      const nextQty = (current.qty || 1) - dec;
+      if (nextQty <= 0) {
+        return prev.filter((i) => i.id !== id);
+      }
       const copy = prev.slice();
-      copy.splice(idx, 1);
+      copy[idx] = { ...current, qty: nextQty };
       return copy;
     });
-  };
+  }, []);
 
-  // Clear all
-  const clearCart = () => setCart([]);
+  const clearCart = useCallback(() => setItems([]), []);
 
-  // Sum total
-  const total = useMemo(
-    () => cart.reduce((sum, i) => sum + (Number(i.price) || 0), 0),
-    [cart]
+  const getTotal = useCallback(() =>
+    items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.qty) || 1), 0), [items]
   );
 
-  return { cart, addItem, removeItem, clearCart, total };
+  const getTotalItems = useCallback(() =>
+    items.reduce((sum, i) => sum + (Number(i.qty) || 1), 0), [items]
+  );
+
+  return {
+    items,
+    addItem,
+    removeItem,
+    clearCart,
+    getTotal,
+    getTotalItems,
+  };
 };

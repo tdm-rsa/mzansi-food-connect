@@ -44,33 +44,83 @@ async function uploadImage(file, folder, storeId) {
 /* -----------------------------------------------
    🎨 Store Designer Component
 ------------------------------------------------- */
-export default function StoreDesigner({ onBack, menuItems = [] }) {
+export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null }) {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("header");
-  const { store, loading, error, updateStore } = useStoreData();
+
+  // 🔥 FIX: Use local state to track store changes
+  const [localStore, setLocalStore] = useState(storeInfo);
+
+  // Sync local store when storeInfo prop changes
+  useEffect(() => {
+    if (storeInfo) {
+      console.log('📦 StoreDesigner received storeInfo:', storeInfo);
+      setLocalStore(storeInfo);
+    }
+  }, [storeInfo]);
+
   const { cart, addItem, removeItem, clearCart, total } = useCart();
+
+  // Determine which store to use
+  const store = localStore;
+  const loading = !store;
+  const error = null;
+
+  // Update function that syncs to database AND local state
+  async function updateStoreData(updates) {
+    if (!store?.id) {
+      console.error('❌ No store ID available');
+      return;
+    }
+
+    console.log('💾 Saving updates:', updates);
+
+    try {
+      // Update database
+      const { error, data } = await supabase
+        .from("stores")
+        .update(updates)
+        .eq("id", store.id)
+        .select()
+        .single();
+
+      if (error && !error.message?.includes('updated_at') && error.code !== '42703') {
+        console.error('❌ Update error:', error);
+        throw error;
+      }
+
+      // 🔥 FIX: Update local state immediately with optimistic update
+      const updatedStore = { ...store, ...updates };
+      setLocalStore(updatedStore);
+      console.log('✅ Store updated successfully:', updatedStore);
+
+    } catch (err) {
+      console.error("Update error:", err);
+      throw err;
+    }
+  }
 
   // Auto-save debounce
   const [saveTimeout, setSaveTimeout] = useState(null);
 
   async function saveChanges(updates) {
     if (!store) return;
-    
+
     // Clear existing timeout
     if (saveTimeout) clearTimeout(saveTimeout);
-    
+
     // Debounce saves
     const timeout = setTimeout(async () => {
       try {
         setSaving(true);
-        await updateStore(updates);
+        await updateStoreData(updates);
       } catch (err) {
         console.error("Save failed:", err.message);
       } finally {
         setSaving(false);
       }
     }, 500);
-    
+
     setSaveTimeout(timeout);
   }
 
@@ -121,6 +171,7 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
       logoDataUrl: store.logo_url,
       storeName: store.name || "My Store",
       layout: store.header_layout || "center",
+      fontSize: store.header_font_size || 20,
     },
     banner: {
       type: store.banner_type || "text-queue",
@@ -131,9 +182,10 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
       showQueue: store.show_queue !== false,
       bgDataUrl: store.banner_url,
       theme: store.banner_theme || "warm",
+      fontSize: store.banner_font_size || 28,
     },
     products: {
-      layout: store.product_layout || "grid3",
+      layout: "grid3", // 🔥 FIX: Always use grid3 layout
       animation: store.product_animation || "fade",
     },
     about: {
@@ -143,6 +195,7 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
       socials: store.socials || {},
       animation: store.about_animation || "fade",
       look: store.about_look || "with-image",
+      fontSize: store.about_font_size || 16,
     },
     menuItems: menuItems || [],
     liveQueue: [],
@@ -199,12 +252,12 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
               Saving...
             </div>
           ) : (
-            <button 
+            <button
               className="btn-save-changes"
               onClick={async () => {
                 setSaving(true);
                 try {
-                  await updateStore(store);
+                  await updateStoreData(store);
                   alert("✅ All changes saved successfully!");
                 } catch (err) {
                   alert("❌ Failed to save changes: " + err.message);
@@ -284,9 +337,13 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
                         try {
                           setSaving(true);
                           const url = await uploadImage(file, "logos", store.id);
-                          await saveChanges({ logo_url: url, show_logo: true });
+                          // 🔥 FIX: Use updateStoreData directly instead of debounced saveChanges
+                          await updateStoreData({ logo_url: url, show_logo: true });
+                          alert("✅ Logo uploaded successfully!");
                         } catch (err) {
-                          alert("Failed to upload logo");
+                          alert("❌ Failed to upload logo: " + err.message);
+                        } finally {
+                          setSaving(false);
                         }
                       }}
                     />
@@ -320,6 +377,20 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
                   </label>
                   <small>Display your logo next to the store name</small>
                 </div>
+
+                {/* Header Font Size */}
+                <div className="control-group">
+                  <label>Store Name Font Size</label>
+                  <input
+                    type="range"
+                    min="12"
+                    max="32"
+                    value={store.header_font_size || 20}
+                    onChange={(e) => saveChanges({ header_font_size: parseInt(e.target.value) })}
+                    className="slider-field"
+                  />
+                  <span className="slider-value">{store.header_font_size || 20}px</span>
+                </div>
               </div>
             )}
 
@@ -327,25 +398,6 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
             {activeTab === "banner" && (
               <div className="tab-section">
                 <h3>Banner Settings</h3>
-
-                {/* Banner Type Selection */}
-                <div className="control-group">
-                  <label>Banner Type</label>
-                  <div className="option-grid">
-                    {bannerTypes.map((type) => (
-                      <button
-                        key={type.id}
-                        className={`option-card ${
-                          store.banner_type === type.id ? "selected" : ""
-                        }`}
-                        onClick={() => saveChanges({ banner_type: type.id })}
-                      >
-                        <span className="option-icon">{type.icon}</span>
-                        <span className="option-label">{type.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Banner Text */}
                 <div className="control-group">
@@ -359,91 +411,30 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
                   />
                 </div>
 
-                {/* Specials Text (if type includes specials) */}
-                {store.banner_type === "text-specials" && (
-                  <div className="control-group">
-                    <label>Specials Text</label>
-                    <input
-                      type="text"
-                      className="input-field"
-                      defaultValue={store.specials_text || ""}
-                      onBlur={(e) => saveChanges({ specials_text: e.target.value })}
-                      placeholder="🔥 Special Offers Today!"
-                    />
-                  </div>
-                )}
-
-                {/* Banner Image Upload (for image types) */}
-                {store.banner_type === "image-queue" && (
-                  <div className="control-group">
-                    <label>Banner Background Image</label>
-                    <div className="file-upload-area">
-                      <input
-                        type="file"
-                        id="banner-upload"
-                        accept="image/*"
-                        className="file-input"
-                        onChange={async (e) => {
-                          const file = e.target.files[0];
-                          if (!file) return;
-                          try {
-                            setSaving(true);
-                            const url = await uploadImage(file, "banners", store.id);
-                            await saveChanges({ banner_url: url });
-                          } catch (err) {
-                            alert("Failed to upload banner");
-                          }
-                        }}
-                      />
-                      <label htmlFor="banner-upload" className="file-label">
-                        {store.banner_url ? "Change Banner" : "Upload Banner"}
-                      </label>
-                    </div>
-                    {store.banner_url && (
-                      <div className="uploaded-preview banner">
-                        <img src={store.banner_url} alt="banner" />
-                        <button
-                          className="remove-btn"
-                          onClick={() => saveChanges({ banner_url: null })}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    )}
-                    <small>Recommended: Wide image (1200x400px) like a YouTube thumbnail</small>
-                  </div>
-                )}
-
-                {/* Banner Theme */}
+                {/* Announcements / Specials Text */}
                 <div className="control-group">
-                  <label>Banner Theme</label>
-                  <select
-                    className="select-field"
-                    value={store.banner_theme || "warm"}
-                    onChange={(e) => saveChanges({ banner_theme: e.target.value })}
-                  >
-                    <option value="warm">🔥 Warm Orange</option>
-                    <option value="cool">💧 Cool Blue</option>
-                    <option value="green">🌿 Fresh Green</option>
-                    <option value="dark">🌙 Dark Minimal</option>
-                    <option value="vibrant">✨ Vibrant Purple</option>
-                  </select>
+                  <label>Announcements / Specials</label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    defaultValue={store.specials_text || ""}
+                    onBlur={(e) => saveChanges({ specials_text: e.target.value })}
+                    placeholder="🔥 Special Offers Today!"
+                  />
                 </div>
 
-                {/* Banner Animation */}
+                {/* Banner Font Size */}
                 <div className="control-group">
-                  <label>Banner Animation</label>
-                  <select
-                    className="select-field"
-                    value={store.banner_animation || "fade"}
-                    onChange={(e) => saveChanges({ banner_animation: e.target.value })}
-                  >
-                    {animations.map((anim) => (
-                      <option key={anim.id} value={anim.id}>
-                        {anim.label}
-                      </option>
-                    ))}
-                  </select>
+                  <label>Banner Text Font Size</label>
+                  <input
+                    type="range"
+                    min="16"
+                    max="40"
+                    value={store.banner_font_size || 28}
+                    onChange={(e) => saveChanges({ banner_font_size: parseInt(e.target.value) })}
+                    className="slider-field"
+                  />
+                  <span className="slider-value">{store.banner_font_size || 28}px</span>
                 </div>
 
                 {/* Store Open/Closed Toggle */}
@@ -471,6 +462,33 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
                   </label>
                   <small>Display ready orders for customer pickup</small>
                 </div>
+
+                {/* Show Instructions Toggle */}
+                <div className="control-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={store.show_instructions === true}
+                      onChange={(e) => saveChanges({ show_instructions: e.target.checked })}
+                    />
+                    <span>Show Instructions Button</span>
+                  </label>
+                  <small>Display ordering instructions for customers</small>
+                </div>
+
+                {/* Instructions Text (if enabled) */}
+                {store.show_instructions && (
+                  <div className="control-group">
+                    <label>Instructions Text</label>
+                    <textarea
+                      className="textarea-field"
+                      rows={3}
+                      defaultValue={store.instructions || ""}
+                      onBlur={(e) => saveChanges({ instructions: e.target.value })}
+                      placeholder="Enter instructions for customers (e.g., pickup location, payment methods, etc.)"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
@@ -479,39 +497,22 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
               <div className="tab-section">
                 <h3>Products Settings</h3>
 
-                {/* Product Layout */}
+                {/* Product Layout - Fixed to Grid 3 */}
                 <div className="control-group">
                   <label>Product Layout</label>
-                  <div className="option-grid">
-                    {productLayouts.map((layout) => (
-                      <button
-                        key={layout.id}
-                        className={`option-card ${
-                          store.product_layout === layout.id ? "selected" : ""
-                        }`}
-                        onClick={() => saveChanges({ product_layout: layout.id })}
-                      >
-                        <span className="option-icon">{layout.icon}</span>
-                        <span className="option-label">{layout.label}</span>
-                      </button>
-                    ))}
+                  <div style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    padding: '1.25rem',
+                    borderRadius: '12px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>▦</div>
+                    <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>Grid (3 per row)</div>
+                    <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '0.25rem' }}>
+                      Optimized layout for best customer experience
+                    </div>
                   </div>
-                </div>
-
-                {/* Product Animation */}
-                <div className="control-group">
-                  <label>Product Animation</label>
-                  <select
-                    className="select-field"
-                    value={store.product_animation || "fade"}
-                    onChange={(e) => saveChanges({ product_animation: e.target.value })}
-                  >
-                    {animations.map((anim) => (
-                      <option key={anim.id} value={anim.id}>
-                        {anim.label}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </div>
             )}
@@ -535,31 +536,6 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
 
                 {store.show_about !== false && (
                   <>
-                    {/* About Look */}
-                    <div className="control-group">
-                      <label>About Style</label>
-                      <div className="option-grid two-col">
-                        <button
-                          className={`option-card ${
-                            store.about_look === "with-image" ? "selected" : ""
-                          }`}
-                          onClick={() => saveChanges({ about_look: "with-image" })}
-                        >
-                          <span className="option-icon">🖼️</span>
-                          <span className="option-label">With Image</span>
-                        </button>
-                        <button
-                          className={`option-card ${
-                            store.about_look === "text-only" ? "selected" : ""
-                          }`}
-                          onClick={() => saveChanges({ about_look: "text-only" })}
-                        >
-                          <span className="option-icon">📝</span>
-                          <span className="option-label">Text Only</span>
-                        </button>
-                      </div>
-                    </div>
-
                     {/* About Text */}
                     <div className="control-group">
                       <label>About Text</label>
@@ -572,45 +548,59 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
                       />
                     </div>
 
-                    {/* About Image (if look is with-image) */}
-                    {store.about_look === "with-image" && (
-                      <div className="control-group">
-                        <label>About Image</label>
-                        <div className="file-upload-area">
-                          <input
-                            type="file"
-                            id="about-upload"
-                            accept="image/*"
-                            className="file-input"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (!file) return;
-                              try {
-                                setSaving(true);
-                                const url = await uploadImage(file, "about", store.id);
-                                await saveChanges({ about_image_url: url });
-                              } catch (err) {
-                                alert("Failed to upload image");
-                              }
+                    {/* Profile Picture */}
+                    <div className="control-group">
+                      <label>Profile Picture</label>
+                      <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "0.75rem" }}>
+                        Upload your profile picture to display in the dashboard header
+                      </p>
+                      <div className="file-upload-area">
+                        <input
+                          type="file"
+                          id="profile-upload"
+                          accept="image/*"
+                          className="file-input"
+                          onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            try {
+                              setSaving(true);
+                              const url = await uploadImage(file, "profiles", store.id);
+                              await updateStoreData({ profile_picture_url: url });
+                              alert("✅ Profile picture uploaded successfully!");
+                            } catch (err) {
+                              alert("❌ Failed to upload profile picture: " + err.message);
+                            } finally {
+                              setSaving(false);
+                            }
+                          }}
+                        />
+                        <label htmlFor="profile-upload" className="file-label">
+                          {store.profile_picture_url ? "Change Profile Picture" : "Upload Profile Picture"}
+                        </label>
+                      </div>
+                      {store.profile_picture_url && (
+                        <div className="uploaded-preview">
+                          <img
+                            src={store.profile_picture_url}
+                            alt="profile"
+                            style={{
+                              borderRadius: "50%",
+                              width: "100px",
+                              height: "100px",
+                              objectFit: "cover",
+                              border: "3px solid #e5e7eb"
                             }}
                           />
-                          <label htmlFor="about-upload" className="file-label">
-                            {store.about_image_url ? "Change Image" : "Upload Image"}
-                          </label>
+                          <button
+                            className="remove-btn"
+                            onClick={() => saveChanges({ profile_picture_url: null })}
+                          >
+                            Remove
+                          </button>
                         </div>
-                        {store.about_image_url && (
-                          <div className="uploaded-preview">
-                            <img src={store.about_image_url} alt="about" />
-                            <button
-                              className="remove-btn"
-                              onClick={() => saveChanges({ about_image_url: null })}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     {/* Social Links */}
                     <div className="control-group">
@@ -641,20 +631,18 @@ export default function StoreDesigner({ onBack, menuItems = [] }) {
                       </div>
                     </div>
 
-                    {/* About Animation */}
+                    {/* About Font Size */}
                     <div className="control-group">
-                      <label>About Animation</label>
-                      <select
-                        className="select-field"
-                        value={store.about_animation || "fade"}
-                        onChange={(e) => saveChanges({ about_animation: e.target.value })}
-                      >
-                        {animations.map((anim) => (
-                          <option key={anim.id} value={anim.id}>
-                            {anim.label}
-                          </option>
-                        ))}
-                      </select>
+                      <label>About Text Font Size</label>
+                      <input
+                        type="range"
+                        min="12"
+                        max="24"
+                        value={store.about_font_size || 16}
+                        onChange={(e) => saveChanges({ about_font_size: parseInt(e.target.value) })}
+                        className="slider-field"
+                      />
+                      <span className="slider-value">{store.about_font_size || 16}px</span>
                     </div>
                   </>
                 )}

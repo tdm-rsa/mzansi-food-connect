@@ -4,6 +4,10 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppWrapper from "./AppWrapper.jsx";
+import CustomerStore from "./CustomerStore.jsx";
+import Checkout from "./Checkout.jsx";
+import LiveQueue from "./LiveQueue.jsx";
+import Landing from "./Landing.jsx";
 
 import ModernFoodTemplate from "./templates/ModernFoodTemplate.jsx";
 import TraditionalSATemplate from "./templates/TraditionalSATemplate.jsx";
@@ -86,7 +90,22 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
+        {/* Landing Page */}
+        <Route path="/landing" element={<Landing />} />
+
+        {/* Owner Dashboard */}
         <Route path="/" element={<AppWrapper />} />
+
+        {/* Customer Storefront with Slug */}
+        <Route path="/store/:slug" element={<CustomerStore />} />
+
+        {/* Checkout Page */}
+        <Route path="/store/:slug/checkout" element={<Checkout />} />
+
+        {/* Live Queue Page */}
+        <Route path="/store/:slug/queue" element={<LiveQueue />} />
+
+        {/* Legacy route for testing (uses first store) */}
         <Route path="/store" element={<StorefrontRouter />} />
       </Routes>
     </BrowserRouter>

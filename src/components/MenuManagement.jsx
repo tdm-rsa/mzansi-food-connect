@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 import "./MenuManagement.css";
+import { getMaxProducts } from "../utils/planFeatures";
 
 // Upload image helper
 async function uploadProductImage(file, storeId) {
@@ -68,6 +69,13 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
     e.preventDefault();
     if (!formData.name || !formData.price) {
       alert("Name and price are required");
+      return;
+    }
+
+    // Check product limit for Free Trial
+    const maxProducts = getMaxProducts(storeInfo.plan);
+    if (!editingItem && menuItems.length >= maxProducts) {
+      alert(`❌ Product Limit Reached\n\nYou've reached the maximum of ${maxProducts} products on the Free Trial plan.\n\nUpgrade to Pro for unlimited products!`);
       return;
     }
 

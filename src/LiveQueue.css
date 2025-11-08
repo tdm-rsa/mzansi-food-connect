@@ -1,0 +1,449 @@
+/* Floating Action Button */
+.live-queue-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 1.8rem;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.5);
+  cursor: pointer;
+  z-index: 999;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.live-queue-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(255, 107, 53, 0.7);
+}
+
+.live-queue-fab:active {
+  transform: scale(0.95);
+}
+
+.queue-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e63946;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Queue Overlay */
+.queue-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Queue Panel */
+.queue-panel {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Queue Header */
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.queue-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.close-queue {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-queue:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Queue Content */
+.queue-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.queue-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.queue-empty small {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+/* Order Card */
+.queue-order-card {
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.queue-order-card:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Order Info */
+.order-info h4 {
+  margin: 0 0 0.8rem 0;
+  font-size: 1.2rem;
+  color: #ff6b35;
+  font-weight: 700;
+}
+
+.order-info p {
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.customer-name {
+  font-weight: 600;
+  font-size: 1rem !important;
+}
+
+.order-phone {
+  color: #666 !important;
+}
+
+.order-total {
+  font-size: 1.1rem !important;
+  font-weight: 700;
+  color: #4CAF50 !important;
+  margin-top: 0.6rem !important;
+}
+
+/* Order Items */
+.order-items {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed #ddd;
+}
+
+.order-items .item {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  color: #555;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.order-items .item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #ff6b35;
+  font-weight: bold;
+}
+
+/* Order Actions */
+.order-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.order-actions label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.time-select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.time-select:hover {
+  border-color: #ff6b35;
+}
+
+.time-select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.time-select:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sending {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #ff6b35;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Confirmed State */
+.order-actions.confirmed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.confirmed-badge {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.fetch-btn {
+  background: linear-gradient(135deg, #2196F3, #42A5F5);
+  color: white;
+  border: none;
+  padding: 0.9rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.fetch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.5);
+}
+
+.fetch-btn:active {
+  transform: translateY(0);
+}
+
+.fetch-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Small Tablets (630px - 775px) */
+@media (max-width: 775px) and (min-width: 630px) {
+  .live-queue-fab {
+    width: 58px;
+    height: 58px;
+    font-size: 1.7rem;
+    bottom: 22px;
+    right: 22px;
+  }
+
+  .queue-panel {
+    width: 92%;
+    max-width: 550px;
+    max-height: 82vh;
+    border-radius: 14px;
+  }
+
+  .queue-header {
+    padding: 1.35rem;
+  }
+
+  .queue-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .close-queue {
+    width: 34px;
+    height: 34px;
+    font-size: 1.4rem;
+  }
+
+  .queue-content {
+    padding: 0.95rem;
+  }
+
+  .queue-order-card {
+    padding: 1.15rem;
+    margin-bottom: 0.95rem;
+  }
+
+  .order-info h4 {
+    font-size: 1.15rem;
+  }
+
+  .order-info p {
+    font-size: 0.95rem;
+  }
+
+  .time-select {
+    padding: 0.85rem;
+    font-size: 0.975rem;
+  }
+
+  .fetch-btn {
+    padding: 0.95rem 1.5rem;
+    font-size: 0.975rem;
+  }
+
+  .confirmed-badge {
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .live-queue-fab {
+    width: 56px;
+    height: 56px;
+    font-size: 1.6rem;
+    bottom: 80px;
+  }
+
+  .queue-panel {
+    width: 95%;
+    max-height: 85vh;
+    border-radius: 12px;
+  }
+
+  .queue-header {
+    padding: 1.2rem;
+  }
+
+  .queue-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .queue-content {
+    padding: 0.8rem;
+  }
+
+  .queue-order-card {
+    padding: 1rem;
+  }
+
+  .order-info h4 {
+    font-size: 1.1rem;
+  }
+
+  .order-info p {
+    font-size: 0.9rem;
+  }
+
+  .time-select, .fetch-btn {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .live-queue-fab {
+    width: 52px;
+    height: 52px;
+    font-size: 1.5rem;
+    bottom: 70px;
+    right: 15px;
+  }
+
+  .queue-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+  }
+}

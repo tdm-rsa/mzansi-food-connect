@@ -63,13 +63,15 @@
   background: #dc2626;
   color: white;
   font-weight: 900;
-  font-size: 11px;
+  font-size: 12px;
   border-radius: 50%;
   width: 22px;
   height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
+  padding: 0;
 }
 
 /* Banner */
@@ -79,8 +81,6 @@
   padding: 2rem 1rem;
   margin: 20px auto;
   width: min(1000px, 95%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 .sa-banner h2 {
@@ -97,23 +97,22 @@
   padding: 6px 14px;
   border-radius: 20px;
   font-weight: 700;
-  background: #f3f4f6;
+  background: #e2e3e5;
 }
 .store-status.open {
   background: #dcfce7;
-  color: #166534;
+  color: #23d667;
 }
 .store-status.closed {
   background: #fee2e2;
-  color: #991b1b;
+  color: #d01919;
 }
 
 /* Menu */
 .sa-menu {
   width: min(1000px, 95%);
   margin: 0 auto 24px auto;
-  background: #fff;
-  border-radius: var(--radius);
+  background: #a9a6a6;
   border: 1px solid var(--line);
   padding: 1rem;
   box-shadow: var(--shadow);
@@ -124,7 +123,7 @@
   gap: 14px;
 }
 .menu-card {
-  background: #fff8f2;
+  background: #fff8f3;
   border: 1px solid var(--accent);
   border-radius: 10px;
   padding: 0;
@@ -234,11 +233,28 @@
   overflow-y: auto;
 }
 .cart-item {
+  display: flex;
+  gap: 10px;
   background: #fffaf4;
   border: 1px solid var(--accent);
   border-radius: var(--radius);
   padding: 0.8rem;
   margin-bottom: 1rem;
+}
+.cart-item-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cart-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cart-item-info {
+  flex: 1;
 }
 .qty-row {
   display: flex;
@@ -471,6 +487,283 @@
 .ask-submit-btn:disabled{
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* =====================================================
+   📱 RESPONSIVE DESIGN - Mobile, Tablet, Desktop
+   ===================================================== */
+
+/* 🖥️ Tablet (768px - 1023px) */
+@media (max-width: 1023px) {
+  .sa-banner,
+  .sa-menu,
+  .sa-about {
+    width: min(95%, 100%);
+  }
+
+  .menu-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+}
+
+/* 📱 Small Tablets (630px - 775px) */
+@media (max-width: 775px) and (min-width: 630px) {
+  .sa-header {
+    padding: 13px 17px;
+  }
+
+  .sa-header h1 {
+    font-size: 18px;
+  }
+
+  .sa-logo {
+    width: 45px;
+    height: 45px;
+  }
+
+  .sa-banner {
+    padding: 26px 16px;
+  }
+
+  .sa-banner h2 {
+    font-size: 26px;
+  }
+
+  .menu-grid {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 13px;
+  }
+
+  .menu-card-image {
+    height: 170px;
+  }
+
+  .cart-sidebar {
+    max-width: 380px;
+  }
+
+  .cart-toggle {
+    padding: 9px 13px;
+  }
+}
+
+/* 📱 Mobile (up to 767px) */
+@media (max-width: 767px) {
+  /* Header */
+  .sa-header {
+    padding: 12px 16px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .sa-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+  
+  .sa-header h1 {
+    font-size: 16px;
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  .sa-logo {
+    height: 44px;
+  }
+  
+  .cart-toggle {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+  
+  /* Banner */
+  .sa-banner {
+    padding: 1.5rem 0.75rem;
+    margin: 16px auto;
+  }
+  
+  .sa-banner h2 {
+    font-size: 24px;
+  }
+  
+  .sa-banner p {
+    font-size: 0.9rem;
+  }
+  
+  /* Menu */
+  .sa-menu {
+    padding: 0.75rem;
+    margin: 0 auto 20px auto;
+  }
+  
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .menu-card {
+    border-radius: 8px;
+  }
+  
+  .menu-card-image {
+    height: 140px;
+    padding: 8px;
+  }
+  
+  .menu-card-content {
+    padding: 0.75rem;
+  }
+  
+  .menu-card-content h4 {
+    font-size: 0.95rem;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 8px;
+    font-size: 0.8rem;
+    width: 48%;
+  }
+  
+  /* About */
+  .sa-about {
+    padding: 1.25rem;
+    margin: 0 auto 1.5rem auto;
+  }
+  
+  .sa-about h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .sa-about p {
+    font-size: 0.9rem;
+  }
+  
+  /* Cart Sidebar */
+  .cart-sidebar {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .cart-header {
+    padding: 0.75rem;
+  }
+  
+  .cart-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .close-cart {
+    font-size: 1.3rem;
+  }
+  
+  .cart-items {
+    padding: 0.75rem;
+  }
+  
+  .cart-item {
+    padding: 0.65rem;
+    margin-bottom: 0.85rem;
+  }
+  
+  .qty-row button {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.85rem;
+  }
+  
+  .remove-item {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .cart-summary {
+    padding: 0.75rem;
+  }
+  
+  .summary-row {
+    font-size: 0.85rem;
+    margin: 0.4rem 0;
+  }
+  
+  .summary-row.total {
+    font-size: 1.1rem;
+  }
+  
+  .checkout-row input {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .checkout-btn {
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* 📱 Small Mobile (340px - 480px) - Keep 2 columns */
+@media (max-width: 480px) and (min-width: 340px) {
+  .sa-header h1 {
+    font-size: 14px;
+  }
+  
+  .sa-logo {
+    height: 40px;
+  }
+  
+  .sa-banner h2 {
+    font-size: 20px;
+  }
+  
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .menu-card-image {
+    height: 130px;
+  }
+  
+  .menu-card-content {
+    padding: 8px;
+  }
+  
+  .menu-card-content h4 {
+    font-size: 0.85rem;
+  }
+  
+  .cart-item-image {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+/* 🐛 Very Tiny Mobile (under 340px) - Single column */
+@media (max-width: 339px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .menu-card-image {
+    height: 160px;
+  }
+}
+
+/* 🌐 Landscape Mobile */
+@media (max-width: 920px) and (orientation: landscape) {
+  .menu-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .sa-banner {
+    padding: 1.25rem 0.75rem;
+  }
 }
 
 /* Responsive */
