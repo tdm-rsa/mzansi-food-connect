@@ -1645,6 +1645,11 @@ export default function App({ user }) {
                 <button
                   className="btn-primary"
                   onClick={async () => {
+                    if (!storeInfo?.id) {
+                      showToast("⚠️ Store not loaded yet. Please wait.", "#f44336");
+                      return;
+                    }
+
                     const newName = document.getElementById("newOwnerName").value.trim();
                     if (!newName) {
                       showToast("⚠️ Name cannot be empty", "#f44336");
@@ -1652,18 +1657,24 @@ export default function App({ user }) {
                     }
 
                     try {
-                      const { error } = await supabase
+                      console.log('Updating owner_name to:', newName, 'for store:', storeInfo.id);
+                      const { data, error } = await supabase
                         .from("stores")
                         .update({ owner_name: newName })
-                        .eq("id", storeInfo.id);
+                        .eq("id", storeInfo.id)
+                        .select();
 
-                      if (error) throw error;
+                      if (error) {
+                        console.error('Update error:', error);
+                        throw error;
+                      }
 
+                      console.log('Update successful:', data);
                       setStoreInfo({ ...storeInfo, owner_name: newName });
                       showToast("✅ Your name updated successfully!", "#4caf50");
                     } catch (error) {
-                      showToast("❌ Failed to update name", "#f44336");
-                      console.error(error);
+                      showToast(`❌ Failed to update name: ${error.message}`, "#f44336");
+                      console.error('Full error:', error);
                     }
                   }}
                   style={{ whiteSpace: "nowrap" }}
@@ -1696,6 +1707,11 @@ export default function App({ user }) {
                 <button
                   className="btn-primary"
                   onClick={async () => {
+                    if (!storeInfo?.id) {
+                      showToast("⚠️ Store not loaded yet. Please wait.", "#f44336");
+                      return;
+                    }
+
                     const newName = document.getElementById("newStoreName").value.trim();
                     if (!newName) {
                       showToast("⚠️ Store name cannot be empty", "#f44336");
@@ -1703,18 +1719,24 @@ export default function App({ user }) {
                     }
 
                     try {
-                      const { error } = await supabase
+                      console.log('Updating store name to:', newName, 'for store:', storeInfo.id);
+                      const { data, error } = await supabase
                         .from("stores")
                         .update({ name: newName })
-                        .eq("id", storeInfo.id);
+                        .eq("id", storeInfo.id)
+                        .select();
 
-                      if (error) throw error;
+                      if (error) {
+                        console.error('Update error:', error);
+                        throw error;
+                      }
 
+                      console.log('Update successful:', data);
                       setStoreInfo({ ...storeInfo, name: newName });
                       showToast("✅ Store name updated successfully!", "#4caf50");
                     } catch (error) {
-                      showToast("❌ Failed to update store name", "#f44336");
-                      console.error(error);
+                      showToast(`❌ Failed to update store name: ${error.message}`, "#f44336");
+                      console.error('Full error:', error);
                     }
                   }}
                   style={{ whiteSpace: "nowrap" }}
