@@ -2,10 +2,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
+import { getSubdomain } from "./utils/subdomain";
 import "./LiveQueue.css";
 
 export default function LiveQueue() {
-  const { slug } = useParams();
+  const { slug: pathSlug } = useParams();
+  const subdomainSlug = getSubdomain();
+  const slug = subdomainSlug || pathSlug;
+
   const navigate = useNavigate();
 
   const [store, setStore] = useState(null);

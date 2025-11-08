@@ -4,10 +4,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { PaystackButton } from "react-paystack";
 import { supabase } from "./supabaseClient";
 import { useCart } from "./hooks/useCart";
+import { getSubdomain } from "./utils/subdomain";
 import "./Checkout.css";
 
 export default function Checkout() {
-  const { slug } = useParams();
+  const { slug: pathSlug } = useParams();
+  const subdomainSlug = getSubdomain();
+  const slug = subdomainSlug || pathSlug;
+
   const navigate = useNavigate();
   const cart = useCart(slug);
 

@@ -8,6 +8,7 @@ import CustomerStore from "./CustomerStore.jsx";
 import Checkout from "./Checkout.jsx";
 import LiveQueue from "./LiveQueue.jsx";
 import Landing from "./Landing.jsx";
+import { getSubdomain } from "./utils/subdomain.js";
 
 import ModernFoodTemplate from "./templates/ModernFoodTemplate.jsx";
 import TraditionalSATemplate from "./templates/TraditionalSATemplate.jsx";
@@ -86,28 +87,59 @@ function StorefrontRouter() {
   }
 }
 
+// Detect if we're on a subdomain to route accordingly
+function AppRouter() {
+  const subdomain = getSubdomain();
+
+  // If on subdomain (e.g., joeskfc.mzansifoodconnect.com)
+  // Show customer storefront routes only
+  if (subdomain) {
+    return (
+      <Routes>
+        {/* Customer Store Home */}
+        <Route path="/" element={<CustomerStore />} />
+
+        {/* Checkout Page */}
+        <Route path="/checkout" element={<Checkout />} />
+
+        {/* Live Queue Page */}
+        <Route path="/queue" element={<LiveQueue />} />
+
+        {/* Catch all - redirect to store home */}
+        <Route path="*" element={<CustomerStore />} />
+      </Routes>
+    );
+  }
+
+  // Main domain (e.g., mzansifoodconnect.com)
+  // Show platform routes (dashboard, landing, path-based stores)
+  return (
+    <Routes>
+      {/* Landing Page */}
+      <Route path="/landing" element={<Landing />} />
+
+      {/* Owner Dashboard */}
+      <Route path="/" element={<AppWrapper />} />
+
+      {/* Customer Storefront with Slug (path-based) */}
+      <Route path="/store/:slug" element={<CustomerStore />} />
+
+      {/* Checkout Page (path-based) */}
+      <Route path="/store/:slug/checkout" element={<Checkout />} />
+
+      {/* Live Queue Page (path-based) */}
+      <Route path="/store/:slug/queue" element={<LiveQueue />} />
+
+      {/* Legacy route for testing (uses first store) */}
+      <Route path="/store" element={<StorefrontRouter />} />
+    </Routes>
+  );
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        {/* Landing Page */}
-        <Route path="/landing" element={<Landing />} />
-
-        {/* Owner Dashboard */}
-        <Route path="/" element={<AppWrapper />} />
-
-        {/* Customer Storefront with Slug */}
-        <Route path="/store/:slug" element={<CustomerStore />} />
-
-        {/* Checkout Page */}
-        <Route path="/store/:slug/checkout" element={<Checkout />} />
-
-        {/* Live Queue Page */}
-        <Route path="/store/:slug/queue" element={<LiveQueue />} />
-
-        {/* Legacy route for testing (uses first store) */}
-        <Route path="/store" element={<StorefrontRouter />} />
-      </Routes>
+      <AppRouter />
     </BrowserRouter>
   </React.StrictMode>
 );

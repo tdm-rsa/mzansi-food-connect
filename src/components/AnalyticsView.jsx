@@ -133,7 +133,8 @@ export default function AnalyticsView({ storeInfo, plan = 'trial', onBack }) {
               Upgrade to Premium to unlock:<br/>
               ✅ Daily & Monthly Charts<br/>
               ✅ Top Selling Products<br/>
-              ✅ Custom Domain Included
+              ✅ Advanced Analytics<br/>
+              🚧 Custom Domain - Coming Soon
             </p>
             <button
               onClick={() => window.open("https://paystack.com/pay/mzansi-premium", "_blank")}

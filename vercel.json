@@ -4,5 +4,16 @@
       "source": "/((?!api).*)",
       "destination": "/index.html"
     }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Subdomain-Support",
+          "value": "enabled"
+        }
+      ]
+    }
   ]
 }

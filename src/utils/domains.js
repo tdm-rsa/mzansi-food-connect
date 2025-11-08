@@ -7,19 +7,33 @@ const DOMAINS_API_URL = "/api/domains/proxy";
 const CLOUDFLARE_API_URL = "https://api.cloudflare.com/client/v4";
 
 /**
- * Get Domains.co.za API Key
- * @returns {string} API key
+ * Authenticate with Domains.co.za API and get JWT token
+ * @returns {Promise<string>} JWT token
  */
-function getDomainsAPIKey() {
-  const apiKey = import.meta.env.VITE_DOMAINS_API_KEY;
+async function authenticateDomains() {
+  const username = import.meta.env.VITE_DOMAINS_USERNAME;
+  const password = import.meta.env.VITE_DOMAINS_API_KEY;
 
-  console.log("Using Domains.co.za API Key:", { hasKey: !!apiKey });
+  console.log("Authenticating with Domains.co.za:", { username, hasPassword: !!password });
 
-  if (!apiKey) {
-    throw new Error("Domain API key not configured");
+  if (!username || !password) {
+    throw new Error("Domain API credentials not configured");
   }
 
-  return apiKey;
+  const response = await fetch(`${DOMAINS_API_URL}?path=login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const data = await response.json();
+  console.log("Auth response:", data);
+
+  if (data.intReturnCode !== 1) {
+    throw new Error(data.strMessage || "Authentication failed");
+  }
+
+  return data.token;
 }
 
 /**
@@ -36,13 +50,15 @@ export async function checkDomainAvailability(domainName) {
 
     console.log("Checking domain:", { domainName, sld, tld });
 
-    const apiKey = getDomainsAPIKey();
+    const token = await authenticateDomains();
+    console.log("Got JWT token");
 
     const response = await fetch(
-      `${DOMAINS_API_URL}?path=domain/check&sld=${encodeURIComponent(sld)}&tld=${encodeURIComponent(tld)}&token=${apiKey}`,
+      `${DOMAINS_API_URL}?path=domain/check&sld=${encodeURIComponent(sld)}&tld=${encodeURIComponent(tld)}`,
       {
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
       }
     );
@@ -76,7 +92,7 @@ export async function registerDomain(domainName, customerInfo) {
 
     console.log("Registering domain:", { domainName, sld, tld });
 
-    const apiKey = getDomainsAPIKey();
+    const token = await authenticateDomains();
 
     const registrationData = {
       sld,
@@ -96,10 +112,11 @@ export async function registerDomain(domainName, customerInfo) {
       registrant_city: customerInfo.city || "Johannesburg",
     };
 
-    const response = await fetch(`${DOMAINS_API_URL}?path=domain&token=${apiKey}`, {
+    const response = await fetch(`${DOMAINS_API_URL}?path=domain`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify(registrationData),
     });

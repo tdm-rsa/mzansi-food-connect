@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "./supabaseClient";
+import { getSubdomain } from "./utils/subdomain";
 
 // Import your existing templates
 import ModernFoodTemplate from "./templates/ModernFoodTemplate";
@@ -13,7 +14,12 @@ import { useCart } from "./hooks/useCart";
 import CartSidebar from "./components/CartSidebar";
 
 export default function CustomerStore() {
-  const { slug } = useParams();
+  const { slug: pathSlug } = useParams(); // Slug from URL path
+  const subdomainSlug = getSubdomain(); // Slug from subdomain
+
+  // Priority: subdomain > path param
+  const slug = subdomainSlug || pathSlug;
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [storeData, setStoreData] = useState(null);

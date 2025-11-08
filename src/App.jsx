@@ -22,6 +22,11 @@ import ProDashboardView from "./components/ProDashboardView.jsx";
 import PremiumDashboardView from "./components/PremiumDashboardView.jsx";
 
 /* -------------------------------------------------------
+   FEATURE FLAGS
+------------------------------------------------------- */
+const ENABLE_CUSTOM_DOMAINS = false; // Set to true when domains.co.za reseller account is activated
+
+/* -------------------------------------------------------
    Helper: tiny badge pill component
 ------------------------------------------------------- */
 function Pill({ children, bg = "#ff6b35", color = "#fff" }) {
@@ -1968,7 +1973,7 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
             </div>
 
             {/* Custom Domain (Premium Only) */}
-            {storeInfo?.plan === 'premium' && (
+            {ENABLE_CUSTOM_DOMAINS && storeInfo?.plan === 'premium' && (
               <div className="settings-section">
                 <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>🌍 Custom Domain</h3>
                 <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
@@ -2141,7 +2146,7 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
                 )}
                 {storeInfo?.plan === 'premium' && (
                   <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
-                    R300/month - Custom domain included + advanced analytics
+                    R300/month - Premium subdomain + advanced analytics (Custom domains coming soon)
                   </p>
                 )}
               </div>
@@ -2156,7 +2161,7 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
                         <div className="plan-card" style={{ border: "2px solid #667eea" }}>
                           <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Pro Plan</h4>
                           <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
-                            ✅ Subdomain (yourstore.mzansifoodconnect.co.za)<br/>
+                            ✅ Subdomain (yourstore.mzansifoodconnect.app)<br/>
                             ✅ Unlimited products<br/>
                             ✅ Basic analytics (revenue tracking)<br/>
                             ✅ WhatsApp API integration<br/>
@@ -2174,11 +2179,12 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
                         <div className="plan-card" style={{ border: "2px solid #764ba2" }}>
                           <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Premium Plan - Best Value</h4>
                           <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
-                            ✅ Custom domain (yourbusiness.co.za) - INCLUDED<br/>
+                            ✅ Premium subdomain (yourbusiness.mzansifoodconnect.app)<br/>
                             ✅ Everything in Pro<br/>
                             ✅ Advanced analytics with charts<br/>
                             ✅ More professional templates<br/>
-                            ✅ White-label solution
+                            ✅ White-label solution<br/>
+                            🚧 Custom domain (yourbusiness.co.za) - Coming Soon
                           </p>
                           <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month</span>
                           <button
@@ -2195,11 +2201,11 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
                       <div className="plan-card" style={{ border: "2px solid #764ba2" }}>
                         <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Premium Plan - Upgrade</h4>
                         <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
-                          ✅ Custom domain (yourbusiness.co.za) - INCLUDED<br/>
                           ✅ Advanced analytics with charts<br/>
                           ✅ More professional templates<br/>
                           ✅ White-label solution<br/>
-                          ✅ Dedicated support
+                          ✅ Dedicated support<br/>
+                          🚧 Custom domain (yourbusiness.co.za) - Coming Soon
                         </p>
                         <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month (only R150 more!)</span>
                         <button
