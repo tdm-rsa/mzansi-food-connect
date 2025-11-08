@@ -19,6 +19,7 @@ import MenuManagement from "./components/MenuManagement.jsx";
 import StarterDashboardView from "./components/StarterDashboardView.jsx";
 import ProDashboardView from "./components/ProDashboardView.jsx";
 import PremiumDashboardView from "./components/PremiumDashboardView.jsx";
+import UpgradePayment from "./components/UpgradePayment.jsx";
 
 /* -------------------------------------------------------
    Helper: tiny badge pill component
@@ -96,6 +97,9 @@ export default function App({ user }) {
   const [paystackPublicKey, setPaystackPublicKey] = useState("");
   const [paystackSecretKey, setPaystackSecretKey] = useState("");
   const [savingPaystack, setSavingPaystack] = useState(false);
+
+  // Upgrade payment state
+  const [showUpgradePayment, setShowUpgradePayment] = useState(null); // 'pro' or 'premium' or null
 
   // Enable audio on first user interaction
   useEffect(() => {
@@ -2098,68 +2102,86 @@ export default function App({ user }) {
               {storeInfo?.plan !== 'premium' && (
                 <>
                   <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Upgrade Your Plan</h4>
-                  <div style={{ display: "grid", gap: "1rem", marginTop: "1rem" }}>
-                    {storeInfo?.plan === 'trial' && (
-                      <>
-                        <div className="plan-card" style={{ border: "2px solid #667eea" }}>
-                          <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Pro Plan</h4>
-                          <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
-                            ✅ Subdomain (yourstore.mzansifoodconnect.app)<br/>
-                            ✅ Unlimited products<br/>
-                            ✅ Basic analytics (revenue tracking)<br/>
-                            ✅ WhatsApp API integration<br/>
-                            ✅ Remove branding
-                          </p>
-                          <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R150 / month</span>
-                          <button
-                            onClick={() => window.open("https://paystack.com/pay/mzansi-pro", "_blank")}
-                            className="btn-primary"
-                          >
-                            Upgrade to Pro 🚀
-                          </button>
-                        </div>
 
+                  {/* Show payment component if upgrade is selected */}
+                  {showUpgradePayment ? (
+                    <UpgradePayment
+                      user={user}
+                      storeInfo={storeInfo}
+                      targetPlan={showUpgradePayment}
+                      onSuccess={(updatedStore) => {
+                        // Refresh store info with new plan
+                        setStoreInfo(updatedStore);
+                        setShowUpgradePayment(null);
+                        // Reload to show new plan features
+                        window.location.reload();
+                      }}
+                      onCancel={() => setShowUpgradePayment(null)}
+                    />
+                  ) : (
+                    <div style={{ display: "grid", gap: "1rem", marginTop: "1rem" }}>
+                      {storeInfo?.plan === 'trial' && (
+                        <>
+                          <div className="plan-card" style={{ border: "2px solid #667eea" }}>
+                            <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Pro Plan</h4>
+                            <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
+                              ✅ Subdomain (yourstore.mzansifoodconnect.app)<br/>
+                              ✅ Unlimited products<br/>
+                              ✅ Basic analytics (revenue tracking)<br/>
+                              ✅ WhatsApp API integration<br/>
+                              ✅ Remove branding
+                            </p>
+                            <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R150 / month</span>
+                            <button
+                              onClick={() => setShowUpgradePayment('pro')}
+                              className="btn-primary"
+                            >
+                              Upgrade to Pro 🚀
+                            </button>
+                          </div>
+
+                          <div className="plan-card" style={{ border: "2px solid #764ba2" }}>
+                            <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Premium Plan - Best Value</h4>
+                            <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
+                              ✅ Premium subdomain (yourbusiness.mzansifoodconnect.app)<br/>
+                              ✅ Everything in Pro<br/>
+                              ✅ Advanced analytics with charts<br/>
+                              ✅ More professional templates<br/>
+                              ✅ White-label solution<br/>
+                              🚧 Custom domain (yourbusiness.co.za) - Coming Soon
+                            </p>
+                            <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month</span>
+                            <button
+                              onClick={() => setShowUpgradePayment('premium')}
+                              className="btn-primary"
+                            >
+                              Upgrade to Premium 🌍
+                            </button>
+                          </div>
+                        </>
+                      )}
+
+                      {storeInfo?.plan === 'pro' && (
                         <div className="plan-card" style={{ border: "2px solid #764ba2" }}>
-                          <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Premium Plan - Best Value</h4>
+                          <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Premium Plan - Upgrade</h4>
                           <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
-                            ✅ Premium subdomain (yourbusiness.mzansifoodconnect.app)<br/>
-                            ✅ Everything in Pro<br/>
                             ✅ Advanced analytics with charts<br/>
                             ✅ More professional templates<br/>
                             ✅ White-label solution<br/>
+                            ✅ Dedicated support<br/>
                             🚧 Custom domain (yourbusiness.co.za) - Coming Soon
                           </p>
-                          <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month</span>
+                          <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month (only R150 more!)</span>
                           <button
-                            onClick={() => window.open("https://paystack.com/pay/mzansi-premium", "_blank")}
+                            onClick={() => setShowUpgradePayment('premium')}
                             className="btn-primary"
                           >
                             Upgrade to Premium 🌍
                           </button>
                         </div>
-                      </>
-                    )}
-
-                    {storeInfo?.plan === 'pro' && (
-                      <div className="plan-card" style={{ border: "2px solid #764ba2" }}>
-                        <h4 style={{ color: darkMode ? "#ffffff" : "#333" }}>Premium Plan - Upgrade</h4>
-                        <p style={{ color: darkMode ? "#cbd5e1" : "#333" }}>
-                          ✅ Advanced analytics with charts<br/>
-                          ✅ More professional templates<br/>
-                          ✅ White-label solution<br/>
-                          ✅ Dedicated support<br/>
-                          🚧 Custom domain (yourbusiness.co.za) - Coming Soon
-                        </p>
-                        <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month (only R150 more!)</span>
-                        <button
-                          onClick={() => window.open("https://paystack.com/pay/mzansi-premium", "_blank")}
-                          className="btn-primary"
-                        >
-                          Upgrade to Premium 🌍
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </div>

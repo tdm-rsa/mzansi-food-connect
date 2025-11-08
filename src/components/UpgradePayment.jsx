@@ -1,0 +1,228 @@
+import { useState } from "react";
+import { PaystackButton } from "react-paystack";
+import { supabase } from "../supabaseClient";
+
+/**
+ * Upgrade Payment Component
+ * Handles Paystack payments for Pro and Premium plan upgrades
+ */
+export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess, onCancel }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
+  const planDetails = {
+    pro: {
+      name: "Pro",
+      price: 150,
+      priceInCents: 15000,
+      features: [
+        "Subdomain (yourstore.mzansifoodconnect.app)",
+        "Unlimited products",
+        "Basic analytics (revenue tracking)",
+        "WhatsApp API integration",
+        "Remove branding",
+        "Priority support"
+      ]
+    },
+    premium: {
+      name: "Premium",
+      price: 300,
+      priceInCents: 30000,
+      features: [
+        "Premium subdomain (yourbusiness.mzansifoodconnect.app)",
+        "Everything in Pro",
+        "Advanced analytics with charts",
+        "More professional templates",
+        "White-label solution",
+        "Dedicated support"
+      ]
+    }
+  };
+
+  const plan = planDetails[targetPlan];
+
+  if (!plan) {
+    return <div>Invalid plan selected</div>;
+  }
+
+  async function handlePaymentSuccess(reference) {
+    setLoading(true);
+    setError("");
+
+    try {
+      console.log('💳 Payment successful! Reference:', reference.reference);
+      console.log('🔄 Upgrading store to:', targetPlan);
+
+      // Update the store plan in database
+      const { data, error: updateError } = await supabase
+        .from("stores")
+        .update({
+          plan: targetPlan,
+          plan_started_at: new Date().toISOString(),
+          plan_expires_at: null, // Paid plans don't expire (subscription-based)
+          payment_reference: reference.reference,
+        })
+        .eq("id", storeInfo.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      console.log('✅ Store upgraded successfully:', data);
+
+      // Show success message
+      alert(`✅ Upgrade successful!\n\nYour store has been upgraded to ${plan.name} plan!\n\nAll ${plan.name} features are now active.\n\nThank you for upgrading!`);
+
+      // Call onSuccess callback to refresh the page/state
+      if (onSuccess) {
+        onSuccess(data);
+      }
+    } catch (err) {
+      console.error('❌ Upgrade error:', err);
+      setError(`Failed to upgrade: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handlePaymentClose() {
+    setError("Payment cancelled. You can try again anytime.");
+  }
+
+  const paystackConfig = {
+    reference: `UPGRADE-${storeInfo.id}-${new Date().getTime()}`,
+    email: user.email,
+    amount: plan.priceInCents,
+    publicKey: paystackKey,
+    metadata: {
+      store_id: storeInfo.id,
+      store_name: storeInfo.name,
+      upgrade_from: storeInfo.plan,
+      upgrade_to: targetPlan,
+    }
+  };
+
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.05)",
+      borderRadius: "16px",
+      padding: "2rem",
+      marginTop: "1rem"
+    }}>
+      <div style={{
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        padding: "2rem",
+        borderRadius: "12px",
+        marginBottom: "1.5rem",
+        color: "white"
+      }}>
+        <h3 style={{ margin: "0 0 1rem 0", color: "white" }}>
+          Upgrade to {plan.name} Plan
+        </h3>
+        <div style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+          R{plan.price} / month
+        </div>
+        <p style={{ margin: 0, opacity: 0.9 }}>
+          Billed monthly • Cancel anytime
+        </p>
+      </div>
+
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h4 style={{ color: "#fff", marginBottom: "1rem" }}>What you'll get:</h4>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          {plan.features.map((feature, idx) => (
+            <li key={idx} style={{
+              color: "#cbd5e1",
+              marginBottom: "0.5rem",
+              paddingLeft: "1.5rem",
+              position: "relative"
+            }}>
+              <span style={{
+                position: "absolute",
+                left: 0,
+                color: "#10b981"
+              }}>✓</span>
+              {feature}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {error && (
+        <div style={{
+          background: "#f443361a",
+          border: "1px solid #f44336",
+          borderRadius: "8px",
+          padding: "1rem",
+          marginBottom: "1rem",
+          color: "#f44336"
+        }}>
+          ⚠️ {error}
+        </div>
+      )}
+
+      <div style={{ marginTop: "1.5rem" }}>
+        <p style={{ color: "#94a3b8", fontSize: "0.9rem", marginBottom: "1rem" }}>
+          🔒 Secure payment powered by Paystack
+        </p>
+
+        {paystackKey ? (
+          <PaystackButton
+            {...paystackConfig}
+            text={`Pay R${plan.price} - Upgrade to ${plan.name}`}
+            onSuccess={handlePaymentSuccess}
+            onClose={handlePaymentClose}
+            disabled={loading}
+            className="btn-primary"
+            style={{
+              width: "100%",
+              padding: "1rem",
+              fontSize: "1rem",
+              fontWeight: "600",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1
+            }}
+          />
+        ) : (
+          <div style={{
+            background: "#f443361a",
+            border: "1px solid #f44336",
+            borderRadius: "8px",
+            padding: "1rem",
+            color: "#f44336"
+          }}>
+            ⚠️ Paystack is not configured. Please contact support.
+          </div>
+        )}
+
+        {onCancel && (
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            style={{
+              width: "100%",
+              marginTop: "1rem",
+              padding: "0.75rem",
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: "8px",
+              color: "#fff",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1
+            }}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+
+      <p style={{ color: "#64748b", fontSize: "0.85rem", marginTop: "1.5rem", textAlign: "center" }}>
+        Your subscription will renew automatically each month. You can cancel anytime from your settings.
+      </p>
+    </div>
+  );
+}
