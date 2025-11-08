@@ -2,8 +2,8 @@
 // Uses Domains.co.za API for .co.za domain registration
 // Uses Cloudflare API for DNS configuration
 
-// Always use /api/domains proxy (Vite in dev, Vercel serverless in production)
-const DOMAINS_API_URL = "/api/domains";
+// Always use /api/domains/proxy (Vite in dev, Vercel serverless in production)
+const DOMAINS_API_URL = "/api/domains/proxy";
 const CLOUDFLARE_API_URL = "https://api.cloudflare.com/client/v4";
 
 /**
@@ -39,7 +39,7 @@ export async function checkDomainAvailability(domainName) {
     const apiKey = getDomainsAPIKey();
 
     const response = await fetch(
-      `${DOMAINS_API_URL}/domain/check?sld=${encodeURIComponent(sld)}&tld=${encodeURIComponent(tld)}&token=${apiKey}`,
+      `${DOMAINS_API_URL}?path=domain/check&sld=${encodeURIComponent(sld)}&tld=${encodeURIComponent(tld)}&token=${apiKey}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -96,7 +96,7 @@ export async function registerDomain(domainName, customerInfo) {
       registrant_city: customerInfo.city || "Johannesburg",
     };
 
-    const response = await fetch(`${DOMAINS_API_URL}/domain?token=${apiKey}`, {
+    const response = await fetch(`${DOMAINS_API_URL}?path=domain&token=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
