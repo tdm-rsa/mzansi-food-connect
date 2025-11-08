@@ -831,7 +831,13 @@ export default function App({ user }) {
         <p>Business Management System</p>
       </div>
 
-      <div className="user-menu">
+      <div className="user-menu" style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "0.75rem"
+      }}>
         {/* 🌙 THEME TOGGLE BUTTON */}
         <button
           className="btn-secondary"
@@ -846,13 +852,16 @@ export default function App({ user }) {
           {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
         </button>
 
+        {/* Profile Section - Centered */}
         <div style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "0.5rem"
+          justifyContent: "center",
+          gap: "0.5rem",
+          minWidth: "fit-content"
         }}>
-          {/* Plan Badge - Larger */}
+          {/* Plan Badge */}
           {storeInfo && (
             <div style={{
               background: storeInfo.plan === 'pro'
@@ -873,12 +882,17 @@ export default function App({ user }) {
               {storeInfo.plan === 'pro' ? '🚀 Pro' : storeInfo.plan === 'premium' ? '👑 Premium' : '📦 Starter'}
             </div>
           )}
-          <span className="user-name">{user?.email}</span>
+          {/* Owner Name */}
+          <span className="user-name" style={{ textAlign: "center" }}>
+            {storeInfo?.owner_name || user?.email?.split('@')[0] || 'User'}
+          </span>
         </div>
+
         <audio ref={audioRef} src={audioReadyUrl} preload="none" />
+
         <button
           className="btn-primary"
-onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/store", "_blank")}
+          onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/store", "_blank")}
           title="Open your public storefront"
           style={{ marginRight: ".75rem" }}
         >
@@ -1605,6 +1619,57 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
               <button className="back-btn" onClick={() => setCurrentView("dashboard")}>← Back</button>
               <h2>⚙️ Settings</h2>
               <p>Manage your account and preferences</p>
+            </div>
+
+            {/* Owner Name */}
+            <div className="settings-section">
+              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>👤 Your Name</h3>
+              <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                Change your display name (shows in header)
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem", maxWidth: "500px" }}>
+                <input
+                  type="text"
+                  id="newOwnerName"
+                  defaultValue={storeInfo?.owner_name || user?.email?.split('@')[0] || ""}
+                  placeholder="Enter your name"
+                  style={{
+                    flex: 1,
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "2px solid #e5e7eb",
+                    fontSize: "1rem"
+                  }}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={async () => {
+                    const newName = document.getElementById("newOwnerName").value.trim();
+                    if (!newName) {
+                      showToast("⚠️ Name cannot be empty", "#f44336");
+                      return;
+                    }
+
+                    try {
+                      const { error } = await supabase
+                        .from("stores")
+                        .update({ owner_name: newName })
+                        .eq("id", storeInfo.id);
+
+                      if (error) throw error;
+
+                      setStoreInfo({ ...storeInfo, owner_name: newName });
+                      showToast("✅ Your name updated successfully!", "#4caf50");
+                    } catch (error) {
+                      showToast("❌ Failed to update name", "#f44336");
+                      console.error(error);
+                    }
+                  }}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Update Name
+                </button>
+              </div>
             </div>
 
             {/* Store Name */}
