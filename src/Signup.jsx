@@ -25,7 +25,7 @@ export default function Signup({ onBack, onSuccess }) {
       period: "for 7 days",
       description: "Try it free - no credit card required",
       features: [
-        "Subdomain (storename.mzansifoodconnect.co.za)",
+        "Subdomain (storename.mzansifoodconnect.app)",
         "Up to 30 products",
         "Order management",
         "Store designer",
@@ -40,7 +40,7 @@ export default function Signup({ onBack, onSuccess }) {
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
-        "Subdomain (storename.mzansifoodconnect.co.za)",
+        "Subdomain (storename.mzansifoodconnect.app)",
         "Unlimited products",
         "Basic analytics (revenue tracking)",
         "WhatsApp API integration",
@@ -117,14 +117,14 @@ export default function Signup({ onBack, onSuccess }) {
       // If free trial, create store immediately
       if (selectedPlan === "trial") {
         console.log('✅ Creating TRIAL store');
-        await createStore(authData.user.id, selectedPlan, null);
-        alert(`✅ Account created successfully!\n\n🎉 Your 7-day free trial has started!\n\nPlease check your email (${email}) to verify your account, then login.`);
+        const store = await createStore(authData.user.id, selectedPlan, null);
+        alert(`✅ Account created successfully!\n\n🎉 Your 7-day free trial has started!\n\n🌐 Your store is live at:\nhttps://${store.slug}.mzansifoodconnect.app\n\nPlease check your email (${email}) to verify your account, then login.`);
         onBack();
       } else {
         // For paid plans - TESTING MODE: Create store without payment
         console.log('✅ Creating PAID store with plan:', selectedPlan);
-        await createStore(authData.user.id, selectedPlan, `TEST-${Date.now()}`);
-        alert(`✅ ${selectedPlan.toUpperCase()} Account created!\n\n⚠️ TESTING MODE - No payment required\n\nPlease check your email (${email}) to verify your account, then login.`);
+        const store = await createStore(authData.user.id, selectedPlan, `TEST-${Date.now()}`);
+        alert(`✅ ${selectedPlan.toUpperCase()} Account created!\n\n⚠️ TESTING MODE - No payment required\n\n🌐 Your store is live at:\nhttps://${store.slug}.mzansifoodconnect.app\n\nPlease check your email (${email}) to verify your account, then login.`);
         onBack();
 
         // For paid plans, go to payment step (COMMENTED FOR TESTING)
@@ -163,7 +163,7 @@ export default function Signup({ onBack, onSuccess }) {
       payment_reference: paymentRef
     });
 
-    const { error: storeError } = await supabase.from("stores").insert([{
+    const { data: storeData, error: storeError } = await supabase.from("stores").insert([{
       owner_id: userId,
       name: storeName,
       slug: uniqueSlug, // 🔥 FIX: Add slug
@@ -174,7 +174,7 @@ export default function Signup({ onBack, onSuccess }) {
       banner_text: `Welcome to ${storeName}!`,
       about_text: `Proudly serving authentic food.`,
       payment_reference: paymentRef,
-    }]);
+    }]).select().single();
 
     if (storeError) {
       console.error('❌ Store creation error:', storeError);
@@ -182,13 +182,14 @@ export default function Signup({ onBack, onSuccess }) {
     }
 
     console.log('✅ Store created successfully with plan:', plan);
+    return storeData; // Return store data including slug
   }
 
   function handlePaymentSuccess(reference) {
     setLoading(true);
     createStore(createdUserId, selectedPlan, reference.reference)
-      .then(() => {
-        alert(`✅ Payment successful!\n\nYour ${plans.find(p => p.id === selectedPlan).name} subscription is now active!\n\nPlease check your email (${email}) to verify your account, then login.`);
+      .then((store) => {
+        alert(`✅ Payment successful!\n\nYour ${plans.find(p => p.id === selectedPlan).name} subscription is now active!\n\n🌐 Your store is live at:\nhttps://${store.slug}.mzansifoodconnect.app\n\nPlease check your email (${email}) to verify your account, then login.`);
         onBack();
       })
       .catch((err) => {

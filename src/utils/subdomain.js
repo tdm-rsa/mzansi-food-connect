@@ -38,8 +38,9 @@ export function getSubdomain() {
     return null;
   }
 
-  // Verify it's alphanumeric (valid store slug)
-  if (!/^[a-z0-9]+$/i.test(subdomain)) {
+  // Verify it's alphanumeric with dashes (valid store slug)
+  // Allow: letters, numbers, and dashes
+  if (!/^[a-z0-9-]+$/i.test(subdomain)) {
     return null;
   }
 
