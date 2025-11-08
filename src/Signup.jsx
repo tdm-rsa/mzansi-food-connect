@@ -143,20 +143,38 @@ export default function Signup({ onBack, onSuccess }) {
       ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       : null;
 
-    // 🔥 FIX: Generate unique slug from store name
+    // 🔥 Generate clean slug from store name (no random suffix)
     const baseSlug = storeName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dashes
       .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
 
-    // Add random suffix to ensure uniqueness
-    const uniqueSlug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
+    // Check if slug exists and find next available
+    let finalSlug = baseSlug;
+    let counter = 2;
+
+    while (true) {
+      const { data: existing } = await supabase
+        .from("stores")
+        .select("slug")
+        .eq("slug", finalSlug)
+        .single();
+
+      if (!existing) {
+        // Slug is available!
+        break;
+      }
+
+      // Slug taken, try with number suffix
+      finalSlug = `${baseSlug}${counter}`;
+      counter++;
+    }
 
     // DEBUG: Log what's being inserted
     console.log('💾 DATABASE INSERT:', {
       owner_id: userId,
       name: storeName,
-      slug: uniqueSlug,
+      slug: finalSlug,
       plan: plan,
       plan_type: typeof plan,
       plan_expires_at: planExpiresAt,
@@ -166,7 +184,7 @@ export default function Signup({ onBack, onSuccess }) {
     const { data: storeData, error: storeError } = await supabase.from("stores").insert([{
       owner_id: userId,
       name: storeName,
-      slug: uniqueSlug, // 🔥 FIX: Add slug
+      slug: finalSlug,
       plan: plan,
       plan_started_at: new Date().toISOString(),
       plan_expires_at: planExpiresAt,
@@ -181,7 +199,7 @@ export default function Signup({ onBack, onSuccess }) {
       throw storeError;
     }
 
-    console.log('✅ Store created successfully with plan:', plan);
+    console.log('✅ Store created successfully with slug:', finalSlug);
     return storeData; // Return store data including slug
   }
 
