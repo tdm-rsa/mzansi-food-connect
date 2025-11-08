@@ -18,6 +18,7 @@ export default function StyledQRCode({ storeName }) {
   const [ownerWebsite, setOwnerWebsite] = useState("");
   const [whatsappGroupLink, setWhatsappGroupLink] = useState("");
   const [storeId, setStoreId] = useState(null);
+  const [storeSlug, setStoreSlug] = useState("");
 
   // ✅ Load saved QR design from Supabase
   useEffect(() => {
@@ -33,15 +34,19 @@ export default function StyledQRCode({ storeName }) {
         setOwnerWebsite(data.qr_custom_url || "");
         setWhatsappGroupLink(data.whatsapp_group_link || "");
         setStoreId(data.id);
+        setStoreSlug(data.slug || "");
       }
       setLoading(false);
     }
     loadSettings();
   }, []);
 
+  // 🔥 Default to subdomain URL: https://slug.mzansifoodconnect.app
   const storeUrl = ownerWebsite?.trim()
     ? ownerWebsite.trim()
-    : `${window.location.origin}/store?shop=${encodeURIComponent(storeName)}`;
+    : storeSlug
+      ? `https://${storeSlug}.mzansifoodconnect.app`
+      : `${window.location.origin}/store/${encodeURIComponent(storeName)}`;
 
   // Initialize QR
   useEffect(() => {
@@ -191,7 +196,7 @@ export default function StyledQRCode({ storeName }) {
         >
           <h4 style={{ color, margin: 0, fontSize: "1.1rem" }}>{storeName}</h4>
           <p style={{ margin: 0, color: "#333", fontSize: "0.85rem" }}>
-            {ownerWebsite || storeUrl.replace(/^https?:\/\//, "")}
+            {storeUrl.replace(/^https?:\/\//, "")}
           </p>
         </div>
       </div>
@@ -263,14 +268,17 @@ export default function StyledQRCode({ storeName }) {
 
         {/* Website */}
         <div>
-          <label>Store Website (optional)</label>
+          <label>Custom Website (optional - defaults to subdomain)</label>
           <input
             type="text"
             className="design-select"
-            placeholder="https://yourstore.mzansifoodconnect.co.za"
+            placeholder={`Default: https://${storeSlug}.mzansifoodconnect.app`}
             value={ownerWebsite}
             onChange={(e) => setOwnerWebsite(e.target.value)}
           />
+          <small style={{ color: "#999", fontSize: "0.75rem", display: "block", marginTop: "0.25rem" }}>
+            Leave blank to use your subdomain URL
+          </small>
         </div>
 
         {/* WhatsApp Group Link */}
