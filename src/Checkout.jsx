@@ -90,7 +90,8 @@ export default function Checkout() {
   /* -------------------------------------------------------
      Paystack Configuration
   ------------------------------------------------------- */
-  const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_xxxxxxxxxxxxxxxxxxxxxx";
+  // Use vendor's Paystack key if available, otherwise fallback to platform key
+  const paystackPublicKey = store?.paystack_public_key || import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_xxxxxxxxxxxxxxxxxxxxxx";
 
   const paystackConfig = {
     publicKey: paystackPublicKey,

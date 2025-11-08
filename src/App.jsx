@@ -1606,6 +1606,57 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
               <p>Manage your account and preferences</p>
             </div>
 
+            {/* Store Name */}
+            <div className="settings-section">
+              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>🏪 Store Name</h3>
+              <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                Change your store's display name (updates everywhere)
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem", maxWidth: "500px" }}>
+                <input
+                  type="text"
+                  id="newStoreName"
+                  defaultValue={storeInfo?.name || ""}
+                  placeholder="Enter store name"
+                  style={{
+                    flex: 1,
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "2px solid #e5e7eb",
+                    fontSize: "1rem"
+                  }}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={async () => {
+                    const newName = document.getElementById("newStoreName").value.trim();
+                    if (!newName) {
+                      showToast("⚠️ Store name cannot be empty", "#f44336");
+                      return;
+                    }
+
+                    try {
+                      const { error } = await supabase
+                        .from("stores")
+                        .update({ name: newName })
+                        .eq("id", storeInfo.id);
+
+                      if (error) throw error;
+
+                      setStoreInfo({ ...storeInfo, name: newName });
+                      showToast("✅ Store name updated successfully!", "#4caf50");
+                    } catch (error) {
+                      showToast("❌ Failed to update store name", "#f44336");
+                      console.error(error);
+                    }
+                  }}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Update Name
+                </button>
+              </div>
+            </div>
+
             {/* Dark Mode */}
             <div className="settings-section">
               <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>🌓 Theme Mode</h3>

@@ -138,13 +138,13 @@ function Landing() {
     },
     {
       name: "Premium",
-      subtitle: "Custom Domain",
+      subtitle: "Subdomain (temporary)",
       price: "R300",
       period: "per month",
       description: "Bring your own domain (e.g., www.yourstore.co.za)",
       features: [
         "Everything in Pro",
-        "Custom domain support",
+        "Custom domain support (coming soonn)",
         "3 Professional templates",
         "Advanced Analytics , charts and reports",
         "API access e.g Automated WhatsApp messaging",
