@@ -115,11 +115,14 @@ function AppRouter() {
   // Show platform routes (dashboard, landing, path-based stores)
   return (
     <Routes>
-      {/* Landing Page */}
-      <Route path="/landing" element={<Landing />} />
+      {/* Landing Page (Homepage) */}
+      <Route path="/" element={<Landing />} />
 
-      {/* Owner Dashboard */}
-      <Route path="/" element={<AppWrapper />} />
+      {/* Owner Dashboard/App */}
+      <Route path="/app" element={<AppWrapper />} />
+
+      {/* Legacy landing route (redirect to home) */}
+      <Route path="/landing" element={<Landing />} />
 
       {/* Customer Storefront with Slug (path-based) */}
       <Route path="/store/:slug" element={<CustomerStore />} />

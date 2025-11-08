@@ -1,8 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from './supabaseClient';
 import './Landing.css';
 import logo from './images/logo.png';
 
 function Landing() {
+  const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        // User is logged in, redirect to app
+        navigate('/app');
+      }
+    });
+  }, [navigate]);
   const features = [
     {
       icon: "🏪",
@@ -157,7 +170,7 @@ function Landing() {
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
             <a href="#testimonials">Success Stories</a>
-            <a href="/" className="btn-login">Login</a>
+            <a href="/app" className="btn-login">Login</a>
           </div>
         </div>
       </nav>
@@ -175,7 +188,7 @@ function Landing() {
             Perfect for fast foods, eateries, shisanyamas, restaurants, and bakeries across South Africa.
           </p>
           <div className="hero-buttons">
-            <a href="/" className="btn btn-primary">Start Free Today</a>
+            <a href="/app" className="btn btn-primary">Start Free Today</a>
             <a href="#features" className="btn btn-secondary">See Features</a>
           </div>
           <div className="hero-trust">
@@ -266,7 +279,7 @@ function Landing() {
                     </li>
                   ))}
                 </ul>
-                <a href="/" className={`plan-cta ${plan.highlight ? 'primary' : 'secondary'}`}>
+                <a href="/app" className={`plan-cta ${plan.highlight ? 'primary' : 'secondary'}`}>
                   {plan.cta}
                 </a>
               </div>
