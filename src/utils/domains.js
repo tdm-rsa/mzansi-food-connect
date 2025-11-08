@@ -2,11 +2,8 @@
 // Uses Domains.co.za API for .co.za domain registration
 // Uses Cloudflare API for DNS configuration
 
-// Use proxy in development, direct API in production (needs backend)
-const DOMAINS_API_URL = import.meta.env.DEV
-  ? "/api/domains"  // Vite dev proxy
-  : "https://api.domains.co.za/api";  // Production (requires backend proxy)
-
+// Always use /api/domains proxy (Vite in dev, Vercel serverless in production)
+const DOMAINS_API_URL = "/api/domains";
 const CLOUDFLARE_API_URL = "https://api.cloudflare.com/client/v4";
 
 /**
