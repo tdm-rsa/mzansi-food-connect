@@ -64,7 +64,9 @@ export async function sendWhatsAppMessage(phoneNumber, message) {
 /**
  * Send Order Confirmation message
  */
-export async function sendOrderConfirmation(customerPhone, customerName, orderNumber, storeName, estimatedTime, totalAmount) {
+export async function sendOrderConfirmation(customerPhone, customerName, orderNumber, storeName, estimatedTime, totalAmount, storeSlug) {
+  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+
   const message = `Hi ${customerName}! 👋
 
 Your order from *${storeName}* has been confirmed! ✅
@@ -75,7 +77,7 @@ Your order from *${storeName}* has been confirmed! ✅
 
 Thank you for your order! We'll notify you when it's ready for pickup.
 
-- Mzansi Food Connect 🍽️`;
+${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽️`;
 
   return await sendWhatsAppMessage(customerPhone, message);
 }
@@ -83,7 +85,9 @@ Thank you for your order! We'll notify you when it's ready for pickup.
 /**
  * Send Order Ready message
  */
-export async function sendOrderReady(customerPhone, customerName, orderNumber, storeName) {
+export async function sendOrderReady(customerPhone, customerName, orderNumber, storeName, storeSlug) {
+  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+
   const message = `Hi ${customerName}! 🎉
 
 Great news! Your order from *${storeName}* is ready for pickup! ✅
@@ -93,7 +97,7 @@ Great news! Your order from *${storeName}* is ready for pickup! ✅
 
 See you soon! 😊
 
-- Mzansi Food Connect 🍽️`;
+${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽️`;
 
   return await sendWhatsAppMessage(customerPhone, message);
 }
@@ -101,7 +105,9 @@ See you soon! 😊
 /**
  * Send Order Fetched (Thank you) message
  */
-export async function sendOrderFetched(customerPhone, customerName, orderNumber, storeName) {
+export async function sendOrderFetched(customerPhone, customerName, orderNumber, storeName, storeSlug) {
+  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+
   const message = `Thank you for collecting your order, ${customerName}! 🙏
 
 We hope you enjoy your meal from *${storeName}*! 🍽️
@@ -110,7 +116,7 @@ We hope you enjoy your meal from *${storeName}*! 🍽️
 
 We'd love to see you again soon! ❤️
 
-- Mzansi Food Connect`;
+${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect`;
 
   return await sendWhatsAppMessage(customerPhone, message);
 }

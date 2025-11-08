@@ -478,7 +478,7 @@ export default function App({ user }) {
       const customerName = updatedOrder.customer_name || updatedOrder.customer || "there";
       const storeName = storeInfo?.name || "Mzansi Food Connect";
 
-      const result = await sendOrderReady(phone, customerName, orderNum, storeName);
+      const result = await sendOrderReady(phone, customerName, orderNum, storeName, storeInfo?.slug);
 
       // Update local state
       setOrders((prev) =>
@@ -538,7 +538,8 @@ export default function App({ user }) {
         orderNum,
         storeName,
         selectedDuration,
-        totalAmount
+        totalAmount,
+        storeInfo?.slug
       );
 
       // Update local state
@@ -593,7 +594,7 @@ export default function App({ user }) {
         const customerName = completedOrder.customer_name || completedOrder.customer || "there";
         const storeName = storeInfo?.name || "Mzansi Food Connect";
 
-        const result = await sendOrderFetched(phone, customerName, orderNum, storeName);
+        const result = await sendOrderFetched(phone, customerName, orderNum, storeName, storeInfo?.slug);
 
         if (!result.success) {
           console.warn('WhatsApp thank you message failed:', result.error);
