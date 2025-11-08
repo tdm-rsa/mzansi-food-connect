@@ -4,7 +4,6 @@ import "./App.css";
 import { supabase } from "./supabaseClient";
 import { getPlanFeatures, canAccessFeature, isPlanActive, getDaysRemaining } from "./utils/planFeatures";
 import { sendOrderConfirmation, sendOrderReady, sendOrderFetched, sendWhatsAppMessage } from "./utils/whatsapp";
-import { checkDomainAvailability, claimDomain } from "./utils/domains";
 import logo from "./images/logo.png";
 
 // Views / components you already have
@@ -20,11 +19,6 @@ import MenuManagement from "./components/MenuManagement.jsx";
 import StarterDashboardView from "./components/StarterDashboardView.jsx";
 import ProDashboardView from "./components/ProDashboardView.jsx";
 import PremiumDashboardView from "./components/PremiumDashboardView.jsx";
-
-/* -------------------------------------------------------
-   FEATURE FLAGS
-------------------------------------------------------- */
-const ENABLE_CUSTOM_DOMAINS = false; // Set to true when domains.co.za reseller account is activated
 
 /* -------------------------------------------------------
    Helper: tiny badge pill component
@@ -97,12 +91,6 @@ export default function App({ user }) {
   );
   const audioRef = useRef(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
-
-  // Domain claiming states
-  const [domainInput, setDomainInput] = useState("");
-  const [domainChecking, setDomainChecking] = useState(false);
-  const [domainAvailable, setDomainAvailable] = useState(null);
-  const [domainClaiming, setDomainClaiming] = useState(false);
 
   // Paystack settings states
   const [paystackPublicKey, setPaystackPublicKey] = useState("");
@@ -783,87 +771,6 @@ export default function App({ user }) {
       await supabase.from("stores").update({ active_template: name }).eq("id", storeInfo.id);
     }
     showToast(`✅ "${name}" template activated!`);
-  };
-
-  /* -------------------------------------------------------
-     Domain claiming functions (Premium feature)
-  ------------------------------------------------------- */
-  const handleDomainCheck = async () => {
-    if (!domainInput.trim()) {
-      showToast("⚠️ Please enter a domain name", "#f59e0b");
-      return;
-    }
-
-    setDomainChecking(true);
-    setDomainAvailable(null);
-
-    try {
-      const fullDomain = `${domainInput}.co.za`;
-      const result = await checkDomainAvailability(fullDomain);
-      setDomainAvailable(result.available);
-
-      if (result.available) {
-        showToast(`✅ ${fullDomain} is available! (R79/year)`, "#10b981");
-      } else {
-        showToast(`❌ ${fullDomain} is already taken`, "#ef4444");
-      }
-    } catch (error) {
-      showToast("❌ Failed to check domain availability", "#ef4444");
-      console.error(error);
-    } finally {
-      setDomainChecking(false);
-    }
-  };
-
-  const handleDomainClaim = async () => {
-    if (!domainAvailable) {
-      showToast("⚠️ Check domain availability first", "#f59e0b");
-      return;
-    }
-
-    setDomainClaiming(true);
-
-    try {
-      const fullDomain = `${domainInput}.co.za`;
-
-      const customerInfo = {
-        name: storeInfo.name,
-        email: user.email,
-        storeName: storeInfo.name,
-        storeSlug: storeInfo.slug,
-        storeId: storeInfo.id,
-        phone: user.phone || "0000000000",
-        address: "South Africa",
-        city: "Johannesburg",
-        province: "Gauteng",
-        postalCode: "0001",
-      };
-
-      const result = await claimDomain(fullDomain, customerInfo, supabase);
-
-      if (result.success) {
-        showToast(`🎉 ${result.domain} claimed! Live within 24 hours`, "#10b981");
-
-        // Refresh store info to show new domain
-        const { data } = await supabase
-          .from("stores")
-          .select("*")
-          .eq("id", storeInfo.id)
-          .single();
-
-        if (data) setStoreInfo(data);
-
-        // Reset form
-        setDomainInput("");
-        setDomainAvailable(null);
-      }
-    } catch (error) {
-      const errorMsg = error.message || "Failed to claim domain";
-      showToast(`❌ ${errorMsg}`, "#ef4444");
-      console.error(error);
-    } finally {
-      setDomainClaiming(false);
-    }
   };
 
   /* -------------------------------------------------------
@@ -1971,151 +1878,6 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
             <div className="settings-section">
               <StyledQRCode storeName={storeInfo?.name || "Mzansi Store"} />
             </div>
-
-            {/* Custom Domain (Premium Only) */}
-            {ENABLE_CUSTOM_DOMAINS && storeInfo?.plan === 'premium' && (
-              <div className="settings-section">
-                <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>🌍 Custom Domain</h3>
-                <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
-                  {storeInfo?.custom_domain
-                    ? `Your custom domain: ${storeInfo.custom_domain}`
-                    : "Claim your professional .co.za domain - included FREE with Premium!"
-                  }
-                </p>
-
-                {storeInfo?.custom_domain ? (
-                  // Domain already claimed
-                  <div style={{
-                    background: darkMode ? "#1e293b" : "#f0fdf4",
-                    border: `2px solid ${darkMode ? "#10b981" : "#86efac"}`,
-                    borderRadius: "12px",
-                    padding: "1.5rem",
-                    textAlign: "center"
-                  }}>
-                    <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>✅</div>
-                    <h4 style={{ margin: "0 0 0.5rem 0", color: darkMode ? "#ffffff" : "#166534" }}>
-                      Domain Active
-                    </h4>
-                    <p style={{
-                      fontSize: "1.1rem",
-                      fontWeight: "600",
-                      margin: "0 0 0.5rem 0",
-                      color: darkMode ? "#10b981" : "#15803d"
-                    }}>
-                      {storeInfo.custom_domain}
-                    </p>
-                    <p style={{ fontSize: "0.85rem", color: darkMode ? "#94a3b8" : "#6b7280", margin: 0 }}>
-                      Status: {storeInfo.domain_status === 'active' ? '🟢 Live' : '🟡 Pending (24 hours)'}
-                    </p>
-                  </div>
-                ) : (
-                  // Claim domain flow
-                  <>
-                    <div className="form-group">
-                      <label htmlFor="domain-input" style={{ color: darkMode ? "#ffffff" : "#333" }}>
-                        Enter your desired domain
-                      </label>
-                      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                        <input
-                          id="domain-input"
-                          type="text"
-                          className="form-input"
-                          placeholder="mykfcsoweto"
-                          value={domainInput}
-                          onChange={(e) => setDomainInput(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
-                          style={{ flex: 1 }}
-                        />
-                        <span style={{
-                          color: darkMode ? "#cbd5e1" : "#333",
-                          fontWeight: "600",
-                          whiteSpace: "nowrap"
-                        }}>
-                          .co.za
-                        </span>
-                      </div>
-                      <p style={{
-                        fontSize: "0.8rem",
-                        color: darkMode ? "#94a3b8" : "#6b7280",
-                        marginTop: "0.5rem"
-                      }}>
-                        Choose a simple, memorable name (letters and numbers only)
-                      </p>
-                    </div>
-
-                    <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                      <button
-                        onClick={handleDomainCheck}
-                        className="btn-secondary"
-                        disabled={domainChecking || !domainInput}
-                        style={{ flex: "1 1 auto" }}
-                      >
-                        {domainChecking ? "Checking..." : "Check Availability"}
-                      </button>
-
-                      {domainAvailable === true && (
-                        <button
-                          onClick={handleDomainClaim}
-                          className="btn-primary"
-                          disabled={domainClaiming}
-                          style={{ flex: "1 1 auto" }}
-                        >
-                          {domainClaiming ? "Claiming..." : "Claim Domain (FREE)"}
-                        </button>
-                      )}
-                    </div>
-
-                    {domainAvailable !== null && (
-                      <div style={{
-                        marginTop: "1rem",
-                        padding: "1rem",
-                        borderRadius: "8px",
-                        background: domainAvailable
-                          ? (darkMode ? "#064e3b" : "#d1fae5")
-                          : (darkMode ? "#7f1d1d" : "#fee2e2"),
-                        border: `2px solid ${domainAvailable
-                          ? (darkMode ? "#10b981" : "#34d399")
-                          : (darkMode ? "#ef4444" : "#f87171")
-                        }`,
-                        color: darkMode ? "#ffffff" : "#1f2937"
-                      }}>
-                        <p style={{ margin: 0, fontWeight: "600" }}>
-                          {domainAvailable
-                            ? `✅ ${domainInput}.co.za is available!`
-                            : `❌ ${domainInput}.co.za is already taken`
-                          }
-                        </p>
-                        {domainAvailable && (
-                          <p style={{
-                            margin: "0.5rem 0 0 0",
-                            fontSize: "0.85rem",
-                            color: darkMode ? "#cbd5e1" : "#6b7280"
-                          }}>
-                            Click "Claim Domain" to register it instantly. It will be live within 24 hours.
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    <div style={{
-                      marginTop: "1.5rem",
-                      padding: "1rem",
-                      background: darkMode ? "#1e293b" : "#fef3c7",
-                      borderRadius: "8px",
-                      fontSize: "0.85rem",
-                      color: darkMode ? "#fbbf24" : "#92400e"
-                    }}>
-                      <strong>📌 How it works:</strong>
-                      <ol style={{ margin: "0.5rem 0 0 0", paddingLeft: "1.5rem" }}>
-                        <li>Check if your desired domain is available</li>
-                        <li>Click "Claim Domain" - we'll register it for you</li>
-                        <li>Domain will be live within 24 hours</li>
-                        <li>Customers can access your store at yourdomain.co.za</li>
-                      </ol>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
 
             {/* Current Plan & Upgrade Options */}
             <div className="settings-section">
