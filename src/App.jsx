@@ -893,7 +893,12 @@ export default function App({ user }) {
 
         <button
           className="btn-primary"
-          onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/store", "_blank")}
+          onClick={() => {
+            const url = storeInfo?.slug
+              ? `https://${storeInfo.slug}.mzansifoodconnect.app`
+              : "/store";
+            window.open(url, "_blank");
+          }}
           title="Open your public storefront"
           style={{ marginRight: ".75rem" }}
         >
@@ -1069,7 +1074,10 @@ export default function App({ user }) {
                               className="btn-secondary"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/store", "_blank");
+                                const url = storeInfo?.slug
+                                  ? `https://${storeInfo.slug}.mzansifoodconnect.app`
+                                  : "/store";
+                                window.open(url, "_blank");
                               }}
                             >
                               Preview
