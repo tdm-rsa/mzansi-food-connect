@@ -65,11 +65,12 @@ export async function sendWhatsAppMessage(phoneNumber, message) {
  * Send Order Confirmation message
  */
 export async function sendOrderConfirmation(customerPhone, customerName, orderNumber, storeName, estimatedTime, totalAmount, storeSlug) {
-  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+  const storeUrl = storeSlug ? `${storeSlug}.mzansifoodconnect.app` : '';
 
   const message = `Hi ${customerName}! 👋
 
 Your order from *${storeName}* has been confirmed! ✅
+${storeUrl ? `🌐 ${storeUrl}` : ''}
 
 📦 Order #${orderNumber}
 ⏱️ Ready in: ${estimatedTime} minutes
@@ -77,7 +78,7 @@ Your order from *${storeName}* has been confirmed! ✅
 
 Thank you for your order! We'll notify you when it's ready for pickup.
 
-${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽️`;
+${storeUrl ? `Order again anytime: https://${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽️`;
 
   return await sendWhatsAppMessage(customerPhone, message);
 }
@@ -86,18 +87,19 @@ ${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽
  * Send Order Ready message
  */
 export async function sendOrderReady(customerPhone, customerName, orderNumber, storeName, storeSlug) {
-  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+  const storeUrl = storeSlug ? `${storeSlug}.mzansifoodconnect.app` : '';
 
   const message = `Hi ${customerName}! 🎉
 
 Great news! Your order from *${storeName}* is ready for pickup! ✅
+${storeUrl ? `🌐 ${storeUrl}` : ''}
 
 📦 Order #${orderNumber}
 📍 Come collect at ${storeName}
 
 See you soon! 😊
 
-${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽️`;
+${storeUrl ? `Order again anytime: https://${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽️`;
 
   return await sendWhatsAppMessage(customerPhone, message);
 }
@@ -106,17 +108,18 @@ ${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect 🍽
  * Send Order Fetched (Thank you) message
  */
 export async function sendOrderFetched(customerPhone, customerName, orderNumber, storeName, storeSlug) {
-  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+  const storeUrl = storeSlug ? `${storeSlug}.mzansifoodconnect.app` : '';
 
   const message = `Thank you for collecting your order, ${customerName}! 🙏
 
 We hope you enjoy your meal from *${storeName}*! 🍽️
+${storeUrl ? `🌐 ${storeUrl}` : ''}
 
 📦 Order #${orderNumber}
 
 We'd love to see you again soon! ❤️
 
-${storeUrl ? `🌐 Order again: ${storeUrl}\n\n` : ''}- Mzansi Food Connect`;
+${storeUrl ? `Order again anytime: https://${storeUrl}\n\n` : ''}- Mzansi Food Connect`;
 
   return await sendWhatsAppMessage(customerPhone, message);
 }
