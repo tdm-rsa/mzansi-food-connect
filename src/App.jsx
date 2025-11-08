@@ -891,6 +891,7 @@ onClick={() => window.open(storeInfo?.slug ? `/store/${storeInfo.slug}` : "/stor
             window.location.reload();
           }}
           title="Sign out"
+          style={{ fontSize: "0.85rem" }}
         >
           🚪 Logout
         </button>
