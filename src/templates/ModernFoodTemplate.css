@@ -13,6 +13,7 @@
   --primary-2:#f97316;
   --line:#e5e7eb;
   --shadow:0 8px 30px rgba(0,0,0,0.06);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.08);
   --radius:14px;
   --radius-sm:10px;
   --radius-lg:18px;
@@ -22,6 +23,9 @@
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Poppins", sans-serif;
   background: var(--bg);
   color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
@@ -29,21 +33,23 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(10px);
-  background: rgba(197, 194, 194, 0.85);
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.9);
   border-bottom: 1px solid var(--line);
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
-  padding: 14px 18px;
+  gap:16px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .store-header h1{
   margin:0;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: .3px;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
 .header-left{
@@ -93,18 +99,27 @@
 /* Banner */
 .store-banner{
   width:min(1100px, 94%);
-  margin: 18px auto;
-  background: linear-gradient(135deg,#928d8d,#ffffff);
+  margin: 24px auto;
+  background: linear-gradient(135deg,#f8f9fa,#ffffff);
   border:1px solid var(--line);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 28px 18px;
+  box-shadow: var(--shadow-lg);
+  padding: 36px 24px;
   text-align:center;
 }
 .store-banner h2{
-  font-size: 28px; margin: 0 0 6px 0; font-weight: 900;
+  font-size: 32px;
+  margin: 0 0 8px 0;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
 }
-.store-banner p{ color: var(--muted); margin:4px 0; }
+.store-banner p{
+  color: var(--muted);
+  margin:8px 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
 .store-status{
   display:inline-block; margin-top:10px; font-weight:800;
   padding: 6px 14px; border-radius:999px; background:#f3f4f6; border:1px solid var(--line);
@@ -122,23 +137,28 @@
 /* Menu */
 .store-menu{
   width:min(1100px, 94%);
-  margin: 10px auto 24px auto;
+  margin: 16px auto 32px auto;
   background: var(--surface);
   border:1px solid var(--line);
-
-  box-shadow: var(--shadow);
-  padding: 16px 14px 22px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px 20px 28px;
 }
 
 .store-menu h3{
-  text-align:center; margin:6px 0 14px 0; font-size:22px; font-weight:900;
+  text-align:center;
+  margin:8px 0 20px 0;
+  font-size:26px;
+  font-weight:900;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
 .menu-grid{
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
-  padding: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  padding: 6px;
 }
 
 .menu-card{
