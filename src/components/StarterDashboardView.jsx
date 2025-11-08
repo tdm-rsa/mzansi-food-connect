@@ -32,17 +32,26 @@ export default function StarterDashboardView({
   };
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
+    <div className="dashboard" style={{
+      background: "#f8f9fa"
+    }}>
+      <div className="dashboard-header" style={{
+        background: "white",
+        borderRadius: "12px",
+        padding: "2rem",
+        marginBottom: "2rem",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.08)"
+      }}>
         <div>
           <h2 style={{
             fontSize: "1.8rem",
             marginBottom: "0.5rem",
-            fontWeight: "700",
+            fontWeight: "600",
             letterSpacing: "-0.5px",
             display: "flex",
             alignItems: "center",
-            gap: "0.75rem"
+            gap: "0.75rem",
+            color: "#1e293b"
           }}>
             {storeInfo?.profile_picture_url ? (
               <img
@@ -53,8 +62,8 @@ export default function StarterDashboardView({
                   height: "45px",
                   borderRadius: "50%",
                   objectFit: "cover",
-                  border: "3px solid #667eea",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)"
+                  border: "2px solid #e2e8f0",
+                  boxShadow: "none"
                 }}
               />
             ) : (
@@ -63,24 +72,24 @@ export default function StarterDashboardView({
             {user?.email?.split('@')[0] || 'Owner'}
           </h2>
           <h3 style={{
-            fontSize: "1.5rem",
+            fontSize: "1.4rem",
             marginTop: "0",
-            marginBottom: "0.75rem",
-            color: "#667eea",
-            fontWeight: "600",
+            marginBottom: "0.5rem",
+            color: "#64748b",
+            fontWeight: "500",
             display: "flex",
             alignItems: "center",
             gap: "0.5rem"
           }}>
-            <span style={{ fontSize: "1.8rem" }}>🏪</span>
+            <span style={{ fontSize: "1.6rem" }}>🏪</span>
             {storeInfo?.name || 'My Store'}
           </h3>
           <p style={{
-            marginBottom: "1rem",
-            fontSize: "1rem",
-            opacity: "0.8"
+            marginBottom: "0",
+            fontSize: "0.95rem",
+            color: "#94a3b8"
           }}>
-            Manage your Mzansi Food Connect business
+            Free Trial • Basic Management Tools
           </p>
         </div>
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
@@ -89,9 +98,7 @@ export default function StarterDashboardView({
             className="store-toggle-btn"
             onClick={toggleStoreStatus}
             style={{
-              background: isOpen
-                ? "linear-gradient(135deg, #10b981, #059669)"
-                : "linear-gradient(135deg, #ef4444, #dc2626)",
+              background: isOpen ? "#10b981" : "#ef4444",
               color: "white",
               border: "none",
               borderRadius: "8px",
@@ -99,9 +106,7 @@ export default function StarterDashboardView({
               fontWeight: "600",
               cursor: "pointer",
               transition: "all 0.2s ease",
-              boxShadow: isOpen
-                ? "0 2px 8px rgba(16, 185, 129, 0.3)"
-                : "0 2px 8px rgba(239, 68, 68, 0.3)",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.1)"
             }}
           >
             {isOpen ? "🟢 Store Open" : "🔴 Store Closed"}
@@ -109,17 +114,43 @@ export default function StarterDashboardView({
         </div>
       </div>
 
-      <div className="admin-menu-section">
-        <h3>Management Tools</h3>
-        <div className="admin-grid">
+      <div className="admin-menu-section" style={{ marginTop: "1rem" }}>
+        <h3 style={{
+          fontSize: "1.3rem",
+          fontWeight: "600",
+          marginBottom: "1.25rem",
+          color: "#1e293b"
+        }}>Management Tools</h3>
+        <div className="admin-grid" style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: "1rem"
+        }}>
           {/* 1. Orders */}
           <div
             className="admin-card"
             onClick={() => setCurrentView("orders")}
-            style={{ position: "relative" }}
+            style={{
+              position: "relative",
+              background: "white",
+              padding: "1.5rem",
+              borderRadius: "10px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+              e.currentTarget.style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
           >
-            <h4 style={{ marginBottom: ".25rem" }}>📦 Orders</h4>
-            <p style={{ opacity: 0.8, margin: 0 }}>Manage customer orders</p>
+            <h4 style={{ marginBottom: ".5rem", color: "#1e293b", fontWeight: "600", fontSize: "1.1rem" }}>📦 Orders</h4>
+            <p style={{ color: "#64748b", margin: 0, fontSize: "0.9rem" }}>Manage customer orders</p>
 
             {newOrders > 0 && (
               <span style={{
@@ -238,50 +269,53 @@ export default function StarterDashboardView({
 
       {/* Upgrade Prompt */}
       <div style={{
-        marginTop: "3rem",
-        padding: "2rem",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        borderRadius: "15px",
-        color: "white",
+        marginTop: "2.5rem",
+        padding: "2.5rem",
+        background: "white",
+        borderRadius: "12px",
+        border: "2px solid #e2e8f0",
         textAlign: "center"
       }}>
-        <h3 style={{ color: "white", marginBottom: "1rem", fontSize: "1.5rem" }}>
-          🚀 Ready to Unlock Analytics & More Templates?
+        <h3 style={{ color: "#1e293b", marginBottom: "0.75rem", fontSize: "1.4rem", fontWeight: "600" }}>
+          🚀 Ready to Grow Your Business?
         </h3>
-        <p style={{ fontSize: "1.1rem", marginBottom: "1.5rem", opacity: 0.9 }}>
-          Upgrade to Pro for basic analytics and 3 templates<br/>
-          Or Premium for advanced analytics with charts and custom domain!
+        <p style={{ fontSize: "1rem", marginBottom: "1.5rem", color: "#64748b" }}>
+          Upgrade to unlock analytics, more templates, and advanced features
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
           <button
             onClick={() => setCurrentView("settings")}
             style={{
-              background: "white",
-              color: "#667eea",
+              background: "#3b82f6",
+              color: "white",
               border: "none",
-              padding: "1rem 2rem",
+              padding: "0.875rem 1.75rem",
               borderRadius: "8px",
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-              cursor: "pointer"
+              fontSize: "1rem",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 2px 4px rgba(59,130,246,0.2)"
             }}
           >
-            Upgrade to Pro - R150/month
+            Pro - R150/month
           </button>
           <button
             onClick={() => setCurrentView("settings")}
             style={{
-              background: "linear-gradient(135deg, #ffd700, #ff6b35)",
+              background: "#f59e0b",
               color: "white",
               border: "none",
-              padding: "1rem 2rem",
+              padding: "0.875rem 1.75rem",
               borderRadius: "8px",
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-              cursor: "pointer"
+              fontSize: "1rem",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 2px 4px rgba(245,158,11,0.2)"
             }}
           >
-            Upgrade to Premium - R300/month
+            Premium - R300/month
           </button>
         </div>
       </div>

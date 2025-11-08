@@ -32,76 +32,102 @@ export default function PremiumDashboardView({
   };
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div>
+    <div className="dashboard" style={{
+      background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)"
+    }}>
+      <div className="dashboard-header" style={{
+        background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        borderRadius: "20px",
+        padding: "3rem",
+        marginBottom: "2rem",
+        boxShadow: "0 20px 60px rgba(240,147,251,0.4), 0 0 0 1px rgba(255,255,255,0.1)",
+        color: "white",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "radial-gradient(circle at top right, rgba(255,215,0,0.3), transparent 50%)",
+          pointerEvents: "none"
+        }}></div>
+        <div style={{ position: "relative", zIndex: 1 }}>
           <h2 style={{
-            fontSize: "1.8rem",
+            fontSize: "2rem",
             marginBottom: "0.5rem",
-            fontWeight: "700",
+            fontWeight: "800",
             letterSpacing: "-0.5px",
             display: "flex",
             alignItems: "center",
-            gap: "0.75rem"
+            gap: "0.75rem",
+            color: "white",
+            textShadow: "0 2px 10px rgba(0,0,0,0.2)"
           }}>
             {storeInfo?.profile_picture_url ? (
               <img
                 src={storeInfo.profile_picture_url}
                 alt="Profile"
                 style={{
-                  width: "45px",
-                  height: "45px",
+                  width: "55px",
+                  height: "55px",
                   borderRadius: "50%",
                   objectFit: "cover",
-                  border: "3px solid #ffd700",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)"
+                  border: "4px solid rgba(255,215,0,0.6)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.2)"
                 }}
               />
             ) : (
-              <span style={{ fontSize: "2.5rem" }}>👤</span>
+              <span style={{ fontSize: "2.8rem" }}>👑</span>
             )}
             {user?.email?.split('@')[0] || 'Owner'}
           </h2>
           <h3 style={{
-            fontSize: "1.5rem",
+            fontSize: "1.7rem",
             marginTop: "0",
-            marginBottom: "0.75rem",
+            marginBottom: "0.5rem",
             color: "#ffd700",
-            fontWeight: "600",
+            fontWeight: "700",
             display: "flex",
             alignItems: "center",
-            gap: "0.5rem"
+            gap: "0.5rem",
+            textShadow: "0 2px 8px rgba(0,0,0,0.2)"
           }}>
-            <span style={{ fontSize: "1.8rem" }}>🏪</span>
+            <span style={{ fontSize: "1.9rem" }}>🏪</span>
             {storeInfo?.name || 'My Store'}
           </h3>
           <p style={{
-            marginBottom: "1rem",
-            fontSize: "1rem",
-            opacity: "0.8"
+            marginBottom: "0",
+            fontSize: "1.05rem",
+            color: "rgba(255,215,0,0.95)",
+            fontWeight: "600",
+            textShadow: "0 1px 3px rgba(0,0,0,0.2)"
           }}>
-            Manage your Mzansi Food Connect business
+            👑 Premium Plan • Luxury Business Experience
           </p>
         </div>
-        <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: ".75rem", alignItems: "center", position: "relative", zIndex: 1 }}>
           {/* Open/Close Toggle */}
           <button
             className="store-toggle-btn"
             onClick={toggleStoreStatus}
             style={{
               background: isOpen
-                ? "linear-gradient(135deg, #10b981, #059669)"
+                ? "linear-gradient(135deg, #ffd700, #ffed4e)"
                 : "linear-gradient(135deg, #ef4444, #dc2626)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.75rem 1.25rem",
-              fontWeight: "600",
+              color: isOpen ? "#1a1a2e" : "white",
+              border: "2px solid rgba(255,255,255,0.3)",
+              borderRadius: "12px",
+              padding: "1rem 1.6rem",
+              fontWeight: "800",
               cursor: "pointer",
-              transition: "all 0.2s ease",
+              transition: "all 0.3s ease",
               boxShadow: isOpen
-                ? "0 2px 8px rgba(16, 185, 129, 0.3)"
-                : "0 2px 8px rgba(239, 68, 68, 0.3)",
+                ? "0 8px 24px rgba(255,215,0,0.4)"
+                : "0 8px 24px rgba(239,68,68,0.4)",
+              textShadow: isOpen ? "0 1px 2px rgba(0,0,0,0.1)" : "none"
             }}
           >
             {isOpen ? "🟢 Store Open" : "🔴 Store Closed"}
@@ -109,17 +135,61 @@ export default function PremiumDashboardView({
         </div>
       </div>
 
-      <div className="admin-menu-section">
-        <h3>Management Tools</h3>
-        <div className="admin-grid">
+      <div className="admin-menu-section" style={{ marginTop: "1rem" }}>
+        <h3 style={{
+          fontSize: "1.5rem",
+          fontWeight: "800",
+          marginBottom: "1.75rem",
+          color: "white",
+          textShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          background: "linear-gradient(135deg, #ffd700, #ff6b35)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text"
+        }}>⚡ Premium Management Tools</h3>
+        <div className="admin-grid" style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: "1.5rem"
+        }}>
           {/* 1. Orders */}
           <div
             className="admin-card"
             onClick={() => setCurrentView("orders")}
-            style={{ position: "relative" }}
+            style={{
+              position: "relative",
+              background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+              padding: "2rem",
+              borderRadius: "16px",
+              cursor: "pointer",
+              transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+              border: "1px solid rgba(255,215,0,0.2)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
+              backdropFilter: "blur(20px)"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = "0 16px 48px rgba(255,215,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)";
+              e.currentTarget.style.transform = "translateY(-6px) scale(1.02)";
+              e.currentTarget.style.borderColor = "rgba(255,215,0,0.5)";
+              e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,107,53,0.1))";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)";
+              e.currentTarget.style.transform = "translateY(0) scale(1)";
+              e.currentTarget.style.borderColor = "rgba(255,215,0,0.2)";
+              e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))";
+            }}
           >
-            <h4 style={{ marginBottom: ".25rem" }}>📦 Orders</h4>
-            <p style={{ opacity: 0.8, margin: 0 }}>Manage customer orders</p>
+            <h4 style={{
+              marginBottom: ".5rem",
+              background: "linear-gradient(135deg, #ffd700, #ff6b35)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              fontWeight: "800",
+              fontSize: "1.2rem"
+            }}>📦 Orders</h4>
+            <p style={{ color: "rgba(255,255,255,0.9)", margin: 0, fontSize: "0.95rem" }}>Manage customer orders</p>
 
             {newOrders > 0 && (
               <span style={{

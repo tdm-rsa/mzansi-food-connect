@@ -32,29 +32,39 @@ export default function ProDashboardView({
   };
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
+    <div className="dashboard" style={{
+      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)"
+    }}>
+      <div className="dashboard-header" style={{
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        borderRadius: "16px",
+        padding: "2.5rem",
+        marginBottom: "2rem",
+        boxShadow: "0 10px 30px rgba(102,126,234,0.3)",
+        color: "white"
+      }}>
         <div>
           <h2 style={{
-            fontSize: "1.8rem",
+            fontSize: "1.9rem",
             marginBottom: "0.5rem",
             fontWeight: "700",
             letterSpacing: "-0.5px",
             display: "flex",
             alignItems: "center",
-            gap: "0.75rem"
+            gap: "0.75rem",
+            color: "white"
           }}>
             {storeInfo?.profile_picture_url ? (
               <img
                 src={storeInfo.profile_picture_url}
                 alt="Profile"
                 style={{
-                  width: "45px",
-                  height: "45px",
+                  width: "50px",
+                  height: "50px",
                   borderRadius: "50%",
                   objectFit: "cover",
-                  border: "3px solid #667eea",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)"
+                  border: "3px solid rgba(255,255,255,0.5)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
                 }}
               />
             ) : (
@@ -63,10 +73,10 @@ export default function ProDashboardView({
             {user?.email?.split('@')[0] || 'Owner'}
           </h2>
           <h3 style={{
-            fontSize: "1.5rem",
+            fontSize: "1.6rem",
             marginTop: "0",
-            marginBottom: "0.75rem",
-            color: "#667eea",
+            marginBottom: "0.5rem",
+            color: "rgba(255,255,255,0.95)",
             fontWeight: "600",
             display: "flex",
             alignItems: "center",
@@ -76,11 +86,11 @@ export default function ProDashboardView({
             {storeInfo?.name || 'My Store'}
           </h3>
           <p style={{
-            marginBottom: "1rem",
+            marginBottom: "0",
             fontSize: "1rem",
-            opacity: "0.8"
+            color: "rgba(255,255,255,0.85)"
           }}>
-            Manage your Mzansi Food Connect business
+            🚀 Pro Plan • Professional Business Management
           </p>
         </div>
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
@@ -90,18 +100,17 @@ export default function ProDashboardView({
             onClick={toggleStoreStatus}
             style={{
               background: isOpen
-                ? "linear-gradient(135deg, #10b981, #059669)"
-                : "linear-gradient(135deg, #ef4444, #dc2626)",
+                ? "rgba(255,255,255,0.25)"
+                : "rgba(239,68,68,0.9)",
               color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.75rem 1.25rem",
-              fontWeight: "600",
+              border: isOpen ? "2px solid rgba(255,255,255,0.5)" : "none",
+              borderRadius: "10px",
+              padding: "0.85rem 1.4rem",
+              fontWeight: "700",
               cursor: "pointer",
               transition: "all 0.2s ease",
-              boxShadow: isOpen
-                ? "0 2px 8px rgba(16, 185, 129, 0.3)"
-                : "0 2px 8px rgba(239, 68, 68, 0.3)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
             }}
           >
             {isOpen ? "🟢 Store Open" : "🔴 Store Closed"}
@@ -109,17 +118,46 @@ export default function ProDashboardView({
         </div>
       </div>
 
-      <div className="admin-menu-section">
-        <h3>Management Tools</h3>
-        <div className="admin-grid">
+      <div className="admin-menu-section" style={{ marginTop: "1rem" }}>
+        <h3 style={{
+          fontSize: "1.4rem",
+          fontWeight: "700",
+          marginBottom: "1.5rem",
+          color: "#1e293b",
+          textShadow: "0 1px 2px rgba(0,0,0,0.05)"
+        }}>Management Tools</h3>
+        <div className="admin-grid" style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: "1.25rem"
+        }}>
           {/* 1. Orders */}
           <div
             className="admin-card"
             onClick={() => setCurrentView("orders")}
-            style={{ position: "relative" }}
+            style={{
+              position: "relative",
+              background: "white",
+              padding: "1.75rem",
+              borderRadius: "14px",
+              cursor: "pointer",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              border: "1px solid rgba(102,126,234,0.15)",
+              boxShadow: "0 4px 12px rgba(102,126,234,0.08)"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = "0 12px 24px rgba(102,126,234,0.2)";
+              e.currentTarget.style.transform = "translateY(-4px)";
+              e.currentTarget.style.borderColor = "rgba(102,126,234,0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(102,126,234,0.08)";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.borderColor = "rgba(102,126,234,0.15)";
+            }}
           >
-            <h4 style={{ marginBottom: ".25rem" }}>📦 Orders</h4>
-            <p style={{ opacity: 0.8, margin: 0 }}>Manage customer orders</p>
+            <h4 style={{ marginBottom: ".5rem", color: "#667eea", fontWeight: "700", fontSize: "1.15rem" }}>📦 Orders</h4>
+            <p style={{ color: "#64748b", margin: 0, fontSize: "0.95rem" }}>Manage customer orders</p>
 
             {newOrders > 0 && (
               <span style={{
