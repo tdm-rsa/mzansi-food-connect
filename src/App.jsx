@@ -883,9 +883,9 @@ export default function App({ user }) {
               {storeInfo.plan === 'pro' ? '🚀 Pro' : storeInfo.plan === 'premium' ? '👑 Premium' : '📦 Starter'}
             </div>
           )}
-          {/* Owner Name */}
+          {/* Store Name */}
           <span className="user-name" style={{ textAlign: "center" }}>
-            {storeInfo?.owner_name || user?.email?.split('@')[0] || 'User'}
+            {storeInfo?.name || 'My Store'}
           </span>
         </div>
 
@@ -1728,9 +1728,42 @@ export default function App({ user }) {
 
                     try {
                       console.log('Updating store name to:', newName, 'for store:', storeInfo.id);
+
+                      // Generate new slug from new name
+                      const baseSlug = newName
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/^-|-$/g, '');
+
+                      // Check if new slug is available (unless it's already ours)
+                      let finalSlug = baseSlug;
+                      let counter = 2;
+
+                      while (true) {
+                        const { data: existing } = await supabase
+                          .from("stores")
+                          .select("slug, id")
+                          .eq("slug", finalSlug)
+                          .single();
+
+                        // If slug doesn't exist or it's our current slug, use it
+                        if (!existing || existing.id === storeInfo.id) {
+                          break;
+                        }
+
+                        // Slug taken by someone else, try with number
+                        finalSlug = `${baseSlug}${counter}`;
+                        counter++;
+                      }
+
+                      console.log('New slug will be:', finalSlug);
+
                       const { data, error } = await supabase
                         .from("stores")
-                        .update({ name: newName })
+                        .update({
+                          name: newName,
+                          slug: finalSlug
+                        })
                         .eq("id", storeInfo.id)
                         .select();
 
@@ -1740,8 +1773,8 @@ export default function App({ user }) {
                       }
 
                       console.log('Update successful:', data);
-                      setStoreInfo({ ...storeInfo, name: newName });
-                      showToast("✅ Store name updated successfully!", "#4caf50");
+                      setStoreInfo({ ...storeInfo, name: newName, slug: finalSlug });
+                      showToast(`✅ Store updated! New URL: ${finalSlug}.mzansifoodconnect.app`, "#4caf50");
                     } catch (error) {
                       showToast(`❌ Failed to update store name: ${error.message}`, "#f44336");
                       console.error('Full error:', error);
