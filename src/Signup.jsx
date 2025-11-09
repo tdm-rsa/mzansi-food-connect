@@ -110,7 +110,8 @@ export default function Signup({ onBack, onSuccess }) {
           data: {
             store_name: storeName,
             plan: selectedPlan,
-            payment_reference: selectedPlan === 'trial' ? null : `TEST-${Date.now()}`
+            payment_reference: null, // Will be updated after payment
+            payment_completed: false
           }
         }
       });
@@ -123,9 +124,15 @@ export default function Signup({ onBack, onSuccess }) {
       console.log('✅ Account created - metadata saved:', authData.user.user_metadata);
       console.log('✅ Store will be created after email confirmation');
 
-      // Show success message - store will be created after email confirmation
-      alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour ${selectedPlan === 'trial' ? '7-day free trial' : selectedPlan.toUpperCase() + ' store'} will be created automatically when you login for the first time!`);
-      onBack();
+      // For trial - show success and go to login
+      if (selectedPlan === 'trial') {
+        alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour 7-day free trial will be created automatically when you login for the first time!`);
+        onBack();
+      } else {
+        // For Pro/Premium - proceed to payment (Step 3)
+        alert(`✅ Account created successfully!\n\n📧 IMPORTANT: Check your email (${email}) to confirm your account BEFORE making payment.\n\n💳 After confirming your email, you can proceed with payment.`);
+        setStep(3);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -199,19 +206,30 @@ export default function Signup({ onBack, onSuccess }) {
     return storeData; // Return store data including slug
   }
 
-  function handlePaymentSuccess(reference) {
+  async function handlePaymentSuccess(reference) {
     setLoading(true);
-    createStore(createdUserId, selectedPlan, reference.reference)
-      .then((store) => {
-        alert(`✅ Payment successful!\n\nYour ${plans.find(p => p.id === selectedPlan).name} subscription is now active!\n\n🌐 Your store is live at:\nhttps://${store.slug}.mzansifoodconnect.app\n\nPlease check your email (${email}) to verify your account, then login.`);
-        onBack();
-      })
-      .catch((err) => {
-        setError("Payment succeeded but store creation failed: " + err.message);
-      })
-      .finally(() => {
-        setLoading(false);
+
+    try {
+      // Update user metadata with payment reference
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          payment_reference: reference.reference,
+          payment_completed: true,
+          payment_date: new Date().toISOString()
+        }
       });
+
+      if (updateError) throw updateError;
+
+      console.log('✅ Payment reference saved to user metadata:', reference.reference);
+
+      alert(`✅ Payment successful!\n\n💳 Payment Reference: ${reference.reference}\n\nYour ${plans.find(p => p.id === selectedPlan).name} subscription is confirmed!\n\n📧 Next steps:\n1. Check your email (${email}) and confirm your account\n2. Login to access your dashboard\n\nYour store will be created automatically when you login for the first time!`);
+      onBack();
+    } catch (err) {
+      setError("Payment succeeded but failed to save payment details: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const paystackConfig = {
