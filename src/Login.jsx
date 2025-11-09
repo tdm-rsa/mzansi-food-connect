@@ -35,8 +35,11 @@ export default function Login({ onLogin, onSwitchToSignup }) {
     setResetLoading(true);
 
     try {
+      // Use production URL for password reset links (even when testing locally)
+      const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
+
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${productionUrl}/reset-password`,
       });
 
       if (error) throw error;
