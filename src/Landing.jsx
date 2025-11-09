@@ -94,6 +94,7 @@ function Landing() {
   ];
 
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const pricingPlans = [
     {
@@ -101,7 +102,7 @@ function Landing() {
       subtitle: "7 Days Free",
       price: "R0",
       period: "for 7 days",
-      description: "Try it free with your own subdomain (e.g., yourstore.mzansifoodconnect.co.za)",
+      description: "Try it free with your own subdomain (e.g., yourstore.mzansifoodconnect.app)",
       features: [
         "Your own subdomain",
         "Unlimited menu items",
@@ -144,7 +145,7 @@ function Landing() {
       description: "Bring your own domain (e.g., www.yourstore.co.za)",
       features: [
         "Everything in Pro",
-        "Custom domain support (coming soonn)",
+        "Custom domain support (coming soon)",
         "3 Professional templates",
         "Advanced Analytics , charts and reports",
         "API access e.g Automated WhatsApp messaging",
@@ -166,10 +167,22 @@ function Landing() {
             <img src={logo} alt="Mzansi Food Connect" />
             <span>Mzansi Food Connect</span>
           </div>
-          <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#testimonials">Success Stories</a>
+
+          {/* Hamburger Menu Button */}
+          <button
+            className={`hamburger ${mobileMenuOpen ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+            <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+            <a href="#testimonials" onClick={() => setMobileMenuOpen(false)}>Success Stories</a>
             <a href="/app" className="btn-login">Login</a>
           </div>
         </div>
@@ -192,7 +205,7 @@ function Landing() {
             <a href="#features" className="btn btn-secondary">See Features</a>
           </div>
           <div className="hero-trust">
-            <p>✅ No credit card required • ✅ Setup in 5 minutes • ✅ Free forever plan</p>
+            <p>✅ No credit card required • ✅ Setup in 5 minutes • ✅ 7-day free trial</p>
           </div>
         </div>
         <div className="hero-visual">
