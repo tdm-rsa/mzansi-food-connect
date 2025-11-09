@@ -169,11 +169,22 @@ export default function FastMobileTemplate(props) {
   };
 
   // Paystack configuration
+  const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
+  // Debug: Log Paystack setup
+  useEffect(() => {
+    if (!paystackPublicKey) {
+      console.error('❌ PAYSTACK KEY MISSING! Add VITE_PAYSTACK_PUBLIC_KEY to .env.local');
+    } else {
+      console.log('✅ Paystack key loaded:', paystackPublicKey.substring(0, 20) + '...');
+    }
+  }, [paystackPublicKey]);
+
   const paystackConfig = {
     reference: `ORD-${new Date().getTime()}`,
     email: customerPhone ? `${customerPhone.replace(/\D/g, '')}@customer.mzansifoodconnect.app` : 'customer@mzansifoodconnect.app',
     amount: Math.round(total * 100), // Amount in cents
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+    publicKey: paystackPublicKey,
   };
 
   // ✅ Ask modal controls
@@ -484,7 +495,7 @@ export default function FastMobileTemplate(props) {
                 />
 
                 {/* Paystack Payment Button */}
-                {!processing && total > 0 && customerName && customerPhone ? (
+                {!processing && total > 0 && customerName && customerPhone && paystackPublicKey ? (
                   <PaystackButton
                     {...paystackConfig}
                     text={`💳 Pay R${total.toFixed(2)}`}
@@ -511,8 +522,21 @@ export default function FastMobileTemplate(props) {
                       background: "#ccc",
                       opacity: 0.6
                     }}
+                    title={
+                      processing ? "Processing..." :
+                      total === 0 ? "Cart is empty" :
+                      !customerName ? "Enter your name" :
+                      !customerPhone ? "Enter your phone number" :
+                      !paystackPublicKey ? "Payment not configured" :
+                      "Fill all fields"
+                    }
                   >
-                    {processing ? "Processing Payment..." : "💳 Pay with Card"}
+                    {processing ? "Processing Payment..." :
+                     total === 0 ? "💳 Add items to cart" :
+                     !customerName ? "💳 Enter your name" :
+                     !customerPhone ? "💳 Enter your phone" :
+                     !paystackPublicKey ? "💳 Payment not available" :
+                     "💳 Pay with Card"}
                   </button>
                 )}
               </div>
