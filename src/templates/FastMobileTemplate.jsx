@@ -8,7 +8,7 @@ import "./FastMobileTemplate.css";
 
 export default function FastMobileTemplate(props) {
   const { state, storeId, cart: extCart } = props;
-  const { header, banner, menuItems, about, paystack_public_key } = state;
+  const { header, banner, menuItems, about, paystack_public_key, paystack_secret_key } = state;
 
   // DEBUG: Log what data the template receives
   useEffect(() => {
@@ -179,7 +179,15 @@ export default function FastMobileTemplate(props) {
       console.log('✅ Paystack key loaded:', paystackPublicKey.substring(0, 20) + '...');
       console.log('   Source:', paystack_public_key ? 'Database (store settings)' : 'Environment variable');
     }
-  }, [paystackPublicKey, paystack_public_key]);
+
+    const secretKey = paystack_secret_key || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
+    if (!secretKey) {
+      console.warn('⚠️ Paystack secret key not configured (needed for payment verification)');
+    } else {
+      console.log('✅ Paystack secret key loaded:', secretKey.substring(0, 20) + '...');
+      console.log('   Source:', paystack_secret_key ? 'Database (store settings)' : 'Environment variable');
+    }
+  }, [paystackPublicKey, paystack_public_key, paystack_secret_key]);
 
   const paystackConfig = {
     reference: `ORD-${new Date().getTime()}`,

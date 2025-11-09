@@ -8,7 +8,7 @@ import "./ModernFoodTemplate.css"; // ✅ NEW: use the Jersey-like CSS
 
 export default function ModernFoodTemplate(props) {
   const { state, storeId, cart: extCart } = props;
-  const { header, banner, menuItems, about, liveQueue, paystack_public_key } = state;
+  const { header, banner, menuItems, about, liveQueue, paystack_public_key, paystack_secret_key } = state;
 
 
   // ✅ Cart state with localStorage persistence
@@ -170,12 +170,20 @@ export default function ModernFoodTemplate(props) {
   // Debug: Log Paystack setup
   useEffect(() => {
     if (!paystackPublicKey) {
-      console.error('❌ PAYSTACK KEY MISSING! Vendor needs to add Paystack key in Settings');
+      console.error('❌ PAYSTACK PUBLIC KEY MISSING! Vendor needs to add Paystack keys in Settings');
     } else {
-      console.log('✅ Paystack key loaded:', paystackPublicKey.substring(0, 20) + '...');
+      console.log('✅ Paystack public key loaded:', paystackPublicKey.substring(0, 20) + '...');
       console.log('   Source:', paystack_public_key ? 'Database (store settings)' : 'Environment variable');
     }
-  }, [paystackPublicKey, paystack_public_key]);
+
+    const secretKey = paystack_secret_key || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
+    if (!secretKey) {
+      console.warn('⚠️ Paystack secret key not configured (needed for payment verification)');
+    } else {
+      console.log('✅ Paystack secret key loaded:', secretKey.substring(0, 20) + '...');
+      console.log('   Source:', paystack_secret_key ? 'Database (store settings)' : 'Environment variable');
+    }
+  }, [paystackPublicKey, paystack_public_key, paystack_secret_key]);
 
   const paystackConfig = {
     reference: `ORD-${new Date().getTime()}`,
