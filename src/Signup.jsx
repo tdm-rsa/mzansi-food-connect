@@ -94,6 +94,14 @@ export default function Signup({ onBack, onSuccess }) {
       // Use production URL for email confirmation links (even when testing locally)
       const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
 
+      // 🚨 DEBUG: Log what plan is being saved
+      console.log('🚨 SIGNUP: Saving plan to metadata:', {
+        selectedPlan: selectedPlan,
+        planType: typeof selectedPlan,
+        storeName: storeName,
+        email: email
+      });
+
       const { data: authData, error: authError} = await supabase.auth.signUp({
         email,
         password,
@@ -111,7 +119,9 @@ export default function Signup({ onBack, onSuccess }) {
 
       setCreatedUserId(authData.user.id);
 
-      console.log('✅ Account created - store will be created after email confirmation');
+      // 🚨 DEBUG: Verify what was saved
+      console.log('✅ Account created - metadata saved:', authData.user.user_metadata);
+      console.log('✅ Store will be created after email confirmation');
 
       // Show success message - store will be created after email confirmation
       alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour ${selectedPlan === 'trial' ? '7-day free trial' : selectedPlan.toUpperCase() + ' store'} will be created automatically when you login for the first time!`);

@@ -191,12 +191,21 @@ export default function App({ user }) {
         if (!s) {
           console.warn('⚠️ LOGIN: No store found! Creating store from signup metadata');
 
+          // 🚨 DEBUG: Log full user metadata
+          console.log('🚨 LOGIN: Full user object:', user);
+          console.log('🚨 LOGIN: user.user_metadata:', user.user_metadata);
+
           // Get signup metadata
           const storeName = user.user_metadata?.store_name || "My New Store";
           const plan = user.user_metadata?.plan || "trial";
           const paymentReference = user.user_metadata?.payment_reference || null;
 
-          console.log('📝 Creating store with metadata:', { storeName, plan, paymentReference });
+          console.log('🚨 LOGIN: Extracted values:', {
+            storeName,
+            plan,
+            planType: typeof plan,
+            paymentReference
+          });
 
           // 🔥 Generate clean slug from store name
           const baseSlug = storeName
@@ -230,31 +239,43 @@ export default function App({ user }) {
             ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
             : null;
 
+          // 🚨 DEBUG: Log what's about to be inserted
+          const storeInsertData = {
+            owner_id: user.id,
+            name: storeName,
+            slug: finalSlug,
+            plan: plan,
+            plan_started_at: new Date().toISOString(),
+            plan_expires_at: planExpiresAt,
+            is_open: true,
+            banner_text: `Welcome to ${storeName}!`,
+            about_text: `Proudly serving authentic food.`,
+            payment_reference: paymentReference,
+            active_template: "Modern Food",
+          };
+
+          console.log('🚨 LOGIN: About to insert store with data:', storeInsertData);
+          console.log('🚨 LOGIN: Plan value being inserted:', plan, 'Type:', typeof plan);
+
           // create store with signup data
           const { data: created, error: e2 } = await supabase
             .from("stores")
-            .insert([
-              {
-                owner_id: user.id,
-                name: storeName,
-                slug: finalSlug,
-                plan: plan,
-                plan_started_at: new Date().toISOString(),
-                plan_expires_at: planExpiresAt,
-                is_open: true,
-                banner_text: `Welcome to ${storeName}!`,
-                about_text: `Proudly serving authentic food.`,
-                payment_reference: paymentReference,
-                active_template: "Modern Food",
-              },
-            ])
+            .insert([storeInsertData])
             .select()
             .single();
           if (e2) throw e2;
           s = created;
+
+          // 🚨 DEBUG: Verify what was actually created
+          console.log('🚨 LOGIN: Store created successfully!');
+          console.log('🚨 LOGIN: Created store object:', created);
+          console.log('🚨 LOGIN: Plan in created store:', created.plan, 'Type:', typeof created.plan);
           console.log(`✅ LOGIN: Created ${plan} store: ${storeName} (${finalSlug})`);
         } else {
-          console.log('✅ LOGIN: Found existing store with plan:', s.plan);
+          // 🚨 DEBUG: Log existing store details
+          console.log('✅ LOGIN: Found existing store');
+          console.log('🚨 LOGIN: Existing store object:', s);
+          console.log('🚨 LOGIN: Existing store plan:', s.plan, 'Type:', typeof s.plan);
 
           // 🔥 FIX: If existing store has no slug, generate one now
           if (!s.slug) {
@@ -2230,13 +2251,20 @@ export default function App({ user }) {
         // Get normalized plan value (trim and lowercase for robust comparison)
         const normalizedPlan = storeInfo?.plan?.trim().toLowerCase();
 
-        // DEBUG: Log which dashboard we're routing to
+        // 🚨 DEBUG: Log which dashboard we're routing to
+        console.log('🚨 DASHBOARD ROUTING: Full storeInfo object:', storeInfo);
         console.log('🚨 DASHBOARD ROUTING:', {
           originalPlan: storeInfo?.plan,
           normalizedPlan: normalizedPlan,
           planType: typeof storeInfo?.plan,
-          storeId: storeInfo?.id
+          planLength: storeInfo?.plan?.length,
+          storeId: storeInfo?.id,
+          storeName: storeInfo?.name
         });
+        console.log('🚨 DASHBOARD ROUTING: Comparison checks:');
+        console.log('  - normalizedPlan === "premium":', normalizedPlan === 'premium');
+        console.log('  - normalizedPlan === "pro":', normalizedPlan === 'pro');
+        console.log('  - normalizedPlan === "trial":', normalizedPlan === 'trial');
 
         // ROBUST ROUTING - Normalize plan value before comparison
         if (normalizedPlan === 'premium') {
