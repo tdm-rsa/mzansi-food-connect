@@ -90,14 +90,16 @@ export default function Signup({ onBack, onSuccess }) {
     setLoading(true);
 
     try {
-      // Create auth account with email confirmation disabled
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Create auth account - save metadata for store creation after confirmation
+      const { data: authData, error: authError} = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/app`,
           data: {
             store_name: storeName,
+            plan: selectedPlan,
+            payment_reference: selectedPlan === 'trial' ? null : `TEST-${Date.now()}`
           }
         }
       });
@@ -106,30 +108,11 @@ export default function Signup({ onBack, onSuccess }) {
 
       setCreatedUserId(authData.user.id);
 
-      // DEBUG: Log what plan is being used
-      console.log('🔥 SIGNUP DEBUG:', {
-        selectedPlan: selectedPlan,
-        planType: typeof selectedPlan,
-        userId: authData.user.id,
-        email: email
-      });
+      console.log('✅ Account created - store will be created after email confirmation');
 
-      // If free trial, create store immediately
-      if (selectedPlan === "trial") {
-        console.log('✅ Creating TRIAL store');
-        const store = await createStore(authData.user.id, selectedPlan, null);
-        alert(`✅ Account created successfully!\n\n🎉 Your 7-day free trial has started!\n\n🌐 Your store is live at:\nhttps://${store.slug}.mzansifoodconnect.app\n\nPlease check your email (${email}) to verify your account, then login.`);
-        onBack();
-      } else {
-        // For paid plans - TESTING MODE: Create store without payment
-        console.log('✅ Creating PAID store with plan:', selectedPlan);
-        const store = await createStore(authData.user.id, selectedPlan, `TEST-${Date.now()}`);
-        alert(`✅ ${selectedPlan.toUpperCase()} Account created!\n\n⚠️ TESTING MODE - No payment required\n\n🌐 Your store is live at:\nhttps://${store.slug}.mzansifoodconnect.app\n\nPlease check your email (${email}) to verify your account, then login.`);
-        onBack();
-
-        // For paid plans, go to payment step (COMMENTED FOR TESTING)
-        // setStep(3);
-      }
+      // Show success message - store will be created after email confirmation
+      alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour ${selectedPlan === 'trial' ? '7-day free trial' : selectedPlan.toUpperCase() + ' store'} will be created automatically when you login for the first time!`);
+      onBack();
     } catch (err) {
       setError(err.message);
     } finally {

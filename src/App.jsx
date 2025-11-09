@@ -189,33 +189,70 @@ export default function App({ user }) {
 
         let s = store;
         if (!s) {
-          console.warn('⚠️ LOGIN: No store found! Creating default trial store');
+          console.warn('⚠️ LOGIN: No store found! Creating store from signup metadata');
 
-          // 🔥 FIX: Generate unique slug
-          const uniqueSlug = `my-new-store-${Math.random().toString(36).substring(2, 8)}`;
+          // Get signup metadata
+          const storeName = user.user_metadata?.store_name || "My New Store";
+          const plan = user.user_metadata?.plan || "trial";
+          const paymentReference = user.user_metadata?.payment_reference || null;
 
-          // create a starter store if none
+          console.log('📝 Creating store with metadata:', { storeName, plan, paymentReference });
+
+          // 🔥 Generate clean slug from store name
+          const baseSlug = storeName
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+
+          // Check if slug exists and find next available
+          let finalSlug = baseSlug;
+          let counter = 2;
+
+          while (true) {
+            const { data: existing } = await supabase
+              .from("stores")
+              .select("slug")
+              .eq("slug", finalSlug)
+              .single();
+
+            if (!existing) {
+              break;
+            }
+
+            finalSlug = `${baseSlug}${counter}`;
+            counter++;
+          }
+
+          console.log('🔗 Final slug:', finalSlug);
+
+          // Calculate plan_expires_at for trial (7 days from now), NULL for paid plans
+          const planExpiresAt = plan === 'trial'
+            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            : null;
+
+          // create store with signup data
           const { data: created, error: e2 } = await supabase
             .from("stores")
             .insert([
               {
                 owner_id: user.id,
-                name: "My New Store",
-                slug: uniqueSlug, // 🔥 FIX: Add slug
-                banner_text: "Welcome!",
-                specials_text: "🔥 Opening Specials",
-                is_open: true,
-                active_template: "Modern Food",
-                plan: "trial", // Default to trial plan
+                name: storeName,
+                slug: finalSlug,
+                plan: plan,
                 plan_started_at: new Date().toISOString(),
-                plan_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+                plan_expires_at: planExpiresAt,
+                is_open: true,
+                banner_text: `Welcome to ${storeName}!`,
+                about_text: `Proudly serving authentic food.`,
+                payment_reference: paymentReference,
+                active_template: "Modern Food",
               },
             ])
             .select()
             .single();
           if (e2) throw e2;
           s = created;
-          console.log('✅ LOGIN: Created new trial store with slug:', uniqueSlug);
+          console.log(`✅ LOGIN: Created ${plan} store: ${storeName} (${finalSlug})`);
         } else {
           console.log('✅ LOGIN: Found existing store with plan:', s.plan);
 
