@@ -17,9 +17,44 @@ export default function FastMobileTemplate(props) {
     console.log("🎨 FastMobileTemplate - banner.notes:", banner.notes);
   }, [banner]);
 
-  const [cart, setCart] = useState([]);
-  const [total, setTotal] = useState(0);
+  // ✅ Cart state with localStorage persistence
+  const cartStorageKey = `cart_${storeId}`;
+
+  const [cart, setCart] = useState(() => {
+    // Load cart from localStorage on mount
+    try {
+      const savedCart = localStorage.getItem(cartStorageKey);
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error('Failed to load cart from localStorage:', error);
+      return [];
+    }
+  });
+
+  const [total, setTotal] = useState(() => {
+    // Calculate total from saved cart
+    try {
+      const savedCart = localStorage.getItem(cartStorageKey);
+      if (savedCart) {
+        const cartItems = JSON.parse(savedCart);
+        return cartItems.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
+      }
+    } catch (error) {
+      console.error('Failed to calculate total from localStorage:', error);
+    }
+    return 0;
+  });
+
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+    } catch (error) {
+      console.error('Failed to save cart to localStorage:', error);
+    }
+  }, [cart, cartStorageKey]);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -80,6 +115,12 @@ export default function FastMobileTemplate(props) {
   const clearCart = () => {
     setCart([]);
     setTotal(0);
+    // Clear from localStorage too
+    try {
+      localStorage.removeItem(cartStorageKey);
+    } catch (error) {
+      console.error('Failed to clear cart from localStorage:', error);
+    }
   };
 
   // ✅ Fake Card Payment (always succeeds)
