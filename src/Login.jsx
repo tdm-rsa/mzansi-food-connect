@@ -9,6 +9,13 @@ export default function Login({ onLogin, onSwitchToSignup }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+
   async function handleLogin(e) {
     e.preventDefault();
     setError("");
@@ -20,6 +27,33 @@ export default function Login({ onLogin, onSwitchToSignup }) {
     setLoading(false);
     if (error) setError(error.message);
     else onLogin(data.user);
+  }
+
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    setResetError("");
+    setResetLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      setResetSent(true);
+    } catch (err) {
+      setResetError(err.message);
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
+  function closeForgotPassword() {
+    setShowForgotPassword(false);
+    setResetEmail("");
+    setResetSent(false);
+    setResetError("");
   }
 
 
@@ -109,7 +143,14 @@ export default function Login({ onLogin, onSwitchToSignup }) {
                 minLength={6}
                 autoComplete="current-password"
               />
-              <a href="#forgot" className="forgot-link">Forgot password?</a>
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="forgot-link"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              >
+                Forgot password?
+              </button>
             </div>
 
             {error && (
@@ -152,6 +193,106 @@ export default function Login({ onLogin, onSwitchToSignup }) {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="modal-overlay" onClick={closeForgotPassword}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Reset Your Password</h2>
+              <button
+                onClick={closeForgotPassword}
+                className="modal-close"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            {resetSent ? (
+              <div className="modal-body">
+                <div className="success-message" style={{
+                  background: '#d4edda',
+                  border: '1px solid #c3e6cb',
+                  color: '#155724',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1rem'
+                }}>
+                  <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>✅</span>
+                  <strong>Check your email!</strong>
+                  <p style={{ margin: '0.5rem 0 0 0' }}>
+                    We've sent a password reset link to <strong>{resetEmail}</strong>
+                  </p>
+                </div>
+                <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+                  Click the link in the email to reset your password. The link will expire in 1 hour.
+                </p>
+                <button
+                  onClick={closeForgotPassword}
+                  className="login-btn"
+                  style={{ width: '100%' }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword}>
+                <div className="modal-body">
+                  <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+                    Enter your email address and we'll send you a link to reset your password.
+                  </p>
+
+                  <div className="form-group">
+                    <label htmlFor="reset-email">Email Address</label>
+                    <input
+                      id="reset-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                      className="form-input"
+                    />
+                  </div>
+
+                  {resetError && (
+                    <div className="error-message">
+                      <span className="error-icon">⚠️</span>
+                      {resetError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="login-btn"
+                    disabled={resetLoading}
+                    style={{ width: '100%', marginTop: '1rem' }}
+                  >
+                    {resetLoading ? (
+                      <span className="btn-loading">
+                        <span className="spinner"></span>
+                        Sending...
+                      </span>
+                    ) : (
+                      'Send Reset Link'
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={closeForgotPassword}
+                    className="toggle-mode-btn"
+                    style={{ width: '100%', marginTop: '0.5rem' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import CustomerStore from "./CustomerStore.jsx";
 import Checkout from "./Checkout.jsx";
 import LiveQueue from "./LiveQueue.jsx";
 import Landing from "./Landing.jsx";
+import ResetPassword from "./ResetPassword.jsx";
 import { getSubdomain } from "./utils/subdomain.js";
 
 import ModernFoodTemplate from "./templates/ModernFoodTemplate.jsx";
@@ -120,6 +121,9 @@ function AppRouter() {
 
       {/* Owner Dashboard/App */}
       <Route path="/app" element={<AppWrapper />} />
+
+      {/* Password Reset Page */}
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Legacy landing route (redirect to home) */}
       <Route path="/landing" element={<Landing />} />
