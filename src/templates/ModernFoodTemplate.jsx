@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
+import { PaystackButton } from "react-paystack";
 import LiveQueueButton from "../components/LiveQueueButton.jsx";
 import PhoneInput from "../components/PhoneInput.jsx";
 import { generateOrderNumber } from "../utils/orderNumber";
@@ -119,18 +120,10 @@ export default function ModernFoodTemplate(props) {
     }
   };
 
-  // ✅ Fake Card Payment (always succeeds)
-  const handleCardPayment = async () => {
-    if (!customerName || !customerPhone) {
-      alert("⚠️ Please fill in your name and phone number");
-      return;
-    }
-
+  // ✅ Paystack Payment Handler
+  const handlePaymentSuccess = async (reference) => {
     try {
       setProcessing(true);
-
-      // Simulate card processing delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const orderItems = cart.map((c) => ({
         item: c.name,
@@ -148,22 +141,35 @@ export default function ModernFoodTemplate(props) {
           items: orderItems,
           total,
           payment_status: "paid",
+          payment_reference: reference.reference,
           order_number: orderNumber,
         },
       ]);
 
       if (error) throw error;
-      alert(`✅ Payment successful! Order placed.\n\nYour order number: ${orderNumber}\n\nThank you! 🎉`);
+      alert(`✅ Payment successful! Order placed.\n\nOrder #${orderNumber}\nPayment Ref: ${reference.reference}\n\nThank you! 🎉`);
       clearCart();
       setCustomerName("");
       setCustomerPhone("");
       setIsCartOpen(false);
     } catch (err) {
       console.error(err.message);
-      alert("⚠️ Something went wrong: " + err.message);
+      alert("⚠️ Order failed after payment: " + err.message);
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handlePaymentClose = () => {
+    alert("❌ Payment cancelled");
+  };
+
+  // Paystack configuration
+  const paystackConfig = {
+    reference: `ORD-${new Date().getTime()}`,
+    email: customerPhone ? `${customerPhone.replace(/\D/g, '')}@customer.mzansifoodconnect.app` : 'customer@mzansifoodconnect.app',
+    amount: Math.round(total * 100), // Amount in cents
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
   };
 
 
@@ -474,17 +480,38 @@ export default function ModernFoodTemplate(props) {
                   required
                 />
 
-                {/* Card Payment Button */}
-                <button
-                  className="checkout-btn"
-                  onClick={handleCardPayment}
-                  disabled={processing || total === 0 || !customerName || !customerPhone}
-                  style={{
-                    background: "linear-gradient(135deg, #667eea, #764ba2)"
-                  }}
-                >
-                  {processing ? "Processing Payment..." : "💳 Pay with Card"}
-                </button>
+                {/* Paystack Payment Button */}
+                {!processing && total > 0 && customerName && customerPhone ? (
+                  <PaystackButton
+                    {...paystackConfig}
+                    text={`💳 Pay R${total.toFixed(2)}`}
+                    onSuccess={handlePaymentSuccess}
+                    onClose={handlePaymentClose}
+                    className="checkout-btn"
+                    style={{
+                      background: "linear-gradient(135deg, #667eea, #764ba2)",
+                      color: "white",
+                      border: "none",
+                      padding: "1rem",
+                      borderRadius: "12px",
+                      fontSize: "1.1rem",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      width: "100%"
+                    }}
+                  />
+                ) : (
+                  <button
+                    className="checkout-btn"
+                    disabled={true}
+                    style={{
+                      background: "#ccc",
+                      opacity: 0.6
+                    }}
+                  >
+                    {processing ? "Processing Payment..." : "💳 Pay with Card"}
+                  </button>
+                )}
               </div>
             </div>
           </aside>
