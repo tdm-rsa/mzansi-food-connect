@@ -8,7 +8,7 @@ import "./ModernFoodTemplate.css"; // ✅ NEW: use the Jersey-like CSS
 
 export default function ModernFoodTemplate(props) {
   const { state, storeId, cart: extCart } = props;
-  const { header, banner, menuItems, about, liveQueue } = state;
+  const { header, banner, menuItems, about, liveQueue, paystack_public_key } = state;
 
 
   // ✅ Cart state with localStorage persistence
@@ -164,17 +164,18 @@ export default function ModernFoodTemplate(props) {
     alert("❌ Payment cancelled");
   };
 
-  // Paystack configuration
-  const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+  // Paystack configuration - Use store key from database, fallback to env variable
+  const paystackPublicKey = paystack_public_key || import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
   // Debug: Log Paystack setup
   useEffect(() => {
     if (!paystackPublicKey) {
-      console.error('❌ PAYSTACK KEY MISSING! Add VITE_PAYSTACK_PUBLIC_KEY to .env.local');
+      console.error('❌ PAYSTACK KEY MISSING! Vendor needs to add Paystack key in Settings');
     } else {
       console.log('✅ Paystack key loaded:', paystackPublicKey.substring(0, 20) + '...');
+      console.log('   Source:', paystack_public_key ? 'Database (store settings)' : 'Environment variable');
     }
-  }, [paystackPublicKey]);
+  }, [paystackPublicKey, paystack_public_key]);
 
   const paystackConfig = {
     reference: `ORD-${new Date().getTime()}`,

@@ -226,6 +226,7 @@ export default function CustomerStore() {
       show_instructions: storeData.show_instructions === true,
       instructions: storeData.instructions || "",
       accept_card_payments: storeData.accept_card_payments !== false,
+      paystack_public_key: storeData.paystack_public_key || "",
       slug: slug,
     };
 

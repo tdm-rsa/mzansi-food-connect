@@ -8,7 +8,7 @@ import "./FastMobileTemplate.css";
 
 export default function FastMobileTemplate(props) {
   const { state, storeId, cart: extCart } = props;
-  const { header, banner, menuItems, about } = state;
+  const { header, banner, menuItems, about, paystack_public_key } = state;
 
   // DEBUG: Log what data the template receives
   useEffect(() => {
@@ -169,7 +169,7 @@ export default function FastMobileTemplate(props) {
   };
 
   // Paystack configuration
-  const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+  const paystackPublicKey = paystack_public_key || import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
   // Debug: Log Paystack setup
   useEffect(() => {
@@ -177,8 +177,9 @@ export default function FastMobileTemplate(props) {
       console.error('❌ PAYSTACK KEY MISSING! Add VITE_PAYSTACK_PUBLIC_KEY to .env.local');
     } else {
       console.log('✅ Paystack key loaded:', paystackPublicKey.substring(0, 20) + '...');
+      console.log('   Source:', paystack_public_key ? 'Database (store settings)' : 'Environment variable');
     }
-  }, [paystackPublicKey]);
+  }, [paystackPublicKey, paystack_public_key]);
 
   const paystackConfig = {
     reference: `ORD-${new Date().getTime()}`,

@@ -8,7 +8,7 @@ import "./TraditionalSATemplate.css";
 
 export default function TraditionalSATemplate(props) {
   const { state, storeId, cart: extCart } = props;
-  const { header, banner, menuItems, about, liveQueue } = state;
+  const { header, banner, menuItems, about, liveQueue, paystack_public_key } = state;
 
   // DEBUG: Log what data the template receives
   useEffect(() => {
@@ -174,7 +174,7 @@ export default function TraditionalSATemplate(props) {
   };
 
   // Paystack configuration
-  const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+  const paystackPublicKey = paystack_public_key || import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
   // Debug: Log Paystack setup
   useEffect(() => {
@@ -182,6 +182,7 @@ export default function TraditionalSATemplate(props) {
       console.error('❌ PAYSTACK KEY MISSING! Add VITE_PAYSTACK_PUBLIC_KEY to .env.local');
     } else {
       console.log('✅ Paystack key loaded:', paystackPublicKey.substring(0, 20) + '...');
+      console.log('   Source:', paystack_public_key ? 'Database (store settings)' : 'Environment variable');
     }
   }, [paystackPublicKey]);
 
