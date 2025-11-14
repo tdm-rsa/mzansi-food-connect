@@ -224,6 +224,20 @@ export default function App({ user }) {
             storeName = user.user_metadata?.store_name || "My New Store";
             plan = user.user_metadata?.plan || "trial";
             paymentReference = user.user_metadata?.payment_reference || null;
+
+            // 🚨 CRITICAL FIX: Don't create store for Pro/Premium until payment is completed
+            if ((plan === 'pro' || plan === 'premium') && !paymentReference && paymentCheckError?.code === 'PGRST116') {
+              console.warn('⚠️ Pro/Premium signup detected but NO payment found!');
+              console.warn('⚠️ Waiting for payment... redirecting to payment page');
+
+              // Show message and redirect to signup to complete payment
+              alert('⚠️ Please complete your payment to activate your ' + plan.toUpperCase() + ' account.\n\nClick OK to go to the signup page.');
+
+              // Logout and redirect to signup
+              await supabase.auth.signOut();
+              window.location.href = '/';
+              return;
+            }
           }
 
           console.log('🚨 LOGIN: Extracted values:', {
