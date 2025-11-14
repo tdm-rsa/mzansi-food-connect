@@ -226,14 +226,16 @@ export default function App({ user }) {
             paymentReference = user.user_metadata?.payment_reference || null;
 
             // 🚨 CRITICAL FIX: Don't create store for Pro/Premium until payment is completed
-            if ((plan === 'pro' || plan === 'premium') && !paymentReference && paymentCheckError?.code === 'PGRST116') {
+            // If user selected Pro/Premium but has no payment reference, block store creation
+            if ((plan === 'pro' || plan === 'premium') && !paymentReference) {
               console.warn('⚠️ Pro/Premium signup detected but NO payment found!');
-              console.warn('⚠️ Waiting for payment... redirecting to payment page');
+              console.warn('⚠️ Plan:', plan, 'Payment Reference:', paymentReference);
+              console.warn('⚠️ Blocking store creation - user must complete payment');
 
               // Show message and redirect to signup to complete payment
-              alert('⚠️ Please complete your payment to activate your ' + plan.toUpperCase() + ' account.\n\nClick OK to go to the signup page.');
+              alert('⚠️ Payment Required\n\nPlease complete your ' + plan.toUpperCase() + ' payment to activate your account.\n\nYou will be redirected to complete the payment process.');
 
-              // Logout and redirect to signup
+              // Logout and redirect to home
               await supabase.auth.signOut();
               window.location.href = '/';
               return;
