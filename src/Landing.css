@@ -26,9 +26,9 @@
 }
 
 .nav-container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 4rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -116,12 +116,12 @@
 /* Hero Section */
 .hero-section {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  padding: 6rem 2rem;
+  padding: 6rem 4rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
   align-items: center;
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -220,12 +220,12 @@
 
 /* Benefits Section */
 .benefits-section {
-  padding: 5rem 2rem;
+  padding: 5rem 4rem;
   background: #f8f8f8;
 }
 
 .container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -282,7 +282,7 @@
 
 /* Features Section */
 .features-section {
-  padding: 5rem 2rem;
+  padding: 5rem 4rem;
   background: white;
 }
 
@@ -322,7 +322,7 @@
 
 /* Pricing Section */
 .pricing-section {
-  padding: 5rem 2rem;
+  padding: 5rem 4rem;
   background: #1a1a1a;
   color: white;
 }
@@ -482,12 +482,12 @@
 
 /* Testimonials Section */
 .testimonials-section {
-  padding: 5rem 2rem;
+  padding: 5rem 4rem;
   background: #f8f8f8;
 }
 
 .testimonials-container {
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -563,7 +563,7 @@
 
 /* CTA Section */
 .cta-section {
-  padding: 5rem 2rem;
+  padding: 5rem 4rem;
   background: linear-gradient(135deg, #ff6b35 0%, #e55a28 100%);
   color: white;
   text-align: center;
@@ -608,7 +608,7 @@
 .landing-footer {
   background: #000000;
   color: white;
-  padding: 3rem 2rem 2rem;
+  padding: 3rem 4rem 2rem;
 }
 
 .footer-content {
@@ -656,6 +656,87 @@
   padding-top: 2rem;
   text-align: center;
   color: #666;
+}
+
+/* Large Desktop Screens (1920px and above) - Ultra-wide monitors */
+@media (min-width: 1920px) {
+  .nav-container {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 0 6rem;
+  }
+
+  .hero-section {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 6rem 6rem;
+  }
+
+  .container {
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+
+  .benefits-section,
+  .features-section,
+  .pricing-section,
+  .testimonials-section,
+  .cta-section {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+
+  .landing-footer {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+
+  .testimonials-container {
+    max-width: 1600px;
+  }
+}
+
+/* Extra Large Desktop Screens (2560px and above) - 4K monitors */
+@media (min-width: 2560px) {
+  .nav-container {
+    max-width: 2400px;
+    padding: 0 8rem;
+  }
+
+  .hero-section {
+    max-width: 2400px;
+    padding: 8rem 8rem;
+  }
+
+  .container {
+    max-width: 2400px;
+  }
+
+  .benefits-section,
+  .features-section,
+  .pricing-section,
+  .testimonials-section,
+  .cta-section {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+
+  .landing-footer {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+
+  .hero-title {
+    font-size: 4.5rem;
+  }
+
+  .section-title {
+    font-size: 3rem;
+  }
+
+  .testimonials-container {
+    max-width: 1800px;
+  }
 }
 
 /* Tablet Responsive (768px - 1024px) */
