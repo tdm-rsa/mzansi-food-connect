@@ -93,10 +93,10 @@ export default function App({ user }) {
   const audioRef = useRef(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
 
-  // Paystack settings states
-  const [paystackPublicKey, setPaystackPublicKey] = useState("");
-  const [paystackSecretKey, setPaystackSecretKey] = useState("");
-  const [savingPaystack, setSavingPaystack] = useState(false);
+  // Yoco settings states
+  const [yocoPublicKey, setYocoPublicKey] = useState("");
+  const [yocoSecretKey, setYocoSecretKey] = useState("");
+  const [savingYoco, setSavingYoco] = useState(false);
 
   // Upgrade payment state
   const [showUpgradePayment, setShowUpgradePayment] = useState(null); // 'pro' or 'premium' or null
@@ -135,12 +135,12 @@ export default function App({ user }) {
   // 🌙 END THEME SYSTEM
 
   /* -------------------------------------------------------
-     Load Paystack keys when store info changes
+     Load Yoco keys when store info changes
   ------------------------------------------------------- */
   useEffect(() => {
     if (storeInfo) {
-      setPaystackPublicKey(storeInfo.paystack_public_key || "");
-      setPaystackSecretKey(storeInfo.paystack_secret_key || "");
+      setYocoPublicKey(storeInfo.yoco_public_key || "");
+      setYocoSecretKey(storeInfo.yoco_secret_key || "");
     }
   }, [storeInfo]);
 
@@ -195,16 +195,43 @@ export default function App({ user }) {
           console.log('🚨 LOGIN: Full user object:', user);
           console.log('🚨 LOGIN: user.user_metadata:', user.user_metadata);
 
-          // Get signup metadata
-          const storeName = user.user_metadata?.store_name || "My New Store";
-          const plan = user.user_metadata?.plan || "trial";
-          const paymentReference = user.user_metadata?.payment_reference || null;
+          // 🔥 FIX: Check pending_payments table first (more reliable than user_metadata)
+          const { data: pendingPayment, error: paymentCheckError } = await supabase
+            .from('pending_payments')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          console.log('🔍 Checking pending_payments table for user:', user.id);
+          console.log('💳 Pending payment found:', pendingPayment);
+
+          // Get signup metadata - prioritize pending_payments table over user_metadata
+          let storeName, plan, paymentReference;
+
+          if (pendingPayment) {
+            console.log('✅ Using data from pending_payments table');
+            storeName = pendingPayment.store_name;
+            plan = pendingPayment.plan;
+            paymentReference = pendingPayment.payment_reference;
+
+            // Mark payment as processed
+            await supabase
+              .from('pending_payments')
+              .update({ processed_at: new Date().toISOString() })
+              .eq('id', pendingPayment.id);
+          } else {
+            console.log('⚠️ No pending payment found, using user_metadata');
+            storeName = user.user_metadata?.store_name || "My New Store";
+            plan = user.user_metadata?.plan || "trial";
+            paymentReference = user.user_metadata?.payment_reference || null;
+          }
 
           console.log('🚨 LOGIN: Extracted values:', {
             storeName,
             plan,
             planType: typeof plan,
-            paymentReference
+            paymentReference,
+            source: pendingPayment ? 'pending_payments table' : 'user_metadata'
           });
 
           // 🔥 Generate clean slug from store name
@@ -276,6 +303,44 @@ export default function App({ user }) {
           console.log('✅ LOGIN: Found existing store');
           console.log('🚨 LOGIN: Existing store object:', s);
           console.log('🚨 LOGIN: Existing store plan:', s.plan, 'Type:', typeof s.plan);
+
+          // 🔥 FIX: Check if there's a pending payment for this user that should upgrade their plan
+          const { data: pendingPayment } = await supabase
+            .from('pending_payments')
+            .select('*')
+            .eq('user_id', user.id)
+            .is('processed_at', null)
+            .single();
+
+          if (pendingPayment && s.plan === 'trial' && (pendingPayment.plan === 'pro' || pendingPayment.plan === 'premium')) {
+            console.log('🚨 UPGRADE: Found pending payment! Upgrading store from trial to', pendingPayment.plan);
+
+            // Upgrade the existing store to the paid plan
+            const { data: upgradedStore, error: upgradeError } = await supabase
+              .from('stores')
+              .update({
+                plan: pendingPayment.plan,
+                plan_started_at: new Date().toISOString(),
+                plan_expires_at: null,
+                payment_reference: pendingPayment.payment_reference
+              })
+              .eq('id', s.id)
+              .select()
+              .single();
+
+            if (!upgradeError && upgradedStore) {
+              s = upgradedStore;
+              console.log('✅ UPGRADE: Store upgraded to', pendingPayment.plan);
+
+              // Mark payment as processed
+              await supabase
+                .from('pending_payments')
+                .update({ processed_at: new Date().toISOString() })
+                .eq('id', pendingPayment.id);
+            } else {
+              console.error('❌ UPGRADE: Failed to upgrade store:', upgradeError);
+            }
+          }
 
           // 🔥 FIX: If existing store has no slug, generate one now
           if (!s.slug) {
@@ -837,40 +902,40 @@ export default function App({ user }) {
   };
 
   /* -------------------------------------------------------
-     Paystack settings functions
+     Yoco settings functions
   ------------------------------------------------------- */
-  const handleSavePaystackKeys = async () => {
-    if (!paystackPublicKey.trim() || !paystackSecretKey.trim()) {
-      showToast("⚠️ Please enter both Paystack keys", "#f59e0b");
+  const handleSaveYocoKeys = async () => {
+    if (!yocoPublicKey.trim() || !yocoSecretKey.trim()) {
+      showToast("⚠️ Please enter both Yoco keys", "#f59e0b");
       return;
     }
 
-    setSavingPaystack(true);
+    setSavingYoco(true);
 
     try {
       const { error } = await supabase
         .from("stores")
         .update({
-          paystack_public_key: paystackPublicKey.trim(),
-          paystack_secret_key: paystackSecretKey.trim(),
+          yoco_public_key: yocoPublicKey.trim(),
+          yoco_secret_key: yocoSecretKey.trim(),
         })
         .eq("id", storeInfo.id);
 
       if (error) throw error;
 
-      showToast("✅ Paystack keys saved successfully!", "#10b981");
+      showToast("✅ Yoco keys saved successfully!", "#10b981");
 
       // Update local store info
       setStoreInfo({
         ...storeInfo,
-        paystack_public_key: paystackPublicKey.trim(),
-        paystack_secret_key: paystackSecretKey.trim(),
+        yoco_public_key: yocoPublicKey.trim(),
+        yoco_secret_key: yocoSecretKey.trim(),
       });
     } catch (error) {
-      console.error("Save Paystack keys failed:", error);
-      showToast("❌ Failed to save Paystack keys", "#ef4444");
+      console.error("Save Yoco keys failed:", error);
+      showToast("❌ Failed to save Yoco keys", "#ef4444");
     } finally {
-      setSavingPaystack(false);
+      setSavingYoco(false);
     }
   };
 
@@ -1983,16 +2048,16 @@ export default function App({ user }) {
                   <button
                     className="btn-primary"
                     onClick={() => {
-                      // Open Paystack card management
-                      showToast("💳 Opening Paystack to add card...", "#667eea");
-                      window.open("https://paystack.com/pay/mzansi-add-card", "_blank");
+                      // Open Yoco portal
+                      showToast("💳 Opening Yoco Portal...", "#667eea");
+                      window.open("https://portal.yoco.com/", "_blank");
                     }}
                     style={{
                       background: "linear-gradient(135deg, #667eea, #764ba2)",
                       border: "none"
                     }}
                   >
-                    + Add New Card
+                    + Manage Payment Methods
                   </button>
                 </div>
 
@@ -2050,53 +2115,53 @@ export default function App({ user }) {
               }}>
                 <strong>🔒 Secure Payment Processing</strong>
                 <p style={{ margin: "0.5rem 0 0 0" }}>
-                  All payment information is securely processed through Paystack.
+                  All payment information is securely processed through Yoco.
                   We never store your card details on our servers.
                 </p>
               </div>
             </div>
 
-            {/* Paystack Integration */}
+            {/* Yoco Integration */}
             <div className="settings-section">
-              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>💰 Paystack Integration</h3>
+              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>💰 Yoco Integration</h3>
               <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
-                Connect your Paystack account to accept customer payments
+                Connect your Yoco account to accept customer payments
               </p>
 
               <div className="form-group">
-                <label htmlFor="paystack-public" style={{ color: darkMode ? "#ffffff" : "#333" }}>
-                  Paystack Public Key
+                <label htmlFor="yoco-public" style={{ color: darkMode ? "#ffffff" : "#333" }}>
+                  Yoco Public Key
                 </label>
                 <input
-                  id="paystack-public"
+                  id="yoco-public"
                   type="text"
                   className="form-input"
-                  placeholder="pk_test_xxxxxxxxxxxxx or pk_live_xxxxxxxxxxxxx"
-                  value={paystackPublicKey}
-                  onChange={(e) => setPaystackPublicKey(e.target.value)}
+                  placeholder="pk_live_xxxxxxxxxxxxx"
+                  value={yocoPublicKey}
+                  onChange={(e) => setYocoPublicKey(e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="paystack-secret" style={{ color: darkMode ? "#ffffff" : "#333" }}>
-                  Paystack Secret Key
+                <label htmlFor="yoco-secret" style={{ color: darkMode ? "#ffffff" : "#333" }}>
+                  Yoco Secret Key
                 </label>
                 <input
-                  id="paystack-secret"
+                  id="yoco-secret"
                   type="password"
                   className="form-input"
-                  placeholder="sk_test_xxxxxxxxxxxxx or sk_live_xxxxxxxxxxxxx"
-                  value={paystackSecretKey}
-                  onChange={(e) => setPaystackSecretKey(e.target.value)}
+                  placeholder="sk_live_xxxxxxxxxxxxx"
+                  value={yocoSecretKey}
+                  onChange={(e) => setYocoSecretKey(e.target.value)}
                 />
               </div>
 
               <button
-                onClick={handleSavePaystackKeys}
+                onClick={handleSaveYocoKeys}
                 className="btn-primary"
-                disabled={savingPaystack}
+                disabled={savingYoco}
               >
-                {savingPaystack ? "Saving..." : "Save Paystack Keys"}
+                {savingYoco ? "Saving..." : "Save Yoco Keys"}
               </button>
 
               <div style={{
@@ -2107,11 +2172,11 @@ export default function App({ user }) {
                 fontSize: "0.85rem",
                 color: darkMode ? "#93c5fd" : "#1e40af"
               }}>
-                <strong>📌 How to get your Paystack keys:</strong>
+                <strong>📌 How to get your Yoco keys:</strong>
                 <ol style={{ margin: "0.5rem 0 0 0", paddingLeft: "1.5rem" }}>
-                  <li>Go to <a href="https://dashboard.paystack.com/" target="_blank" rel="noopener noreferrer" style={{ color: darkMode ? "#60a5fa" : "#2563eb" }}>Paystack Dashboard</a></li>
-                  <li>Click Settings → API Keys & Webhooks</li>
-                  <li>Copy your Public Key and Secret Key</li>
+                  <li>Go to <a href="https://portal.yoco.com/" target="_blank" rel="noopener noreferrer" style={{ color: darkMode ? "#60a5fa" : "#2563eb" }}>Yoco Portal</a></li>
+                  <li>Click Settings → Developers</li>
+                  <li>Copy your Live Public Key and Live Secret Key</li>
                   <li>Paste them here and click "Save"</li>
                 </ol>
               </div>

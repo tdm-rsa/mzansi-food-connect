@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
-import { PaystackButton } from "react-paystack";
 import "./App.css";
 
 export default function Signup({ onBack, onSuccess }) {
@@ -13,8 +12,22 @@ export default function Signup({ onBack, onSuccess }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [createdUserId, setCreatedUserId] = useState(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentReference, setPaymentReference] = useState(null);
 
-  const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+  // Use LIVE key for production signups
+  const yocoPublicKey = import.meta.env.VITE_YOCO_PUBLIC_KEY; // Yoco live key from .env
+
+  // Load Yoco SDK
+  useEffect(() => {
+    if (!document.getElementById('yoco-sdk')) {
+      const script = document.createElement('script');
+      script.id = 'yoco-sdk';
+      script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   const plans = [
     {
@@ -130,7 +143,7 @@ export default function Signup({ onBack, onSuccess }) {
         onBack();
       } else {
         // For Pro/Premium - proceed to payment (Step 3)
-        alert(`✅ Account created successfully!\n\n📧 IMPORTANT: Check your email (${email}) to confirm your account BEFORE making payment.\n\n💳 After confirming your email, you can proceed with payment.`);
+        alert(`✅ Account created successfully!\n\n💳 Next: Complete payment to activate your subscription.`);
         setStep(3);
       }
     } catch (err) {
@@ -206,38 +219,101 @@ export default function Signup({ onBack, onSuccess }) {
     return storeData; // Return store data including slug
   }
 
-  async function handlePaymentSuccess(reference) {
+  async function handleYocoPayment() {
+    if (!yocoPublicKey) {
+      setError('⚠️ Payment is not configured. Please contact support.');
+      return;
+    }
+
+    if (!window.YocoSDK) {
+      setError('⚠️ Payment system is loading. Please try again in a moment.');
+      return;
+    }
+
+    setProcessingPayment(true);
+    setError("");
+
+    try {
+      const selectedPlanData = plans.find(p => p.id === selectedPlan);
+      const amountInCents = selectedPlan === "pro" ? 15000 : 30000; // R150 or R300
+
+      const sdk = new window.YocoSDK({
+        publicKey: yocoPublicKey,
+      });
+
+      // Create checkout
+      sdk.showPopup({
+        amountInCents: amountInCents,
+        currency: 'ZAR',
+        name: 'Mzansi Food Connect',
+        description: `${selectedPlanData.name} Plan Subscription`,
+        metadata: {
+          storeName: storeName,
+          email: email,
+          plan: selectedPlan,
+        },
+        callback: async function (result) {
+          if (result.error) {
+            console.error('Yoco payment error:', result.error);
+            setError('❌ Payment failed: ' + result.error.message);
+            setProcessingPayment(false);
+            return;
+          }
+
+          // Payment successful
+          console.log('💳 Yoco payment successful:', result);
+          await savePaymentReference(result.id, selectedPlanData);
+        },
+      });
+    } catch (err) {
+      console.error('Yoco SDK error:', err);
+      setError('⚠️ Payment initialization failed. Please try again.');
+      setProcessingPayment(false);
+    }
+  }
+
+  async function savePaymentReference(paymentId, selectedPlanData) {
     setLoading(true);
 
     try {
-      // Update user metadata with payment reference
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          payment_reference: reference.reference,
-          payment_completed: true,
-          payment_date: new Date().toISOString()
-        }
-      });
+      console.log('✅ Payment successful! ID:', paymentId);
+      console.log('💾 Saving payment for user ID:', createdUserId);
+      console.log('📋 Plan selected:', selectedPlan);
 
-      if (updateError) throw updateError;
+      // 🔥 FIX: Store payment in a pending_payments table so we can retrieve it after email confirmation
+      // This is more reliable than user_metadata which may not persist properly before email confirmation
+      const { error: paymentError } = await supabase
+        .from('pending_payments')
+        .insert([{
+          user_id: createdUserId,
+          email: email,
+          store_name: storeName,
+          plan: selectedPlan,
+          payment_reference: paymentId,
+          amount_in_cents: selectedPlan === 'pro' ? 15000 : 30000,
+          payment_status: 'completed',
+          created_at: new Date().toISOString()
+        }]);
 
-      console.log('✅ Payment reference saved to user metadata:', reference.reference);
+      if (paymentError) {
+        console.error('❌ Failed to save payment reference:', paymentError);
+        // Don't throw - payment was successful, just log the error
+        console.warn('⚠️ Payment succeeded but couldn\'t save to pending_payments table');
+        console.warn('⚠️ User will need to contact support with payment ID:', paymentId);
+      } else {
+        console.log('✅ Payment reference saved to pending_payments table');
+      }
 
-      alert(`✅ Payment successful!\n\n💳 Payment Reference: ${reference.reference}\n\nYour ${plans.find(p => p.id === selectedPlan).name} subscription is confirmed!\n\n📧 Next steps:\n1. Check your email (${email}) and confirm your account\n2. Login to access your dashboard\n\nYour store will be created automatically when you login for the first time!`);
+      // Show success message
+      alert(`✅ Payment successful!\n\n💳 Payment ID: ${paymentId}\n\nYour ${selectedPlanData.name} subscription is confirmed!\n\n📧 Next steps:\n1. Check your email (${email}) and confirm your account\n2. Login to access your dashboard\n\nYour ${selectedPlanData.name} store will be created automatically when you login for the first time!`);
       onBack();
     } catch (err) {
       setError("Payment succeeded but failed to save payment details: " + err.message);
     } finally {
       setLoading(false);
+      setProcessingPayment(false);
     }
   }
-
-  const paystackConfig = {
-    reference: new Date().getTime().toString(),
-    email: email,
-    amount: selectedPlan === "pro" ? 15000 : 30000, // R150 or R300 in cents
-    publicKey: paystackKey,
-  };
 
   // Step 3: Payment page
   if (step === 3) {
@@ -271,7 +347,7 @@ export default function Signup({ onBack, onSuccess }) {
           <div className="login-form-container">
             <div className="form-header">
               <h2>Payment</h2>
-              <p>Secure payment powered by Paystack</p>
+              <p>Secure payment powered by Yoco</p>
             </div>
 
             {error && (
@@ -282,20 +358,25 @@ export default function Signup({ onBack, onSuccess }) {
             )}
 
             <div style={{ marginTop: "2rem" }}>
-              <PaystackButton
-                {...paystackConfig}
-                text={`Pay ${selectedPlanData.price} - Start ${selectedPlanData.name}`}
-                onSuccess={handlePaymentSuccess}
-                onClose={() => setError("Payment cancelled. You can try again.")}
+              <button
+                onClick={handleYocoPayment}
+                disabled={loading || processingPayment}
                 className="login-btn"
-                style={{ width: "100%", marginBottom: "1rem" }}
-              />
+                style={{
+                  width: "100%",
+                  marginBottom: "1rem",
+                  cursor: (loading || processingPayment) ? "not-allowed" : "pointer",
+                  opacity: (loading || processingPayment) ? 0.6 : 1
+                }}
+              >
+                {processingPayment ? "Processing..." : `Pay ${selectedPlanData.price} - Start ${selectedPlanData.name}`}
+              </button>
 
               <button
                 type="button"
                 className="toggle-mode-btn"
                 onClick={() => setStep(2)}
-                disabled={loading}
+                disabled={loading || processingPayment}
               >
                 ← Back to Account Details
               </button>

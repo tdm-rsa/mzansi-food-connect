@@ -2814,3 +2814,205 @@ body.dark .plan-price {
   }
 }
 
+/* ========================================
+   LAPTOP RESPONSIVE (1024px - 1440px)
+   ======================================== */
+@media (max-width: 1440px) {
+  .app {
+    padding: 0.75rem;
+  }
+
+  .header {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard {
+    padding: 1rem;
+  }
+
+  /* Reduce spacing in content areas */
+  .dashboard-header {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .settings-section {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Make forms more compact */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  /* Adjust card spacing */
+  .plan-card {
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Compact stats */
+  .stats-grid {
+    gap: 1rem;
+  }
+
+  /* Better table fit */
+  .orders-table {
+    font-size: 0.9rem;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    padding: 0.65rem;
+  }
+}
+
+@media (max-width: 1280px) {
+  .app {
+    padding: 0.5rem;
+  }
+
+  .header {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .dashboard {
+    padding: 0.75rem;
+  }
+
+  .dashboard-header {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Make content more compact */
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  /* Reduce button sizes slightly */
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  /* More compact navigation */
+  .nav-links {
+    gap: 0.75rem;
+  }
+
+  .nav-links button {
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Small Laptops (1024px and below) */
+@media (max-width: 1024px) {
+  .app {
+    padding: 0.5rem;
+  }
+
+  .header {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .dashboard {
+    padding: 0.5rem;
+  }
+
+  .dashboard-header {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .settings-section {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Stack stats vertically if needed */
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* More compact tables */
+  .orders-table {
+    font-size: 0.85rem;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    padding: 0.5rem;
+  }
+
+  /* Hide less important columns on small laptops */
+  .orders-table .hide-on-small-laptop {
+    display: none;
+  }
+
+  /* Compact forms */
+  .form-input,
+  .form-select {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  /* Reduce modal sizes */
+  .modal-content {
+    max-width: 90%;
+    padding: 1.25rem;
+  }
+
+  /* Compact plan cards */
+  .pricing-grid {
+    gap: 1rem;
+  }
+
+  .plan-card {
+    padding: 1rem;
+  }
+}
+
+/* Ensure no horizontal scroll */
+body, html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.app {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Make all containers fit viewport */
+.dashboard,
+.settings-section,
+.orders-container,
+.menu-container {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Responsive tables with horizontal scroll */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.orders-table {
+  min-width: 600px; /* Minimum width before scroll */
+}
+

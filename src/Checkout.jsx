@@ -1,7 +1,6 @@
 // src/Checkout.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { PaystackButton } from "react-paystack";
 import { supabase } from "./supabaseClient";
 import { useCart } from "./hooks/useCart";
 import { getSubdomain } from "./utils/subdomain";
@@ -59,13 +58,14 @@ export default function Checkout() {
   const { items, getTotal, clearCart } = cart;
 
   const total = getTotal();
-  const totalInKobo = Math.round(total * 100); // Paystack uses kobo (cents)
+  const totalInCents = Math.round(total * 100); // Yoco uses cents
 
   /* -------------------------------------------------------
-     Fetch Store Data to get PayFast/Paystack keys
+     Fetch Store Data to get Yoco keys
   ------------------------------------------------------- */
   const [store, setStore] = useState(null);
   const [storeLoaded, setStoreLoaded] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     async function loadStore() {
@@ -88,48 +88,79 @@ export default function Checkout() {
   }, [slug]);
 
   /* -------------------------------------------------------
-     Paystack Configuration
+     Yoco Configuration
   ------------------------------------------------------- */
-  // Use vendor's Paystack key if available, otherwise fallback to platform key
-  const paystackPublicKey = store?.paystack_public_key || import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_xxxxxxxxxxxxxxxxxxxxxx";
+  // Use vendor's Yoco key if available, otherwise fallback to platform key
+  const yocoPublicKey = store?.yoco_public_key || import.meta.env.VITE_YOCO_PUBLIC_KEY;
 
-  const paystackConfig = {
-    publicKey: paystackPublicKey,
-    email: customerPhone ? `${customerPhone.replace(/\D/g, '')}@mzansifood.co.za` : "customer@mzansifood.co.za",
-    amount: totalInKobo,
-    currency: "ZAR",
-    reference: `MFC-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    metadata: {
-      custom_fields: [
-        {
-          display_name: "Customer Name",
-          variable_name: "customer_name",
-          value: customerName,
+  // Load Yoco SDK
+  useEffect(() => {
+    if (!document.getElementById('yoco-sdk')) {
+      const script = document.createElement('script');
+      script.id = 'yoco-sdk';
+      script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  /* -------------------------------------------------------
+     Handle Yoco Payment
+  ------------------------------------------------------- */
+  const handleYocoPayment = async () => {
+    if (!yocoPublicKey) {
+      alert('⚠️ Payment is not configured. Please contact the store.');
+      return;
+    }
+
+    if (!window.YocoSDK) {
+      alert('⚠️ Payment system is loading. Please try again in a moment.');
+      return;
+    }
+
+    setProcessingPayment(true);
+
+    try {
+      const sdk = new window.YocoSDK({
+        publicKey: yocoPublicKey,
+      });
+
+      // Create checkout
+      sdk.showPopup({
+        amountInCents: totalInCents,
+        currency: 'ZAR',
+        name: store?.name || 'Mzansi Food Connect',
+        description: `Order from ${store?.name}`,
+        metadata: {
+          customerName: customerName,
+          customerPhone: customerPhone,
+          storeSlug: slug,
+          storeId: store?.id || '',
         },
-        {
-          display_name: "Phone Number",
-          variable_name: "phone",
-          value: customerPhone,
+        callback: async function (result) {
+          if (result.error) {
+            console.error('Yoco payment error:', result.error);
+            alert('❌ Payment failed: ' + result.error.message);
+            setProcessingPayment(false);
+            return;
+          }
+
+          // Payment successful
+          console.log('💳 Yoco payment successful:', result);
+          await createOrder(result.id);
         },
-        {
-          display_name: "Store",
-          variable_name: "store_slug",
-          value: slug,
-        },
-        {
-          display_name: "Store ID",
-          variable_name: "store_id",
-          value: store?.id || "",
-        },
-      ],
-    },
+      });
+    } catch (err) {
+      console.error('Yoco SDK error:', err);
+      alert('⚠️ Payment initialization failed. Please try again.');
+      setProcessingPayment(false);
+    }
   };
 
   /* -------------------------------------------------------
-     Handle Payment Success
+     Create Order after Payment Success
   ------------------------------------------------------- */
-  const handlePaymentSuccess = async (reference) => {
-    console.log('💳 Payment successful:', reference);
+  const createOrder = async (paymentId) => {
     setLoading(true);
 
     try {
@@ -139,22 +170,22 @@ export default function Checkout() {
       const randomDigits = Math.floor(Math.random() * 900) + 100; // 100-999
       const orderNumber = `${randomLetter}${randomDigits}`;
 
-      // Create order in Supabase with correct field names
+      // Create order in Supabase
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert([
           {
             store_id: store.id,
-            customer_name: customerName, // 🔥 FIX: Use customer_name not customer
+            customer_name: customerName,
             phone: customerPhone,
             items: items.map((item) => ({
-              item: item.name, // 🔥 FIX: Use 'item' field name as expected by database
+              item: item.name,
               qty: item.qty,
               price: item.price,
             })),
             total,
             payment_status: "paid",
-            payment_reference: reference.reference,
+            payment_reference: paymentId,
             order_number: orderNumber,
             status: "pending",
             estimated_time: 0,
@@ -180,18 +211,12 @@ export default function Checkout() {
       navigate(`/store/${slug}`);
     } catch (err) {
       console.error("Order creation error:", err);
-      alert(`⚠️ Payment was successful but order creation failed.\n\nPlease contact ${store?.name} with your payment reference:\n${reference.reference}`);
+      alert(`⚠️ Payment was successful but order creation failed.\n\nPlease contact ${store?.name} with your payment ID:\n${paymentId}`);
       setError("Failed to create order. Please contact the store with your payment reference.");
     } finally {
       setLoading(false);
+      setProcessingPayment(false);
     }
-  };
-
-  /* -------------------------------------------------------
-     Handle Payment Close (Cancel)
-  ------------------------------------------------------- */
-  const handlePaymentClose = () => {
-    alert("Payment cancelled. Your cart is still saved.");
   };
 
   /* -------------------------------------------------------
@@ -299,20 +324,19 @@ export default function Checkout() {
         {/* Payment Button */}
         <div className="checkout-payment">
           {isValid ? (
-            <PaystackButton
-              {...paystackConfig}
-              text={loading ? "Processing..." : `Pay R${total.toFixed(2)}`}
-              onSuccess={handlePaymentSuccess}
-              onClose={handlePaymentClose}
+            <button
+              onClick={handleYocoPayment}
               className="paystack-button"
-              disabled={loading}
-            />
+              disabled={loading || processingPayment}
+            >
+              {processingPayment ? "Processing..." : `Pay R${total.toFixed(2)}`}
+            </button>
           ) : (
             <button className="paystack-button disabled" disabled>
               Please fill in all fields
             </button>
           )}
-          <p className="checkout-secure">🔒 Secure payment powered by Paystack</p>
+          <p className="checkout-secure">🔒 Secure payment powered by Yoco</p>
         </div>
       </div>
     </div>

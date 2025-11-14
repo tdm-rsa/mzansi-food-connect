@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-import { PaystackButton } from "react-paystack";
 import PhoneInput from "../components/PhoneInput.jsx";
 import LiveQueueButton from "../components/LiveQueueButton.jsx";
 import { generateOrderNumber } from "../utils/orderNumber";

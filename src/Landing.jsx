@@ -147,7 +147,7 @@ function Landing() {
         "Everything in Pro",
         "Custom domain support (coming soon)",
         "3 Professional templates",
-        "Advanced Analytics , charts and reports",
+        "Advanced Analytics, charts and reports",
         "API access e.g Automated WhatsApp messaging",
         "Unlimited Menu Items",
         "First priority support",

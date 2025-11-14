@@ -1,16 +1,27 @@
-import { useState } from "react";
-import { PaystackButton } from "react-paystack";
+import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 
 /**
  * Upgrade Payment Component
- * Handles Paystack payments for Pro and Premium plan upgrades
+ * Handles Yoco payments for Pro and Premium plan upgrades
  */
 export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [processingPayment, setProcessingPayment] = useState(false);
 
-  const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+  const yocoKey = import.meta.env.VITE_YOCO_PUBLIC_KEY;
+
+  // Load Yoco SDK
+  useEffect(() => {
+    if (!document.getElementById('yoco-sdk')) {
+      const script = document.createElement('script');
+      script.id = 'yoco-sdk';
+      script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   const planDetails = {
     pro: {
@@ -47,12 +58,63 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
     return <div>Invalid plan selected</div>;
   }
 
-  async function handlePaymentSuccess(reference) {
-    setLoading(true);
+  async function handleYocoPayment() {
+    if (!yocoKey) {
+      setError('⚠️ Payment is not configured. Please contact support.');
+      return;
+    }
+
+    if (!window.YocoSDK) {
+      setError('⚠️ Payment system is loading. Please try again in a moment.');
+      return;
+    }
+
+    setProcessingPayment(true);
     setError("");
 
     try {
-      console.log('💳 Payment successful! Reference:', reference.reference);
+      const sdk = new window.YocoSDK({
+        publicKey: yocoKey,
+      });
+
+      // Create checkout
+      sdk.showPopup({
+        amountInCents: plan.priceInCents,
+        currency: 'ZAR',
+        name: 'Mzansi Food Connect',
+        description: `${plan.name} Plan Subscription`,
+        metadata: {
+          storeId: storeInfo.id,
+          storeName: storeInfo.name,
+          upgradeFrom: storeInfo.plan,
+          upgradeTo: targetPlan,
+          userEmail: user.email,
+        },
+        callback: async function (result) {
+          if (result.error) {
+            console.error('Yoco payment error:', result.error);
+            setError('❌ Payment failed: ' + result.error.message);
+            setProcessingPayment(false);
+            return;
+          }
+
+          // Payment successful
+          console.log('💳 Yoco payment successful:', result);
+          await upgradeStore(result.id);
+        },
+      });
+    } catch (err) {
+      console.error('Yoco SDK error:', err);
+      setError('⚠️ Payment initialization failed. Please try again.');
+      setProcessingPayment(false);
+    }
+  }
+
+  async function upgradeStore(paymentId) {
+    setLoading(true);
+
+    try {
+      console.log('💳 Payment successful! ID:', paymentId);
       console.log('🔄 Upgrading store to:', targetPlan);
 
       // Update the store plan in database
@@ -62,7 +124,7 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
           plan: targetPlan,
           plan_started_at: new Date().toISOString(),
           plan_expires_at: null, // Paid plans don't expire (subscription-based)
-          payment_reference: reference.reference,
+          payment_reference: paymentId,
         })
         .eq("id", storeInfo.id)
         .select()
@@ -86,25 +148,9 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
       setError(`Failed to upgrade: ${err.message}`);
     } finally {
       setLoading(false);
+      setProcessingPayment(false);
     }
   }
-
-  function handlePaymentClose() {
-    setError("Payment cancelled. You can try again anytime.");
-  }
-
-  const paystackConfig = {
-    reference: `UPGRADE-${storeInfo.id}-${new Date().getTime()}`,
-    email: user.email,
-    amount: plan.priceInCents,
-    publicKey: paystackKey,
-    metadata: {
-      store_id: storeInfo.id,
-      store_name: storeInfo.name,
-      upgrade_from: storeInfo.plan,
-      upgrade_to: targetPlan,
-    }
-  };
 
   return (
     <div style={{
@@ -167,26 +213,29 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
 
       <div style={{ marginTop: "1.5rem" }}>
         <p style={{ color: "#94a3b8", fontSize: "0.9rem", marginBottom: "1rem" }}>
-          🔒 Secure payment powered by Paystack
+          🔒 Secure payment powered by Yoco
         </p>
 
-        {paystackKey ? (
-          <PaystackButton
-            {...paystackConfig}
-            text={`Pay R${plan.price} - Upgrade to ${plan.name}`}
-            onSuccess={handlePaymentSuccess}
-            onClose={handlePaymentClose}
-            disabled={loading}
+        {yocoKey ? (
+          <button
+            onClick={handleYocoPayment}
+            disabled={loading || processingPayment}
             className="btn-primary"
             style={{
               width: "100%",
               padding: "1rem",
               fontSize: "1rem",
               fontWeight: "600",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.6 : 1
+              cursor: (loading || processingPayment) ? "not-allowed" : "pointer",
+              opacity: (loading || processingPayment) ? 0.6 : 1,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              border: "none",
+              borderRadius: "8px",
+              color: "white"
             }}
-          />
+          >
+            {processingPayment ? "Processing..." : `Pay R${plan.price} - Upgrade to ${plan.name}`}
+          </button>
         ) : (
           <div style={{
             background: "#f443361a",
@@ -195,7 +244,7 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
             padding: "1rem",
             color: "#f44336"
           }}>
-            ⚠️ Paystack is not configured. Please contact support.
+            ⚠️ Yoco is not configured. Please contact support.
           </div>
         )}
 
