@@ -112,12 +112,12 @@ export default function CustomerStore() {
         {
           event: "UPDATE",
           schema: "public",
-          table: "stores",
+          table: "tenants",
           filter: `id=eq.${storeData.id}`,
         },
         (payload) => {
           const updated = payload.new;
-          console.log("Store updated in realtime:", updated);
+          console.log("✅ Store updated in realtime:", updated);
           setStoreData(updated);
           setIsOpen(updated.is_open);
         }
