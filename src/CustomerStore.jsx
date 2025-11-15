@@ -243,6 +243,15 @@ export default function CustomerStore() {
       showAbout: state.show_about,
       hasNonEmptySocials: state.about.socials && Object.keys(state.about.socials).filter(k => state.about.socials[k]).length > 0
     });
+    console.log("📋 Instructions debug:", {
+      show_instructions: storeData.show_instructions,
+      instructions: storeData.instructions,
+      willShowButton: state.show_instructions && state.instructions
+    });
+    console.log("📢 Announcements debug:", {
+      specials_text: storeData.specials_text,
+      willShowButton: !!storeData.specials_text
+    });
 
     const commonProps = { state, storeId: storeData.id, cart };
 
