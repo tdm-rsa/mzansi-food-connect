@@ -203,6 +203,11 @@ export default function TraditionalSATemplate(props) {
 
   // ✅ Handle Yoco Payment
   const handleYocoPayment = async () => {
+    console.log('🔵 handleYocoPayment called');
+    console.log('🔵 yocoPublicKey:', yocoPublicKey);
+    console.log('🔵 window.YocoSDK:', window.YocoSDK);
+    console.log('🔵 totalInCents:', totalInCents);
+
     if (!yocoPublicKey) {
       alert('⚠️ Payment is not configured. Please contact the store.');
       return;
@@ -213,13 +218,20 @@ export default function TraditionalSATemplate(props) {
       return;
     }
 
+    if (totalInCents < 200) {
+      alert('⚠️ Minimum payment amount is R2.00 (200 cents). Current total: ' + (totalInCents/100).toFixed(2));
+      return;
+    }
+
     setProcessing(true);
 
     try {
+      console.log('🔵 Creating Yoco SDK instance...');
       const sdk = new window.YocoSDK({
         publicKey: yocoPublicKey,
       });
 
+      console.log('🔵 Showing Yoco popup...');
       sdk.showPopup({
         amountInCents: totalInCents,
         currency: 'ZAR',
@@ -231,6 +243,7 @@ export default function TraditionalSATemplate(props) {
           storeId: storeId,
         },
         callback: async function (result) {
+          console.log('🔵 Yoco callback received:', result);
           if (result.error) {
             console.error('Yoco payment error:', result.error);
             alert('❌ Payment failed: ' + result.error.message);
@@ -243,9 +256,10 @@ export default function TraditionalSATemplate(props) {
           await createOrder(result.id);
         },
       });
+      console.log('🔵 Popup shown successfully');
     } catch (err) {
-      console.error('Yoco SDK error:', err);
-      alert('⚠️ Payment initialization failed. Please try again.');
+      console.error('❌ Yoco SDK error:', err);
+      alert('⚠️ Payment initialization failed: ' + err.message);
       setProcessing(false);
     }
   };
@@ -571,7 +585,12 @@ export default function TraditionalSATemplate(props) {
                 {/* Yoco Payment Button */}
                 {!processing && total > 0 && customerName && customerPhone && yocoPublicKey ? (
                   <button
-                    onClick={handleYocoPayment}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('🔴 BUTTON CLICKED - Event fired!');
+                      handleYocoPayment();
+                    }}
                     className="checkout-btn"
                     style={{
                       background: "linear-gradient(135deg, #667eea, #764ba2)",
@@ -582,7 +601,10 @@ export default function TraditionalSATemplate(props) {
                       fontSize: "1.1rem",
                       fontWeight: "bold",
                       cursor: "pointer",
-                      width: "100%"
+                      width: "100%",
+                      position: "relative",
+                      zIndex: 99999,
+                      pointerEvents: "auto"
                     }}
                   >
                     💳 Pay R{total.toFixed(2)}
