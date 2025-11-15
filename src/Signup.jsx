@@ -208,6 +208,7 @@ export default function Signup({ onBack, onSuccess }) {
       banner_text: `Welcome to ${storeName}!`,
       about_text: `Proudly serving authentic food.`,
       payment_reference: paymentRef,
+      // Note: Vendors must add their Yoco keys in Settings after signup
     }]).select().single();
 
     if (storeError) {
