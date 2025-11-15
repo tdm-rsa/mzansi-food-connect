@@ -71,19 +71,6 @@ export default function StarterDashboardView({
             )}
             {user?.email?.split('@')[0] || 'Owner'}
           </h2>
-          <h3 style={{
-            fontSize: "1.4rem",
-            marginTop: "0",
-            marginBottom: "0.5rem",
-            color: "#64748b",
-            fontWeight: "500",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem"
-          }}>
-            <span style={{ fontSize: "1.6rem" }}>🏪</span>
-            {storeInfo?.name || 'My Store'}
-          </h3>
           <p style={{
             marginBottom: "0",
             fontSize: "0.95rem",

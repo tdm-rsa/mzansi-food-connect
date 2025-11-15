@@ -72,19 +72,6 @@ export default function ProDashboardView({
             )}
             {user?.email?.split('@')[0] || 'Owner'}
           </h2>
-          <h3 style={{
-            fontSize: "1.6rem",
-            marginTop: "0",
-            marginBottom: "0.5rem",
-            color: "rgba(255,255,255,0.95)",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem"
-          }}>
-            <span style={{ fontSize: "1.8rem" }}>🏪</span>
-            {storeInfo?.name || 'My Store'}
-          </h3>
           <p style={{
             marginBottom: "0",
             fontSize: "1rem",
