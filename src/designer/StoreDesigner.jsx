@@ -78,7 +78,7 @@ export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null
     try {
       // Update database
       const { error, data } = await supabase
-        .from("stores")
+        .from("tenants")
         .update(updates)
         .eq("id", store.id)
         .select()

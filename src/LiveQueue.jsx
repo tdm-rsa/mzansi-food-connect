@@ -28,7 +28,7 @@ export default function LiveQueue() {
 
         // Fetch store
         const { data: storeData, error: storeError } = await supabase
-          .from("stores")
+          .from("tenants")
           .select("*")
           .eq("slug", slug)
           .single();

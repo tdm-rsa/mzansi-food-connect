@@ -25,7 +25,7 @@ function StorefrontRouter() {
   useEffect(() => {
     async function fetchStoreData() {
       // get first store
-      const { data: store } = await supabase.from("stores").select("*").limit(1).single();
+      const { data: store } = await supabase.from("tenants").select("*").limit(1).single();
       if (!store) return;
 
       // load menu

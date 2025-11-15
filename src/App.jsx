@@ -158,7 +158,7 @@ export default function App({ user }) {
 
         // First check if there are multiple stores for this user
         const { data: allStores } = await supabase
-          .from("stores")
+          .from("tenants")
           .select("*")
           .eq("owner_id", user.id);
 
@@ -170,7 +170,7 @@ export default function App({ user }) {
 
         // 1) Store for this owner - GET MOST RECENT ONE
         const { data: store, error: e1 } = await supabase
-          .from("stores")
+          .from("tenants")
           .select("*")
           .eq("owner_id", user.id)
           .order("created_at", { ascending: false })
@@ -262,7 +262,7 @@ export default function App({ user }) {
 
           while (true) {
             const { data: existing } = await supabase
-              .from("stores")
+              .from("tenants")
               .select("slug")
               .eq("slug", finalSlug)
               .single();
@@ -302,7 +302,7 @@ export default function App({ user }) {
 
           // create store with signup data
           const { data: created, error: e2 } = await supabase
-            .from("stores")
+            .from("tenants")
             .insert([storeInsertData])
             .select()
             .single();
@@ -368,7 +368,7 @@ export default function App({ user }) {
             const uniqueSlug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
 
             const { error: slugError } = await supabase
-              .from("stores")
+              .from("tenants")
               .update({ slug: uniqueSlug })
               .eq("id", s.id);
 
@@ -912,7 +912,7 @@ export default function App({ user }) {
   const activateTemplate = async (name) => {
     setActiveTemplate(name);
     if (storeInfo?.id) {
-      await supabase.from("stores").update({ active_template: name }).eq("id", storeInfo.id);
+      await supabase.from("tenants").update({ active_template: name }).eq("id", storeInfo.id);
     }
     showToast(`✅ "${name}" template activated!`);
   };
@@ -930,7 +930,7 @@ export default function App({ user }) {
 
     try {
       const { error } = await supabase
-        .from("stores")
+        .from("tenants")
         .update({
           yoco_public_key: yocoPublicKey.trim(),
           yoco_secret_key: yocoSecretKey.trim(),
@@ -1810,7 +1810,7 @@ export default function App({ user }) {
                     try {
                       console.log('Updating owner_name to:', newName, 'for store:', storeInfo.id);
                       const { data, error } = await supabase
-                        .from("stores")
+                        .from("tenants")
                         .update({ owner_name: newName })
                         .eq("id", storeInfo.id)
                         .select();
@@ -1884,7 +1884,7 @@ export default function App({ user }) {
 
                       while (true) {
                         const { data: existing } = await supabase
-                          .from("stores")
+                          .from("tenants")
                           .select("slug, id")
                           .eq("slug", finalSlug)
                           .single();
@@ -1902,7 +1902,7 @@ export default function App({ user }) {
                       console.log('New slug will be:', finalSlug);
 
                       const { data, error } = await supabase
-                        .from("stores")
+                        .from("tenants")
                         .update({
                           name: newName,
                           slug: finalSlug

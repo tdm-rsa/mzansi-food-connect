@@ -119,7 +119,7 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
 
       // Update the store plan in database
       const { data, error: updateError } = await supabase
-        .from("stores")
+        .from("tenants")
         .update({
           plan: targetPlan,
           plan_started_at: new Date().toISOString(),

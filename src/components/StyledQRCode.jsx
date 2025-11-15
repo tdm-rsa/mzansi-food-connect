@@ -23,7 +23,7 @@ export default function StyledQRCode({ storeName }) {
   // ✅ Load saved QR design from Supabase
   useEffect(() => {
     async function loadSettings() {
-      const { data, error } = await supabase.from("stores").select("*").limit(1).single();
+      const { data, error } = await supabase.from("tenants").select("*").limit(1).single();
       if (error) console.error("Error loading store:", error.message);
 
       if (data) {
@@ -139,7 +139,7 @@ export default function StyledQRCode({ storeName }) {
   const saveDesign = async () => {
     if (!storeId) return;
     const { error } = await supabase
-      .from("stores")
+      .from("tenants")
       .update({
         qr_color: color,
         qr_bg: bgColor,

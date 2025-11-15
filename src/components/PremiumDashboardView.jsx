@@ -18,7 +18,7 @@ export default function PremiumDashboardView({
     const newState = !isOpen;
     try {
       const { error } = await supabase
-        .from("stores")
+        .from("tenants")
         .update({ is_open: newState })
         .eq("id", storeInfo.id);
 

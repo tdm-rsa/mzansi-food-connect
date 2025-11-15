@@ -41,7 +41,7 @@ export default function CustomerStore() {
         // 1. Fetch store by slug
         console.log("🔍 Looking for store with slug:", slug);
         const { data: store, error: storeError } = await supabase
-          .from("stores")
+          .from("tenants")
           .select("*")
           .eq("slug", slug)
           .single();

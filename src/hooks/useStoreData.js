@@ -29,7 +29,7 @@ export function useStoreData(ownerId = null) {
       }
 
       const { data, error} = await supabase
-        .from("stores")
+        .from("tenants")
         .select("*")
         .eq("owner_id", effectiveOwnerId)
         .limit(1);
@@ -65,7 +65,7 @@ export function useStoreData(ownerId = null) {
       setStore(optimisticStore);
       
       const { data, error } = await supabase
-        .from("stores")
+        .from("tenants")
         .update(updates)
         .eq("id", store.id)
         .select()

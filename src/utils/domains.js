@@ -229,7 +229,7 @@ export async function claimDomain(domainName, customerInfo, supabase) {
 
     // Step 4: Save to database
     const { error: dbError } = await supabase
-      .from("stores")
+      .from("tenants")
       .update({
         custom_domain: domainName,
         domain_status: registration.status,

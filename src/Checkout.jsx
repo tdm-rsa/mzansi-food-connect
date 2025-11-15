@@ -70,7 +70,7 @@ export default function Checkout() {
   useEffect(() => {
     async function loadStore() {
       const { data, error } = await supabase
-        .from("stores")
+        .from("tenants")
         .select("*")
         .eq("slug", slug)
         .single();

@@ -171,7 +171,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     while (true) {
       const { data: existing } = await supabase
-        .from("stores")
+        .from("tenants")
         .select("slug")
         .eq("slug", finalSlug)
         .single();
@@ -197,7 +197,7 @@ export default function Signup({ onBack, onSuccess }) {
       payment_reference: paymentRef
     });
 
-    const { data: storeData, error: storeError } = await supabase.from("stores").insert([{
+    const { data: storeData, error: storeError } = await supabase.from("tenants").insert([{
       owner_id: userId,
       name: storeName,
       slug: finalSlug,
