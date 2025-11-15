@@ -233,6 +233,10 @@ export default function CustomerStore() {
 
     console.log("🎨 Rendering template:", storeData.active_template);
     console.log("🍔 Menu items to render:", menuItems?.length || 0);
+    console.log("🔑 Yoco keys being passed to template:", {
+      public: storeData.yoco_public_key ? storeData.yoco_public_key.substring(0, 20) + '...' : 'MISSING',
+      secret: storeData.yoco_secret_key ? storeData.yoco_secret_key.substring(0, 20) + '...' : 'MISSING'
+    });
 
     const commonProps = { state, storeId: storeData.id, cart };
 
