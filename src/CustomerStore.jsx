@@ -226,8 +226,8 @@ export default function CustomerStore() {
       show_instructions: storeData.show_instructions === true,
       instructions: storeData.instructions || "",
       accept_card_payments: storeData.accept_card_payments !== false,
-      paystack_public_key: storeData.paystack_public_key || "",
-      paystack_secret_key: storeData.paystack_secret_key || "",
+      yoco_public_key: storeData.yoco_public_key || "",
+      yoco_secret_key: storeData.yoco_secret_key || "",
       slug: slug,
     };
 

@@ -7,7 +7,7 @@ import "./FastMobileTemplate.css";
 
 export default function FastMobileTemplate(props) {
   const { state, storeId, cart: extCart } = props;
-  const { header, banner, menuItems, about, paystack_public_key, paystack_secret_key } = state;
+  const { header, banner, menuItems, about, yoco_public_key, yoco_secret_key } = state;
 
   // DEBUG: Log what data the template receives
   useEffect(() => {
@@ -123,8 +123,41 @@ export default function FastMobileTemplate(props) {
     }
   };
 
-  // ✅ Paystack Payment Handler
-  const handlePaymentSuccess = async (reference) => {
+  // Yoco configuration - Use store key from database, fallback to env variable
+  const yocoPublicKey = yoco_public_key || import.meta.env.VITE_YOCO_PUBLIC_KEY;
+  const totalInCents = Math.round(total * 100); // Yoco uses cents
+
+  // Load Yoco SDK
+  useEffect(() => {
+    if (!document.getElementById('yoco-sdk')) {
+      const script = document.createElement('script');
+      script.id = 'yoco-sdk';
+      script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  // Debug: Log Yoco setup
+  useEffect(() => {
+    if (!yocoPublicKey) {
+      console.error('❌ YOCO PUBLIC KEY MISSING! Vendor needs to add Yoco keys in Settings');
+    } else {
+      console.log('✅ Yoco public key loaded:', yocoPublicKey.substring(0, 20) + '...');
+      console.log('   Source:', yoco_public_key ? 'Database (store settings)' : 'Environment variable');
+    }
+
+    const secretKey = yoco_secret_key || import.meta.env.VITE_YOCO_SECRET_KEY;
+    if (!secretKey) {
+      console.warn('⚠️ Yoco secret key not configured (needed for payment verification)');
+    } else {
+      console.log('✅ Yoco secret key loaded:', secretKey.substring(0, 20) + '...');
+      console.log('   Source:', yoco_secret_key ? 'Database (store settings)' : 'Environment variable');
+    }
+  }, [yocoPublicKey, yoco_public_key, yoco_secret_key]);
+
+  // ✅ Create Order after Payment Success
+  const createOrder = async (paymentId) => {
     try {
       setProcessing(true);
 
@@ -144,13 +177,13 @@ export default function FastMobileTemplate(props) {
           items: orderItems,
           total,
           payment_status: "paid",
-          payment_reference: reference.reference,
+          payment_reference: paymentId,
           order_number: orderNumber,
         },
       ]);
 
       if (error) throw error;
-      alert(`✅ Payment successful! Order placed.\n\nOrder #${orderNumber}\nPayment Ref: ${reference.reference}\n\nThank you! 🎉`);
+      alert(`✅ Payment successful! Order placed.\n\nOrder #${orderNumber}\nPayment Ref: ${paymentId}\n\nThank you! 🎉`);
       clearCart();
       setCustomerName("");
       setCustomerPhone("");
@@ -163,36 +196,53 @@ export default function FastMobileTemplate(props) {
     }
   };
 
-  const handlePaymentClose = () => {
-    alert("❌ Payment cancelled");
-  };
-
-  // Paystack configuration
-  const paystackPublicKey = paystack_public_key || import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-
-  // Debug: Log Paystack setup
-  useEffect(() => {
-    if (!paystackPublicKey) {
-      console.error('❌ PAYSTACK KEY MISSING! Add VITE_PAYSTACK_PUBLIC_KEY to .env.local');
-    } else {
-      console.log('✅ Paystack key loaded:', paystackPublicKey.substring(0, 20) + '...');
-      console.log('   Source:', paystack_public_key ? 'Database (store settings)' : 'Environment variable');
+  // ✅ Handle Yoco Payment
+  const handleYocoPayment = async () => {
+    if (!yocoPublicKey) {
+      alert('⚠️ Payment is not configured. Please contact the store.');
+      return;
     }
 
-    const secretKey = paystack_secret_key || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
-    if (!secretKey) {
-      console.warn('⚠️ Paystack secret key not configured (needed for payment verification)');
-    } else {
-      console.log('✅ Paystack secret key loaded:', secretKey.substring(0, 20) + '...');
-      console.log('   Source:', paystack_secret_key ? 'Database (store settings)' : 'Environment variable');
+    if (!window.YocoSDK) {
+      alert('⚠️ Payment system is loading. Please try again in a moment.');
+      return;
     }
-  }, [paystackPublicKey, paystack_public_key, paystack_secret_key]);
 
-  const paystackConfig = {
-    reference: `ORD-${new Date().getTime()}`,
-    email: customerPhone ? `${customerPhone.replace(/\D/g, '')}@customer.mzansifoodconnect.app` : 'customer@mzansifoodconnect.app',
-    amount: Math.round(total * 100), // Amount in cents
-    publicKey: paystackPublicKey,
+    setProcessing(true);
+
+    try {
+      const sdk = new window.YocoSDK({
+        publicKey: yocoPublicKey,
+      });
+
+      sdk.showPopup({
+        amountInCents: totalInCents,
+        currency: 'ZAR',
+        name: header.storeName || 'Mzansi Food Connect',
+        description: `Order from ${header.storeName}`,
+        metadata: {
+          customerName: customerName,
+          customerPhone: customerPhone,
+          storeId: storeId,
+        },
+        callback: async function (result) {
+          if (result.error) {
+            console.error('Yoco payment error:', result.error);
+            alert('❌ Payment failed: ' + result.error.message);
+            setProcessing(false);
+            return;
+          }
+
+          // Payment successful
+          console.log('💳 Yoco payment successful:', result);
+          await createOrder(result.id);
+        },
+      });
+    } catch (err) {
+      console.error('Yoco SDK error:', err);
+      alert('⚠️ Payment initialization failed. Please try again.');
+      setProcessing(false);
+    }
   };
 
   // ✅ Ask modal controls
@@ -502,13 +552,10 @@ export default function FastMobileTemplate(props) {
                   onChange={(e) => setCustomerPhone(e.target.value)}
                 />
 
-                {/* Paystack Payment Button */}
-                {!processing && total > 0 && customerName && customerPhone && paystackPublicKey ? (
-                  <PaystackButton
-                    {...paystackConfig}
-                    text={`💳 Pay R${total.toFixed(2)}`}
-                    onSuccess={handlePaymentSuccess}
-                    onClose={handlePaymentClose}
+                {/* Yoco Payment Button */}
+                {!processing && total > 0 && customerName && customerPhone && yocoPublicKey ? (
+                  <button
+                    onClick={handleYocoPayment}
                     className="checkout-btn"
                     style={{
                       background: "linear-gradient(135deg, #667eea, #764ba2)",
@@ -521,7 +568,9 @@ export default function FastMobileTemplate(props) {
                       cursor: "pointer",
                       width: "100%"
                     }}
-                  />
+                  >
+                    💳 Pay R{total.toFixed(2)}
+                  </button>
                 ) : (
                   <button
                     className="checkout-btn"
@@ -535,7 +584,7 @@ export default function FastMobileTemplate(props) {
                       total === 0 ? "Cart is empty" :
                       !customerName ? "Enter your name" :
                       !customerPhone ? "Enter your phone number" :
-                      !paystackPublicKey ? "Payment not configured" :
+                      !yocoPublicKey ? "Payment not configured" :
                       "Fill all fields"
                     }
                   >
@@ -543,7 +592,7 @@ export default function FastMobileTemplate(props) {
                      total === 0 ? "💳 Add items to cart" :
                      !customerName ? "💳 Enter your name" :
                      !customerPhone ? "💳 Enter your phone" :
-                     !paystackPublicKey ? "💳 Payment not available" :
+                     !yocoPublicKey ? "💳 Payment not available" :
                      "💳 Pay with Card"}
                   </button>
                 )}
