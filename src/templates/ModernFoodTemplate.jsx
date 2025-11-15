@@ -550,6 +550,15 @@ export default function ModernFoodTemplate(props) {
                 />
 
                 {/* Yoco Payment Button */}
+                {/* Debug checkout button conditions */}
+                {console.log('🔍 Checkout button conditions:', {
+                  processing,
+                  total,
+                  customerName,
+                  customerPhone,
+                  yocoPublicKey: yocoPublicKey ? 'present' : 'missing',
+                  shouldShow: !processing && total > 0 && customerName && customerPhone && yocoPublicKey
+                })}
                 {!processing && total > 0 && customerName && customerPhone && yocoPublicKey ? (
                   <button
                     onClick={handleYocoPayment}
