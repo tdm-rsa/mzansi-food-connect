@@ -14,7 +14,18 @@ export default function CartSidebar({ cart, store }) {
   const handleCheckout = () => {
     if (items.length === 0) return;
     // Navigate to checkout page
-    navigate(`/store/${store.slug}/checkout`);
+    // Check if we're on a subdomain or path-based store
+    const isSubdomain = window.location.hostname !== 'localhost' &&
+                       window.location.hostname !== 'mzansifoodconnect.com' &&
+                       !window.location.hostname.includes('vercel.app');
+
+    if (isSubdomain) {
+      // Subdomain: just /checkout
+      navigate('/checkout');
+    } else {
+      // Path-based: /store/slug/checkout
+      navigate(`/store/${store.slug}/checkout`);
+    }
   };
 
   const totalItems = getTotalItems();
