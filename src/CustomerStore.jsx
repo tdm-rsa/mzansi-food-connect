@@ -237,6 +237,12 @@ export default function CustomerStore() {
       public: storeData.yoco_public_key ? storeData.yoco_public_key.substring(0, 20) + '...' : 'MISSING',
       secret: storeData.yoco_secret_key ? storeData.yoco_secret_key.substring(0, 20) + '...' : 'MISSING'
     });
+    console.log("🔗 Social links debug:", {
+      socialsFromDB: storeData.socials,
+      socialsInState: state.about.socials,
+      showAbout: state.show_about,
+      hasNonEmptySocials: state.about.socials && Object.keys(state.about.socials).filter(k => state.about.socials[k]).length > 0
+    });
 
     const commonProps = { state, storeId: storeData.id, cart };
 

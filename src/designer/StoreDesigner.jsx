@@ -620,11 +620,18 @@ export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null
                               className="input-field"
                               placeholder={`${label} URL or phone number`}
                               defaultValue={store.socials?.[key] || ""}
-                              onBlur={(e) =>
-                                saveChanges({
-                                  socials: { ...store.socials, [key]: e.target.value },
-                                })
-                              }
+                              onBlur={(e) => {
+                                const value = e.target.value.trim();
+                                const currentSocials = store.socials || {};
+                                // Only include non-empty values
+                                const updatedSocials = { ...currentSocials };
+                                if (value) {
+                                  updatedSocials[key] = value;
+                                } else {
+                                  delete updatedSocials[key]; // Remove empty keys
+                                }
+                                saveChanges({ socials: updatedSocials });
+                              }}
                             />
                           </div>
                         ))}
