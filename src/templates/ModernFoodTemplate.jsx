@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import LiveQueueButton from "../components/LiveQueueButton.jsx";
 import PhoneInput from "../components/PhoneInput.jsx";
+import GeneralAskModal from "../components/GeneralAskModal.jsx";
 import { generateOrderNumber } from "../utils/orderNumber";
 import "./ModernFoodTemplate.css"; // ✅ NEW: use the Jersey-like CSS
 
@@ -65,6 +66,7 @@ export default function ModernFoodTemplate(props) {
   // 🔥 NEW: Banner modals state
   const [showAnnouncementsModal, setShowAnnouncementsModal] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [showGeneralAskModal, setShowGeneralAskModal] = useState(false);
 
 
   // Add, remove, qty helpers
@@ -362,6 +364,14 @@ export default function ModernFoodTemplate(props) {
               ℹ️ Instructions
             </button>
           )}
+
+          <button
+            className="queue-btn"
+            onClick={() => setShowGeneralAskModal(true)}
+            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
+          >
+            💬 Ask a Question
+          </button>
         </div>
       </section>
 
@@ -721,6 +731,14 @@ export default function ModernFoodTemplate(props) {
           </div>
         </div>
       )}
+
+      {/* ===== General Ask Modal ===== */}
+      <GeneralAskModal
+        isOpen={showGeneralAskModal}
+        onClose={() => setShowGeneralAskModal(false)}
+        storeId={storeId}
+        storeName={header.storeName}
+      />
 
       {/* Live Queue Button */}
       <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName }} />

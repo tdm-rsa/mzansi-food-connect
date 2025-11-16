@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import PhoneInput from "../components/PhoneInput.jsx";
 import LiveQueueButton from "../components/LiveQueueButton.jsx";
+import GeneralAskModal from "../components/GeneralAskModal.jsx";
 import { generateOrderNumber } from "../utils/orderNumber";
 import "./FastMobileTemplate.css";
 
@@ -70,6 +71,7 @@ export default function FastMobileTemplate(props) {
   // 🔥 NEW: Banner modals state
   const [showAnnouncementsModal, setShowAnnouncementsModal] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [showGeneralAskModal, setShowGeneralAskModal] = useState(false);
 
   // ✅ Add to cart
   const addToCart = (item) => {
@@ -329,6 +331,14 @@ export default function FastMobileTemplate(props) {
               ℹ️ Instructions
             </button>
           )}
+
+          <button
+            className="queue-btn"
+            onClick={() => setShowGeneralAskModal(true)}
+            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
+          >
+            💬 Ask a Question
+          </button>
         </div>
       </section>
 
@@ -714,6 +724,14 @@ export default function FastMobileTemplate(props) {
           </div>
         </div>
       )}
+
+      {/* ===== General Ask Modal ===== */}
+      <GeneralAskModal
+        isOpen={showGeneralAskModal}
+        onClose={() => setShowGeneralAskModal(false)}
+        storeId={storeId}
+        storeName={header.storeName}
+      />
 
       {/* Live Queue Button */}
       <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName }} />
