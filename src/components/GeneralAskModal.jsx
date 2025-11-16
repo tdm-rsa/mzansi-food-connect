@@ -87,7 +87,7 @@ export default function GeneralAskModal({ isOpen, onClose, storeId, storeName })
               <label htmlFor="ask-phone">WhatsApp Number *</label>
               <PhoneInput
                 value={phone}
-                onChange={setPhone}
+                onChange={(e) => setPhone(e.target.value)}
                 disabled={sending}
               />
               <small>We'll send the vendor's response via WhatsApp</small>
