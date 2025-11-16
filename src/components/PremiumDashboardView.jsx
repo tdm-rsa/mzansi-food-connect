@@ -121,6 +121,59 @@ export default function PremiumDashboardView({
         </div>
       </div>
 
+      {/* Yoco Warning Banner */}
+      {(!storeInfo?.yoco_public_key || !storeInfo?.yoco_secret_key) && (
+        <div style={{
+          background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+          border: "2px solid #d97706",
+          borderRadius: "16px",
+          padding: "1.75rem",
+          marginBottom: "1.5rem",
+          boxShadow: "0 12px 32px rgba(245, 158, 11, 0.3), 0 0 0 1px rgba(255,215,0,0.2)"
+        }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem" }}>
+            <div style={{ fontSize: "3rem", flexShrink: 0 }}>⚠️</div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: "0 0 0.5rem 0", color: "#78350f", fontWeight: "800", fontSize: "1.35rem" }}>
+                Yoco Payment Keys Required
+              </h3>
+              <p style={{ margin: "0 0 1rem 0", color: "#92400e", fontSize: "1rem", lineHeight: "1.6" }}>
+                To accept card payments, you need to add your Yoco API keys in Settings. Without these keys, customers can only see your menu but cannot complete purchases.
+              </p>
+              <button
+                onClick={() => setCurrentView("settings")}
+                style={{
+                  background: "white",
+                  color: "#d97706",
+                  border: "2px solid #d97706",
+                  borderRadius: "12px",
+                  padding: "0.85rem 1.75rem",
+                  fontWeight: "800",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#d97706";
+                  e.currentTarget.style.color = "white";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.2)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "white";
+                  e.currentTarget.style.color = "#d97706";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+                }}
+              >
+                Go to Settings →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="admin-menu-section" style={{ marginTop: "1rem" }}>
         <h3 style={{
           fontSize: "1.5rem",

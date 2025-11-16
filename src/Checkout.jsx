@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 import { useCart } from "./hooks/useCart";
+import { useToast } from "./hooks/useToast";
 import { getSubdomain } from "./utils/subdomain";
+import Toast from "./components/Toast";
 import "./Checkout.css";
 
 export default function Checkout() {
@@ -13,6 +15,7 @@ export default function Checkout() {
 
   const navigate = useNavigate();
   const cart = useCart(slug);
+  const toast = useToast();
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -109,12 +112,12 @@ export default function Checkout() {
   ------------------------------------------------------- */
   const handleYocoPayment = async () => {
     if (!yocoPublicKey) {
-      alert('⚠️ Payment is not configured. Please contact the store.');
+      toast.error('Payment is not configured. Please contact the store.');
       return;
     }
 
     if (!window.YocoSDK) {
-      alert('⚠️ Payment system is loading. Please try again in a moment.');
+      toast.warning('Payment system is loading. Please try again in a moment.');
       return;
     }
 
@@ -140,7 +143,7 @@ export default function Checkout() {
         callback: async function (result) {
           if (result.error) {
             console.error('Yoco payment error:', result.error);
-            alert('❌ Payment failed: ' + result.error.message);
+            toast.error(`Payment failed: ${result.error.message}\nPlease try again or contact the store.`);
             setProcessingPayment(false);
             return;
           }
@@ -152,7 +155,7 @@ export default function Checkout() {
       });
     } catch (err) {
       console.error('Yoco SDK error:', err);
-      alert('⚠️ Payment initialization failed. Please try again.');
+      toast.error('Payment initialization failed. Please try again.');
       setProcessingPayment(false);
     }
   };
@@ -205,13 +208,21 @@ export default function Checkout() {
       clearCart();
 
       // Show success message with order number
-      alert(`✅ Payment Successful!\n\nOrder Number: ${orderNumber}\nTotal: R${total.toFixed(2)}\n\nYou'll receive a WhatsApp notification when your order is ready!`);
+      toast.success(
+        `Payment Successful!\n\nOrder Number: ${orderNumber}\nTotal: R${total.toFixed(2)}\n\nYou'll receive a WhatsApp notification when your order is ready!`,
+        6000
+      );
 
-      // Redirect to store
-      navigate(`/store/${slug}`);
+      // Redirect to store after delay
+      setTimeout(() => {
+        navigate(`/store/${slug}`);
+      }, 2000);
     } catch (err) {
       console.error("Order creation error:", err);
-      alert(`⚠️ Payment was successful but order creation failed.\n\nPlease contact ${store?.name} with your payment ID:\n${paymentId}`);
+      toast.error(
+        `Payment was successful but order creation failed.\n\nPlease contact ${store?.name} with your payment ID:\n${paymentId}`,
+        8000
+      );
       setError("Failed to create order. Please contact the store with your payment reference.");
     } finally {
       setLoading(false);
@@ -244,16 +255,17 @@ export default function Checkout() {
   }
 
   return (
-    <div className="checkout-page">
-      <div className="checkout-container">
-        {/* Header */}
-        <div className="checkout-header">
-          <button onClick={() => navigate(`/store/${slug}`)} className="checkout-back-btn">
-            ← Back
-          </button>
-          <h1>Checkout</h1>
-          <p>{store?.name}</p>
-        </div>
+    <>
+      <div className="checkout-page">
+        <div className="checkout-container">
+          {/* Header */}
+          <div className="checkout-header">
+            <button onClick={() => navigate(`/store/${slug}`)} className="checkout-back-btn">
+              ← Back
+            </button>
+            <h1>Checkout</h1>
+            <p>{store?.name}</p>
+          </div>
 
         {/* Error Message */}
         {error && (
@@ -340,5 +352,11 @@ export default function Checkout() {
         </div>
       </div>
     </div>
+
+      {/* Toast Notifications */}
+      {toast.toasts.map(t => (
+        <Toast key={t.id} message={t.message} type={t.type} onClose={() => toast.removeToast(t.id)} duration={t.duration} />
+      ))}
+    </>
   );
 }

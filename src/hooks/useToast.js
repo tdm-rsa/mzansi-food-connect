@@ -1,0 +1,32 @@
+// src/hooks/useToast.js
+import { useState } from 'react';
+
+export function useToast() {
+  const [toasts, setToasts] = useState([]);
+
+  const showToast = (message, type = 'success', duration = 4000) => {
+    const id = Date.now();
+    const newToast = { id, message, type, duration };
+
+    setToasts(prev => [...prev, newToast]);
+
+    // Auto-remove after duration
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, duration);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  return {
+    toasts,
+    showToast,
+    removeToast,
+    success: (message, duration) => showToast(message, 'success', duration),
+    error: (message, duration) => showToast(message, 'error', duration),
+    warning: (message, duration) => showToast(message, 'warning', duration),
+    info: (message, duration) => showToast(message, 'info', duration),
+  };
+}

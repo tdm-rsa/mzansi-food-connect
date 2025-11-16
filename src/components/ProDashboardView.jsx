@@ -105,6 +105,55 @@ export default function ProDashboardView({
         </div>
       </div>
 
+      {/* Yoco Warning Banner */}
+      {(!storeInfo?.yoco_public_key || !storeInfo?.yoco_secret_key) && (
+        <div style={{
+          background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+          border: "2px solid #d97706",
+          borderRadius: "14px",
+          padding: "1.5rem",
+          marginBottom: "1.5rem",
+          boxShadow: "0 8px 24px rgba(245, 158, 11, 0.25)"
+        }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+            <div style={{ fontSize: "2.5rem", flexShrink: 0 }}>⚠️</div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: "0 0 0.5rem 0", color: "#78350f", fontWeight: "700", fontSize: "1.25rem" }}>
+                Yoco Payment Keys Required
+              </h3>
+              <p style={{ margin: "0 0 1rem 0", color: "#92400e", fontSize: "0.95rem", lineHeight: "1.6" }}>
+                To accept card payments, you need to add your Yoco API keys in Settings. Without these keys, customers can only see your menu but cannot complete purchases.
+              </p>
+              <button
+                onClick={() => setCurrentView("settings")}
+                style={{
+                  background: "white",
+                  color: "#d97706",
+                  border: "2px solid #d97706",
+                  borderRadius: "10px",
+                  padding: "0.75rem 1.5rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  fontSize: "0.95rem",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#d97706";
+                  e.currentTarget.style.color = "white";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "white";
+                  e.currentTarget.style.color = "#d97706";
+                }}
+              >
+                Go to Settings →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="admin-menu-section" style={{ marginTop: "1rem" }}>
         <h3 style={{
           fontSize: "1.4rem",

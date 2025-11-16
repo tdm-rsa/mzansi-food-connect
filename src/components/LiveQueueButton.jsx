@@ -135,7 +135,7 @@ export default function LiveQueueButton({ storeInfo }) {
                     textAlign: "center"
                   }}>
                     <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#6b7280" }}>
-                      ⏱️ Your order is being prepared
+                      ⏱️ Orders are being prepared
                     </p>
                     <p style={{ margin: 0, fontSize: "0.85rem", color: "#9ca3af" }}>
                       You'll receive a WhatsApp message when ready
