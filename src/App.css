@@ -2815,6 +2815,169 @@ body.dark .plan-price {
 }
 
 /* ========================================
+   LARGE DESKTOP & MONITOR RESPONSIVE
+   ======================================== */
+
+/* Ultra-wide monitors (1920px and above) */
+@media (min-width: 1920px) {
+  .app {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 2rem 4rem;
+  }
+
+  .header {
+    max-width: 1800px;
+    margin: 0 auto 2rem;
+    padding: 1.5rem 2rem;
+  }
+
+  .dashboard,
+  .template-view,
+  .orders-container,
+  .menu-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .dashboard-header {
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .settings-section {
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Better spacing for large screens */
+  .stats-grid {
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .orders-grid,
+  .menu-grid {
+    gap: 2rem;
+  }
+
+  /* Make cards breathe more */
+  .order-card,
+  .menu-item-card,
+  .plan-card {
+    padding: 2rem;
+  }
+
+  /* Tables with better spacing */
+  .orders-table th,
+  .orders-table td {
+    padding: 1rem 1.5rem;
+  }
+
+  /* Form layouts */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* 4K monitors (2560px and above) */
+@media (min-width: 2560px) {
+  .app {
+    max-width: 2200px;
+    padding: 3rem 6rem;
+  }
+
+  .header {
+    max-width: 2200px;
+    padding: 2rem 3rem;
+    margin-bottom: 3rem;
+  }
+
+  .dashboard,
+  .template-view,
+  .orders-container,
+  .menu-container {
+    max-width: 2200px;
+    padding: 3rem;
+  }
+
+  .dashboard-header {
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .settings-section {
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Larger fonts for readability */
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  /* Larger buttons */
+  .btn-primary,
+  .btn-secondary {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+
+  /* More breathing room */
+  .stats-grid {
+    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .order-card,
+  .menu-item-card {
+    padding: 2.5rem;
+  }
+}
+
+/* Standard Desktop (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+  }
+
+  .header {
+    max-width: 1400px;
+    margin: 0 auto 1.5rem;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .dashboard,
+  .template-view {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  .stats-grid {
+    gap: 1.5rem;
+  }
+}
+
+/* ========================================
    LAPTOP RESPONSIVE (1024px - 1440px)
    ======================================== */
 @media (max-width: 1440px) {
