@@ -24,7 +24,7 @@ export const PLAN_FEATURES = {
     hasCustomDomain: false,
     hasSubdomain: true,
     removeBranding: true,
-    templates: ['Modern Food', 'Traditional SA', 'Fast & Mobile'], // 3 templates
+    templates: ['Modern Food', 'Traditional SA'], // 2 templates - Fast & Mobile locked for Premium only
     support: 'priority'
   },
   premium: {

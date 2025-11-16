@@ -1252,8 +1252,8 @@ export default function App({ user }) {
             }}>
               <p style={{ margin: 0, color: "#667eea", fontWeight: "600" }}>
                 {storeInfo?.plan === 'trial' && '📦 Free Trial: 1 Template Available'}
-                {storeInfo?.plan === 'pro' && '🚀 Pro Plan: 3 Templates Available'}
-                {storeInfo?.plan === 'premium' && '👑 Premium Plan: All Templates Available'}
+                {storeInfo?.plan === 'pro' && '🚀 Pro Plan: 2 Templates Available'}
+                {storeInfo?.plan === 'premium' && '👑 Premium Plan: All 3 Templates Available'}
               </p>
             </div>
 
@@ -1791,20 +1791,20 @@ export default function App({ user }) {
                         {q.status || "pending"}
                       </span>
                     </div>
-                    <p style={{ margin: ".25rem 0", fontSize: "0.85rem", opacity: 0.7 }}>
+                    <p style={{ margin: ".25rem 0", fontSize: "0.85rem", color: "#4b5563" }}>
                       <strong>📅</strong> {new Date(q.created_at).toLocaleString("en-ZA", {
                         dateStyle: "medium",
                         timeStyle: "short"
                       })}
                     </p>
-                    <p style={{ margin: ".25rem 0" }}>
+                    <p style={{ margin: ".25rem 0", color: "#1f2937" }}>
                       <strong>Phone:</strong> {q.customer_phone}
                     </p>
-                    <p style={{ margin: ".25rem 0", background: "#faf5ff", padding: "0.75rem", borderRadius: "8px", borderLeft: "4px solid #9333ea" }}>
+                    <p style={{ margin: ".25rem 0", background: "#faf5ff", padding: "0.75rem", borderRadius: "8px", borderLeft: "4px solid #9333ea", color: "#1f2937" }}>
                       <strong>Question:</strong> {q.question}
                     </p>
                     {q.vendor_response && (
-                      <p style={{ marginTop: ".25rem", opacity: 0.85, background: "#f0fdf4", padding: "0.75rem", borderRadius: "8px", borderLeft: "4px solid #10b981" }}>
+                      <p style={{ marginTop: ".25rem", background: "#f0fdf4", padding: "0.75rem", borderRadius: "8px", borderLeft: "4px solid #10b981", color: "#1f2937" }}>
                         <strong>Your response:</strong> {q.vendor_response}
                       </p>
                     )}
