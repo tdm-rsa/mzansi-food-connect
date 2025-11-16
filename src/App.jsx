@@ -76,6 +76,7 @@ export default function App({ user }) {
   const [liveQueue, setLiveQueue] = useState([]);
   const [analytics, setAnalytics] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [generalQuestions, setGeneralQuestions] = useState([]);
 
   // UI state
   const [activeTemplate, setActiveTemplate] = useState("Modern Food");
@@ -436,6 +437,15 @@ export default function App({ user }) {
           .order("created_at", { ascending: false });
         if (!mounted) return;
         setNotifications(notifs || []);
+
+        // 6) General Questions
+        const { data: genQuestions } = await supabase
+          .from("general_questions")
+          .select("*")
+          .eq("store_id", s.id)
+          .order("created_at", { ascending: false});
+        if (!mounted) return;
+        setGeneralQuestions(genQuestions || []);
       } catch (err) {
         console.error("Load failed:", err.message);
         showToast("⚠️ Failed to load data", "#f44336");
@@ -557,6 +567,55 @@ export default function App({ user }) {
           showToast(
             `📩 New customer message from ${n.customer_name || "customer"}`,
             "#2196F3"
+          );
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(ch);
+  }, [storeInfo, audioReadyUrl]);
+
+  /* -------------------------------------------------------
+     Realtime: general_questions INSERT
+     - INSERT: increment newMsgs badge, play sound and toast
+  ------------------------------------------------------- */
+  useEffect(() => {
+    const ch = supabase
+      .channel("general-questions-live")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "general_questions" },
+        (payload) => {
+          const q = payload.new;
+          console.log('💬 NEW GENERAL QUESTION RECEIVED:', q);
+          if (storeInfo && q.store_id !== storeInfo.id) {
+            console.log('❌ Question not for this store');
+            return;
+          }
+          setGeneralQuestions((prev) => [q, ...prev]);
+          setNewMsgs((m) => {
+            console.log(`📊 Messages badge count: ${m} → ${m + 1}`);
+            return m + 1;
+          });
+
+          // Play notification sound
+          console.log('🔊 Playing general question notification sound...');
+          try {
+            const a = new Audio(audioReadyUrl);
+            a.volume = 0.7;
+            a.play()
+              .then(() => console.log('✅ Question sound played successfully'))
+              .catch((error) => {
+                console.warn('⚠️ Question sound blocked by browser:', error);
+                console.log('💡 Click anywhere on the page to enable sound');
+              });
+          } catch (err) {
+            console.error('❌ Question sound error:', err);
+          }
+
+          showToast(
+            `💬 New general question from ${q.customer_name || "customer"}`,
+            "#9333ea"
           );
         }
       )
@@ -905,6 +964,81 @@ export default function App({ user }) {
       showToast("✅ Notification dismissed", "#10b981");
     } catch (err) {
       console.error("Dismiss failed:", err.message);
+      showToast("⚠️ Could not dismiss: " + err.message, "#f44336");
+    }
+  };
+
+  // General Questions Handlers
+  const handleGeneralQuestionResponse = async (question, replyText) => {
+    try {
+      // Update general_questions in database
+      const { error } = await supabase
+        .from("general_questions")
+        .update({
+          vendor_response: replyText,
+          status: "answered",
+          answered_at: new Date().toISOString()
+        })
+        .eq("id", question.id);
+
+      if (error) {
+        console.error("Handle General Question Response Error:", error);
+        throw error;
+      }
+
+      // Update local state immediately
+      setGeneralQuestions((prev) =>
+        prev.map((q) => (q.id === question.id ? { ...q, vendor_response: replyText, status: "answered" } : q))
+      );
+
+      // Format WhatsApp number
+      let phone = question.customer_phone || "";
+      phone = phone.replace(/\s+/g, "").replace(/[^0-9+]/g, "");
+
+      if (phone.startsWith("0")) {
+        phone = "+27" + phone.substring(1);
+      } else if (phone.startsWith("27")) {
+        phone = "+" + phone;
+      } else if (!phone.startsWith("+")) {
+        phone = "+27" + phone;
+      }
+
+      // Send WhatsApp message
+      const message = `Hi ${question.customer_name || "there"} 👋\n\nYou asked: "${question.question}"\n\nOur response:\n${replyText}\n\n- ${storeInfo?.name || "Mzansi Food Connect"}`;
+
+      const result = await sendWhatsAppMessage(phone, message);
+
+      if (result.success) {
+        if (audioRef.current && audioEnabled) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(err => console.log('Audio play failed:', err));
+        }
+        showToast(`✅ Reply sent to ${question.customer_name || phone}`, "#10b981");
+      } else {
+        showToast(`⚠️ Reply sent but WhatsApp failed: ${result.error}`, "#f59e0b");
+      }
+    } catch (err) {
+      console.error("Handle General Question Response Failed:", err.message);
+      showToast("⚠️ Could not send response: " + err.message, "#f44336");
+    }
+  };
+
+  const dismissGeneralQuestion = async (id) => {
+    try {
+      const { error } = await supabase
+        .from("general_questions")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Delete general question error:", error);
+        throw error;
+      }
+
+      setGeneralQuestions((prev) => prev.filter((q) => q.id !== id));
+      showToast("✅ Question dismissed", "#10b981");
+    } catch (err) {
+      console.error("Dismiss general question failed:", err.message);
       showToast("⚠️ Could not dismiss: " + err.message, "#f44336");
     }
   };
@@ -1634,22 +1768,89 @@ export default function App({ user }) {
 
       /* ---------------------- Notifications ---------------------- */
       case "notifications":
+        const totalMessages = notifications.length + generalQuestions.length;
+
         return (
           <div className="template-view">
             <div className="view-header">
               <button className="back-btn" onClick={() => setCurrentView("dashboard")}>← Back</button>
               <h2>🔔 Notifications</h2>
-              <p>Customer messages from the storefront</p>
+              <p>Product questions ({notifications.length}) and general questions ({generalQuestions.length})</p>
             </div>
 
-            {notifications.length === 0 ? (
+            {totalMessages === 0 ? (
               <p>No messages yet.</p>
             ) : (
               <div className="orders-list">
-                {notifications.map((n) => (
-                  <div key={n.id} className="order-management-card">
+                {/* General Questions */}
+                {generalQuestions.map((q) => (
+                  <div key={q.id} className="order-management-card" style={{ background: "linear-gradient(135deg, #faf5ff, #ffffff)", border: "2px solid #c084fc" }}>
                     <div className="order-header">
-                      <h4>From: {n.customer_name || "Customer"}</h4>
+                      <h4>💬 General Question from: {q.customer_name || "Customer"}</h4>
+                      <span className={`status-badge ${q.status || "pending"}`} style={{ background: q.status === "answered" ? "#10b981" : "#9333ea" }}>
+                        {q.status || "pending"}
+                      </span>
+                    </div>
+                    <p style={{ margin: ".25rem 0", fontSize: "0.85rem", opacity: 0.7 }}>
+                      <strong>📅</strong> {new Date(q.created_at).toLocaleString("en-ZA", {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                      })}
+                    </p>
+                    <p style={{ margin: ".25rem 0" }}>
+                      <strong>Phone:</strong> {q.customer_phone}
+                    </p>
+                    <p style={{ margin: ".25rem 0", background: "#faf5ff", padding: "0.75rem", borderRadius: "8px", borderLeft: "4px solid #9333ea" }}>
+                      <strong>Question:</strong> {q.question}
+                    </p>
+                    {q.vendor_response && (
+                      <p style={{ marginTop: ".25rem", opacity: 0.85, background: "#f0fdf4", padding: "0.75rem", borderRadius: "8px", borderLeft: "4px solid #10b981" }}>
+                        <strong>Your response:</strong> {q.vendor_response}
+                      </p>
+                    )}
+
+                    <div style={{ display: "flex", gap: ".5rem", marginTop: ".75rem", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
+                        {!q.vendor_response && (
+                          <button
+                            className="btn-primary"
+                            onClick={() => {
+                              const custom = prompt("Type your response to this general question:");
+                              if (custom && custom.trim().length > 0) handleGeneralQuestionResponse(q, custom.trim());
+                            }}
+                            style={{ background: "#9333ea" }}
+                          >
+                            ✍️ Reply
+                          </button>
+                        )}
+                        {q.vendor_response && (
+                          <span style={{ color: "#10b981", fontWeight: 600, fontSize: "0.9rem" }}>
+                            ✓ Answered
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => dismissGeneralQuestion(q.id)}
+                        style={{
+                          background: "#f44336",
+                          color: "white",
+                          border: "none",
+                          padding: "0.5rem 1rem",
+                          fontSize: "0.85rem"
+                        }}
+                      >
+                        ✕ Close
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Product Questions */}
+                {notifications.map((n) => (
+                  <div key={n.id} className="order-management-card" style={{ background: "linear-gradient(135deg, #eff6ff, #ffffff)", border: "2px solid #93c5fd" }}>
+                    <div className="order-header">
+                      <h4>📦 Product Question from: {n.customer_name || "Customer"}</h4>
                       <span className={`status-badge ${n.status || "new"}`}>
                         {n.status || "new"}
                       </span>
