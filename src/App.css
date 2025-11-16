@@ -9,8 +9,9 @@
   background: linear-gradient(135deg, #f0f9ff, #e0f2fe, #ffffff);
   color: #1e293b;
   padding: 1rem;
-  max-width: 100%;
+  max-width: 2800px;
   margin: 0 auto;
+  width: 100%;
 }
 
 /* Dark mode override */
@@ -2893,12 +2894,12 @@ body.dark .plan-price {
 /* 4K monitors (2560px and above) */
 @media (min-width: 2560px) {
   .app {
-    max-width: 2200px;
+    max-width: 2800px;
     padding: 3rem 6rem;
   }
 
   .header {
-    max-width: 2200px;
+    max-width: 2800px;
     padding: 2rem 3rem;
     margin-bottom: 3rem;
   }
@@ -2907,7 +2908,7 @@ body.dark .plan-price {
   .template-view,
   .orders-container,
   .menu-container {
-    max-width: 2200px;
+    max-width: 2800px;
     padding: 3rem;
   }
 
