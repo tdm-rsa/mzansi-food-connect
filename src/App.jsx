@@ -334,7 +334,7 @@ export default function App({ user }) {
 
             // Upgrade the existing store to the paid plan
             const { data: upgradedStore, error: upgradeError } = await supabase
-              .from('stores')
+              .from('tenants')
               .update({
                 plan: pendingPayment.plan,
                 plan_started_at: new Date().toISOString(),
