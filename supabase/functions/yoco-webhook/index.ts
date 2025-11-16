@@ -4,36 +4,57 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const YOCO_SECRET_KEY = Deno.env.get("YOCO_SECRET_KEY") || "";
+const YOCO_WEBHOOK_SECRET = "whsec_QkI5RTBCMThCRjBGQUQ4MDg1NUIwQ0M5Njg5QkI4NTI=";
 
 serve(async (req) => {
   try {
-    // Verify Yoco signature
-    const signature = req.headers.get("x-yoco-signature");
+    // Get Yoco webhook headers
+    const webhookId = req.headers.get("webhook-id");
+    const webhookTimestamp = req.headers.get("webhook-timestamp");
+    const webhookSignature = req.headers.get("webhook-signature");
     const body = await req.text();
 
-    // Yoco uses HMAC SHA256
+    // Verify webhook timestamp (prevent replay attacks)
+    const timestamp = parseInt(webhookTimestamp || "0");
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (Math.abs(currentTime - timestamp) > 180) { // 3 minutes threshold
+      console.error("Webhook timestamp too old");
+      return new Response(JSON.stringify({ error: "Invalid timestamp" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Construct signed content: {webhook-id}.{webhook-timestamp}.{request body}
+    const signedContent = `${webhookId}.${webhookTimestamp}.${body}`;
+
+    // Extract secret bytes (remove whsec_ prefix and decode base64)
+    const secretWithoutPrefix = YOCO_WEBHOOK_SECRET.split("_")[1];
+    const secretBytes = Uint8Array.from(atob(secretWithoutPrefix), c => c.charCodeAt(0));
+
+    // Calculate expected signature using HMAC SHA256
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(YOCO_SECRET_KEY);
-    const bodyData = encoder.encode(body);
+    const dataBytes = encoder.encode(signedContent);
 
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
-      keyData,
+      secretBytes,
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["sign"]
     );
 
-    const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, bodyData);
-    const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
+    const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, dataBytes);
+    const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
 
-    if (signature !== expectedSignature) {
-      console.error("Invalid signature");
+    // Extract actual signature from header (format: "v1,{signature}")
+    const actualSignature = webhookSignature?.split(" ")[0].split(",")[1];
+
+    // Compare signatures using constant-time comparison
+    if (actualSignature !== expectedSignature) {
+      console.error("Invalid webhook signature");
       return new Response(JSON.stringify({ error: "Invalid signature" }), {
-        status: 401,
+        status: 403,
         headers: { "Content-Type": "application/json" },
       });
     }
