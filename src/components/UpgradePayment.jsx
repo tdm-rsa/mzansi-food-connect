@@ -115,38 +115,72 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
 
     try {
       console.log('💳 Payment successful! ID:', paymentId);
-      console.log('🔄 Upgrading store to:', targetPlan);
+      console.log('⏳ Waiting for Yoco webhook to confirm payment...');
 
-      // Update the store plan in database
-      const { data, error: updateError } = await supabase
-        .from("tenants")
-        .update({
+      // ✅ SECURITY FIX: Don't upgrade immediately - let webhook handle it
+      // Store payment in pending_payments table for webhook to process
+      const { error: pendingError } = await supabase
+        .from("pending_payments")
+        .insert([{
+          user_id: user.id,
           plan: targetPlan,
-          plan_started_at: new Date().toISOString(),
-          plan_expires_at: null, // Paid plans don't expire (subscription-based)
           payment_reference: paymentId,
-        })
-        .eq("id", storeInfo.id)
-        .select()
-        .single();
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        }]);
 
-      if (updateError) {
-        throw updateError;
+      if (pendingError) {
+        throw pendingError;
       }
 
-      console.log('✅ Store upgraded successfully:', data);
+      console.log('✅ Payment recorded. Waiting for webhook confirmation...');
 
-      // Show success message
-      alert(`✅ Upgrade successful!\n\nYour store has been upgraded to ${plan.name} plan!\n\nAll ${plan.name} features are now active.\n\nThank you for upgrading!`);
+      // Poll for webhook to process the payment (with timeout)
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds (30 attempts × 1 second)
 
-      // Call onSuccess callback to refresh the page/state
-      if (onSuccess) {
-        onSuccess(data);
-      }
+      const checkPayment = async () => {
+        const { data: updatedStore } = await supabase
+          .from("tenants")
+          .select("plan, payment_reference")
+          .eq("id", storeInfo.id)
+          .single();
+
+        if (updatedStore?.plan === targetPlan && updatedStore?.payment_reference === paymentId) {
+          // Webhook processed successfully!
+          console.log('✅ Webhook confirmed! Store upgraded to:', targetPlan);
+
+          alert(`✅ Upgrade successful!\n\nYour store has been upgraded to ${plan.name} plan!\n\nAll ${plan.name} features are now active.\n\nThank you for upgrading!`);
+
+          if (onSuccess) {
+            onSuccess(updatedStore);
+          }
+          return true;
+        }
+        return false;
+      };
+
+      // Poll every 1 second for up to 30 seconds
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        const success = await checkPayment();
+
+        if (success || attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+
+          if (!success) {
+            console.warn('⚠️ Webhook timeout. Payment may still be processing.');
+            alert(`⚠️ Payment received but verification is taking longer than expected.\n\nPlease refresh the page in a moment to see your upgraded plan.\n\nIf the upgrade doesn't appear after 2 minutes, please contact support with payment ID: ${paymentId}`);
+          }
+
+          setLoading(false);
+          setProcessingPayment(false);
+        }
+      }, 1000);
+
     } catch (err) {
       console.error('❌ Upgrade error:', err);
-      setError(`Failed to upgrade: ${err.message}`);
-    } finally {
+      setError(`Failed to process upgrade: ${err.message}`);
       setLoading(false);
       setProcessingPayment(false);
     }

@@ -61,11 +61,12 @@ serve(async (req) => {
 
           // Update user's plan
           const { error } = await supabase
-            .from("stores")
+            .from("tenants")
             .update({
               plan: planType,
               plan_started_at: new Date().toISOString(),
               plan_expires_at: null, // Subscriptions don't expire
+              payment_reference: event.payload.id,
             })
             .eq("id", storeId);
 
@@ -88,10 +89,11 @@ serve(async (req) => {
           const planType = metadata.upgradeTo;
 
           const { error } = await supabase
-            .from("stores")
+            .from("tenants")
             .update({
               plan: planType,
               plan_started_at: new Date().toISOString(),
+              subscription_id: event.payload.subscription_id,
             })
             .eq("id", storeId);
 
@@ -109,10 +111,11 @@ serve(async (req) => {
           const storeId = metadata.storeId;
 
           const { error } = await supabase
-            .from("stores")
+            .from("tenants")
             .update({
               plan: "trial",
-              plan_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days trial
+              plan_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days trial
+              subscription_id: null,
             })
             .eq("id", storeId);
 
