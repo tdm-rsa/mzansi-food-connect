@@ -926,7 +926,11 @@ export default function App({ user }) {
       }
 
       // Send WhatsApp message via API instead of opening window
-      const message = `Hi ${notif.customer_name || "there"} 👋\n${replyText}\n\n- ${storeInfo?.name || "Mzansi Food Connect"}`;
+      const storeUrl = storeInfo?.slug
+        ? `https://${storeInfo.slug}.mzansifoodconnect.app`
+        : window.location.origin;
+
+      const message = `Hi ${notif.customer_name || "there"} 👋\n${replyText}\n\n- ${storeInfo?.name || "Mzansi Food Connect"}\n\n🛒 Visit us: ${storeUrl}`;
 
       const result = await sendWhatsAppMessage(phone, message);
 
@@ -1004,7 +1008,11 @@ export default function App({ user }) {
       }
 
       // Send WhatsApp message
-      const message = `Hi ${question.customer_name || "there"} 👋\n\nYou asked: "${question.question}"\n\nOur response:\n${replyText}\n\n- ${storeInfo?.name || "Mzansi Food Connect"}`;
+      const storeUrl = storeInfo?.slug
+        ? `https://${storeInfo.slug}.mzansifoodconnect.app`
+        : window.location.origin;
+
+      const message = `Hi ${question.customer_name || "there"} 👋\n\nYou asked: "${question.question}"\n\nOur response:\n${replyText}\n\n- ${storeInfo?.name || "Mzansi Food Connect"}\n\n🛒 Visit us: ${storeUrl}`;
 
       const result = await sendWhatsAppMessage(phone, message);
 
