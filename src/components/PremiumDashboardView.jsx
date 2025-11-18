@@ -82,7 +82,6 @@ export default function PremiumDashboardView({
             ) : (
               <span style={{ fontSize: "2.8rem" }}>👑</span>
             )}
-            {user?.email?.split('@')[0] || 'Owner'}
           </h2>
           <p style={{
             marginBottom: "0",

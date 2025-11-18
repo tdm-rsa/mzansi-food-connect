@@ -1129,10 +1129,11 @@ export default function App({ user }) {
           className="btn-secondary"
           onClick={toggleTheme}
           style={{
-            border: "1px solid rgba(255,255,255,0.4)",
-            background: darkMode ? "#fff" : "rgba(255,255,255,0.1)",
-            color: darkMode ? "#222" : "#fff",
+            border: darkMode ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(15,23,42,0.12)",
+            background: darkMode ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.95)",
+            color: darkMode ? "#f8fafc" : "#0f172a",
             fontWeight: "600",
+            boxShadow: "0 8px 18px rgba(15,23,42,0.12)"
           }}
         >
           {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
@@ -1196,7 +1197,14 @@ export default function App({ user }) {
             window.location.reload();
           }}
           title="Sign out"
-          style={{ fontSize: "0.85rem" }}
+          style={{
+            fontSize: "0.9rem",
+            border: darkMode ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(15,23,42,0.12)",
+            background: darkMode ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.95)",
+            color: darkMode ? "#f8fafc" : "#0f172a",
+            fontWeight: "600",
+            boxShadow: "0 8px 18px rgba(15,23,42,0.12)"
+          }}
         >
           🚪 Logout
         </button>
@@ -1723,8 +1731,16 @@ export default function App({ user }) {
               </div>
             ) : (
               <div className="orders-list">
-                {fetchedOrders.map((o) => (
-                  <div key={o.id} className="order-management-card" style={{ background: "linear-gradient(135deg, #f0fdf4, #ffffff)", border: "2px solid #86efac" }}>
+                {fetchedOrders.map((o) => {
+                  const fetchedCardStyle = {
+                    background: darkMode
+                      ? "linear-gradient(135deg, rgba(5,46,22,0.9), rgba(22,163,74,0.2))"
+                      : "linear-gradient(135deg, #f0fdf4, #ffffff)",
+                    border: `2px solid ${darkMode ? "rgba(134,239,172,0.4)" : "#86efac"}`,
+                    color: darkMode ? "#f1f5f9" : undefined
+                  };
+                  return (
+                  <div key={o.id} className="order-management-card" style={fetchedCardStyle}>
                     <div className="order-header">
                       <h4>#{o.order_number || o.id.slice(0, 6)} — {o.customer_name || o.customer || "Customer"}</h4>
                       <span className="status-badge completed" style={{ background: "#10b981", color: "white" }}>✅ Fetched</span>
@@ -1751,13 +1767,24 @@ export default function App({ user }) {
                       </ul>
                     )}
 
-                    <div style={{ marginTop: ".75rem", padding: "0.75rem", background: "#dcfce7", borderRadius: "8px", textAlign: "center" }}>
-                      <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: "600", color: "#166534" }}>
+                    <div style={{
+                      marginTop: ".75rem",
+                      padding: "0.75rem",
+                      background: darkMode ? "rgba(22,163,74,0.25)" : "#dcfce7",
+                      borderRadius: "8px",
+                      textAlign: "center"
+                    }}>
+                      <p style={{
+                        margin: 0,
+                        fontSize: "0.9rem",
+                        fontWeight: "600",
+                        color: darkMode ? "#bbf7d0" : "#166534"
+                      }}>
                         ✅ Order completed and picked up
                       </p>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             )}
           </div>
@@ -2739,7 +2766,3 @@ export default function App({ user }) {
     </div>
   );
 }
-
-
-
-

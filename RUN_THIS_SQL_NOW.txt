@@ -1,0 +1,11 @@
+🚨 IMPORTANT: Run this SQL in Supabase RIGHT NOW! 🚨
+
+Open: https://supabase.com → Your Project → SQL Editor → New Query
+
+Then run:
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS estimated_time INTEGER;
+
+Click "Run" button.
+
+✅ This fixes the "estimated_time column does not exist" error!

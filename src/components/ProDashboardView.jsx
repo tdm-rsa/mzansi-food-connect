@@ -70,7 +70,6 @@ export default function ProDashboardView({
             ) : (
               <span style={{ fontSize: "2.5rem" }}>👤</span>
             )}
-            {user?.email?.split('@')[0] || 'Owner'}
           </h2>
           <p style={{
             marginBottom: "0",

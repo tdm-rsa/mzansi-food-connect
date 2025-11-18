@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Domains.co.za Account</title>
+</head>
+<body>
+    <h1>Domains.co.za Account Tester</h1>
+
+    <h2>Step 1: Login and Get Token</h2>
+    <button onclick="testLogin()">Test Login</button>
+    <pre id="loginResult"></pre>
+
+    <h2>Step 2: Check Account Type</h2>
+    <button onclick="checkAccount()">Check My Account</button>
+    <pre id="accountResult"></pre>
+
+    <h2>Step 3: Test Domain Availability</h2>
+    <input type="text" id="domainInput" placeholder="testdomain" />
+    <button onclick="checkDomain()">Check Domain</button>
+    <pre id="domainResult"></pre>
+
+    <script>
+        const API_BASE = '/api/domains/proxy';
+        const USERNAME = 'nqubeko377@gmail.com';
+        const PASSWORD = 'f905d34c97a90fe5e8aee3050edb2cdb';
+
+        let authToken = null;
+
+        async function testLogin() {
+            const resultEl = document.getElementById('loginResult');
+            resultEl.textContent = 'Testing login...';
+
+            try {
+                const response = await fetch(`${API_BASE}?path=login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: USERNAME,
+                        password: PASSWORD
+                    })
+                });
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+
+                if (data.token) {
+                    authToken = data.token;
+                    resultEl.textContent += '\n\n✅ Token saved! Proceed to Step 2';
+                }
+            } catch (error) {
+                resultEl.textContent = 'ERROR: ' + error.message;
+            }
+        }
+
+        async function checkAccount() {
+            const resultEl = document.getElementById('accountResult');
+
+            if (!authToken) {
+                resultEl.textContent = '❌ Please login first (Step 1)';
+                return;
+            }
+
+            resultEl.textContent = 'Checking account type...';
+
+            try {
+                // Try reseller endpoint (should work for Reseller accounts)
+                const response = await fetch(`${API_BASE}?path=reseller`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+
+                if (data.intReturnCode === 1) {
+                    resultEl.textContent += '\n\n✅ ACCOUNT TYPE: RESELLER';
+                    resultEl.textContent += `\n💰 Balance: R${data.fltBalance}`;
+                    resultEl.textContent += `\n📧 Email: ${data.strEmail}`;
+                } else {
+                    resultEl.textContent += '\n\n⚠️ ' + data.strMessage;
+                }
+            } catch (error) {
+                resultEl.textContent = 'ERROR: ' + error.message;
+            }
+        }
+
+        async function checkDomain() {
+            const resultEl = document.getElementById('domainResult');
+            const domain = document.getElementById('domainInput').value;
+
+            if (!authToken) {
+                resultEl.textContent = '❌ Please login first (Step 1)';
+                return;
+            }
+
+            if (!domain) {
+                resultEl.textContent = '❌ Enter a domain name';
+                return;
+            }
+
+            resultEl.textContent = `Checking ${domain}.co.za...`;
+
+            try {
+                const response = await fetch(
+                    `${API_BASE}?path=domain/check&sld=${domain}&tld=co.za`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+
+                if (data.isAvailable === true) {
+                    resultEl.textContent += '\n\n✅ Domain is AVAILABLE!';
+                } else if (data.isAvailable === false) {
+                    resultEl.textContent += '\n\n❌ Domain is TAKEN';
+                } else {
+                    resultEl.textContent += '\n\n⚠️ Status unknown';
+                }
+            } catch (error) {
+                resultEl.textContent = 'ERROR: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
