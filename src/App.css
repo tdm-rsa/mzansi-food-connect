@@ -8,8 +8,27 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f0f9ff, #e0f2fe, #ffffff);
   color: #1e293b;
-  padding: 1rem;
+  padding: 1rem 2rem;
   width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 1400px) {
+  .app {
+    padding: 1.5rem 4rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .app {
+    padding: 2rem 6rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .app {
+    padding: 2rem 8rem;
+  }
 }
 
 /* Dark mode override */
@@ -32,6 +51,20 @@ body.dark .app {
   box-shadow: 0 4px 20px rgba(14, 165, 233, 0.2);
 }
 
+@media (min-width: 1920px) {
+  .header {
+    padding: 2rem 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .header {
+    padding: 2.5rem 3rem;
+    margin-bottom: 3rem;
+  }
+}
+
 body.dark .header {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -42,6 +75,18 @@ body.dark .header {
   font-size: 1.8rem;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1920px) {
+  .header-content h1 {
+    font-size: 2.2rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .header-content h1 {
+    font-size: 2.5rem;
+  }
 }
 
 body.dark .header-content h1 {
@@ -108,6 +153,18 @@ body.dark .dashboard-header {
   background-clip: text;
 }
 
+@media (min-width: 1920px) {
+  .dashboard-header h2 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .dashboard-header h2 {
+    font-size: 3rem;
+  }
+}
+
 body.dark .dashboard-header h2 {
   background: linear-gradient(45deg, #06b6d4, #14b8a6);
   -webkit-background-clip: text;
@@ -131,6 +188,27 @@ body.dark .dashboard-header p {
   margin-bottom: 2rem;
 }
 
+@media (min-width: 1400px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 3rem;
+  }
+}
+
 .stat-card {
   background: #ffffff;
   backdrop-filter: blur(10px);
@@ -142,6 +220,20 @@ body.dark .dashboard-header p {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+@media (min-width: 1920px) {
+  .stat-card {
+    padding: 2rem;
+    border-radius: 18px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .stat-card {
+    padding: 2.5rem;
+    border-radius: 20px;
+  }
 }
 
 body.dark .stat-card {
@@ -164,10 +256,34 @@ body.dark .stat-card:hover {
   opacity: 0.8;
 }
 
+@media (min-width: 1920px) {
+  .stat-icon {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .stat-icon {
+    font-size: 3.5rem;
+  }
+}
+
 .stat-info h3 {
   font-size: 1.8rem;
   margin-bottom: 0.25rem;
   color: #10b981;
+}
+
+@media (min-width: 1920px) {
+  .stat-info h3 {
+    font-size: 2.2rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .stat-info h3 {
+    font-size: 2.5rem;
+  }
 }
 
 body.dark .stat-info h3 {
@@ -386,6 +502,27 @@ body.dark .time {
   gap: 1rem;
 }
 
+@media (min-width: 1400px) {
+  .actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .actions-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .actions-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2.5rem;
+  }
+}
+
 .action-btn {
   display: flex;
   align-items: center;
@@ -398,6 +535,20 @@ body.dark .time {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1920px) {
+  .action-btn {
+    padding: 1.25rem 2rem;
+    border-radius: 18px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .action-btn {
+    padding: 1.5rem 2.5rem;
+    border-radius: 20px;
+  }
 }
 
 body.dark .action-btn {
@@ -424,8 +575,33 @@ body.dark .action-btn:hover {
   font-size: 1.5rem;
 }
 
+@media (min-width: 1920px) {
+  .action-icon {
+    font-size: 1.8rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .action-icon {
+    font-size: 2rem;
+  }
+}
+
 .action-text {
   font-weight: bold;
+  font-size: 1rem;
+}
+
+@media (min-width: 1920px) {
+  .action-text {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .action-text {
+    font-size: 1.25rem;
+  }
 }
 
 /* Admin Menu Grid */
