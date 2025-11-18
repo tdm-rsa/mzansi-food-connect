@@ -91,6 +91,6 @@ export function getDaysRemaining(storeInfo) {
 
 export const PLAN_PRICING = {
   trial: { price: 0, period: '7 days' },
-  pro: { price: 150, period: 'month' },
-  premium: { price: 300, period: 'month' }
+  pro: { price: 135, period: 'month' },
+  premium: { price: 185, period: 'month' }
 };

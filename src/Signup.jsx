@@ -49,7 +49,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "pro",
       name: "Pro",
       subtitle: "For Growing Businesses",
-      price: "R150",
+      price: "R135",
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
@@ -66,7 +66,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "premium",
       name: "Premium",
       subtitle: "Custom Domain Included",
-      price: "R300",
+      price: "R185",
       period: "per month",
       description: "Professional solution with your own domain",
       features: [
@@ -220,7 +220,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      const amountInCents = selectedPlan === "pro" ? 2500 : 2500; // R25 for testing
+      const amountInCents = selectedPlan === "pro" ? 13500 : 18500; // R135 Pro, R185 Premium
 
       const sdk = new window.YocoSDK({
         publicKey: yocoPublicKey,
@@ -298,7 +298,7 @@ export default function Signup({ onBack, onSuccess }) {
           store_name: storeName,
           plan: selectedPlan,
           payment_reference: paymentId,
-          amount_in_cents: selectedPlan === 'pro' ? 2500 : 2500, // R25 for testing
+          amount_in_cents: selectedPlan === 'pro' ? 13500 : 18500, // R135 Pro, R185 Premium
           payment_status: 'completed',
           created_at: new Date().toISOString()
         }]);
