@@ -1397,7 +1397,7 @@ export default function App({ user }) {
                     }}
                     onClick={() => setCurrentView("settings")}
                   >
-                    Upgrade to Pro - R150/month
+                    Upgrade to Pro - R25/month
                   </button>
                 )}
                 <button
@@ -1409,7 +1409,7 @@ export default function App({ user }) {
                   }}
                   onClick={() => setCurrentView("settings")}
                 >
-                  {storeInfo?.plan === 'trial' ? 'Upgrade to Premium - R300/month' : 'Upgrade to Premium - R300/month'}
+                  {storeInfo?.plan === 'trial' ? 'Upgrade to Premium - R25/month' : 'Upgrade to Premium - R25/month'}
                 </button>
               </div>
             )}
@@ -2428,12 +2428,12 @@ export default function App({ user }) {
                 )}
                 {storeInfo?.plan === 'pro' && (
                   <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
-                    R150/month - Unlimited products & basic analytics
+                    R25/month - Unlimited products & basic analytics
                   </p>
                 )}
                 {storeInfo?.plan === 'premium' && (
                   <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
-                    R300/month - Premium subdomain + advanced analytics (Custom domains coming soon)
+                    R25/month - Premium subdomain + advanced analytics (Custom domains coming soon)
                   </p>
                 )}
               </div>
@@ -2471,7 +2471,7 @@ export default function App({ user }) {
                               ✅ WhatsApp API integration<br/>
                               ✅ Remove branding
                             </p>
-                            <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R150 / month</span>
+                            <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R25 / month</span>
                             <button
                               onClick={() => setShowUpgradePayment('pro')}
                               className="btn-primary"
@@ -2490,7 +2490,7 @@ export default function App({ user }) {
                               ✅ White-label solution<br/>
                               🚧 Custom domain (yourbusiness.co.za) - Coming Soon
                             </p>
-                            <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month</span>
+                            <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R25 / month</span>
                             <button
                               onClick={() => setShowUpgradePayment('premium')}
                               className="btn-primary"
@@ -2511,7 +2511,7 @@ export default function App({ user }) {
                             ✅ Dedicated support<br/>
                             🚧 Custom domain (yourbusiness.co.za) - Coming Soon
                           </p>
-                          <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R300 / month (only R150 more!)</span>
+                          <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R25 / month (only R25 more!)</span>
                           <button
                             onClick={() => setShowUpgradePayment('premium')}
                             className="btn-primary"

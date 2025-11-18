@@ -119,7 +119,7 @@ function Landing() {
     {
       name: "Pro",
       subtitle: "Subdomain",
-      price: "R150",
+      price: "R25",
       period: "per month",
       description: "Keep your subdomain and unlock all features",
       features: [
@@ -140,7 +140,7 @@ function Landing() {
     {
       name: "Premium",
       subtitle: "Subdomain (temporary)",
-      price: "R300",
+      price: "R25",
       period: "per month",
       description: "Bring your own domain (e.g., www.yourstore.co.za)",
       features: [

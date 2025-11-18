@@ -105,8 +105,8 @@ export default function Login({ onLogin, onSwitchToSignup }) {
           <h4>🚀 Start Free, Upgrade Anytime</h4>
           <div className="price-tags">
             <span className="price-tag free">7-Day Free Trial</span>
-            <span className="price-tag pro">Pro R150/mo</span>
-            <span className="price-tag premium">Premium R300/mo</span>
+            <span className="price-tag pro">Pro R25/mo</span>
+            <span className="price-tag premium">Premium R25/mo</span>
           </div>
         </div>
       </div>

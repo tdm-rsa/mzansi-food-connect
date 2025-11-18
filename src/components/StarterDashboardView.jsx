@@ -285,7 +285,7 @@ export default function StarterDashboardView({
               boxShadow: "0 2px 4px rgba(59,130,246,0.2)"
             }}
           >
-            Pro - R150/month
+            Pro - R25/month
           </button>
           <button
             onClick={() => setCurrentView("settings")}
@@ -302,7 +302,7 @@ export default function StarterDashboardView({
               boxShadow: "0 2px 4px rgba(245,158,11,0.2)"
             }}
           >
-            Premium - R300/month
+            Premium - R25/month
           </button>
         </div>
       </div>

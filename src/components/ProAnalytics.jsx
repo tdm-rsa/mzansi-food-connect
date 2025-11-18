@@ -377,7 +377,7 @@ export default function ProAnalytics({ storeInfo, onBack, darkMode }) {
             cursor: "pointer"
           }}
         >
-          Upgrade to Premium - R300/month
+          Upgrade to Premium - R25/month
         </button>
       </div>
     </div>

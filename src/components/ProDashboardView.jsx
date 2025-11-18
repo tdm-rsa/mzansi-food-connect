@@ -1,5 +1,5 @@
 // PRO PLAN DASHBOARD - COMPLETE STANDALONE COMPONENT
-// This is for PRO accounts ONLY - R150/month
+// This is for PRO accounts ONLY - R25/month
 // Features: 3 templates, unlimited products, BASIC analytics (numbers only), WhatsApp API, subdomain
 
 import { useState } from "react";
@@ -339,7 +339,7 @@ export default function ProDashboardView({
             cursor: "pointer"
           }}
         >
-          Upgrade to Premium - R300/month (Only R150 more!)
+          Upgrade to Premium - R25/month (Only R25 more!)
         </button>
       </div>
     </div>
