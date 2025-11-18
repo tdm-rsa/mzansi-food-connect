@@ -103,48 +103,32 @@ export default function Signup({ onBack, onSuccess }) {
     setLoading(true);
 
     try {
-      // Create auth account - save metadata for store creation after confirmation
-      // Use production URL for email confirmation links (even when testing locally)
-      const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
-
-      // 🚨 DEBUG: Log what plan is being saved
-      console.log('🚨 SIGNUP: Saving plan to metadata:', {
-        selectedPlan: selectedPlan,
-        planType: typeof selectedPlan,
-        storeName: storeName,
-        email: email
-      });
-
-      const { data: authData, error: authError} = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${productionUrl}/app`,
-          data: {
-            store_name: storeName,
-            plan: selectedPlan,
-            payment_reference: null, // Will be updated after payment
-            payment_completed: false
-          }
-        }
-      });
-
-      if (authError) throw authError;
-
-      setCreatedUserId(authData.user.id);
-
-      // 🚨 DEBUG: Verify what was saved
-      console.log('✅ Account created - metadata saved:', authData.user.user_metadata);
-      console.log('✅ Store will be created after email confirmation');
-
-      // For trial - show success and go to login
+      // For trial - create account immediately (no payment needed)
       if (selectedPlan === 'trial') {
+        const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
+
+        const { data: authData, error: authError} = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${productionUrl}/app`,
+            data: {
+              store_name: storeName,
+              plan: selectedPlan,
+              payment_reference: null,
+              payment_completed: false
+            }
+          }
+        });
+
+        if (authError) throw authError;
+
         alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour 7-day free trial will be created automatically when you login for the first time!`);
         onBack();
       } else {
-        // For Pro/Premium - proceed to payment (Step 3)
-        alert(`✅ Account created successfully!\n\n💳 Next: Complete payment to activate your subscription.`);
-        setStep(3);
+        // For Pro/Premium - GO TO PAYMENT FIRST (don't create account yet!)
+        console.log('💳 Pro/Premium selected - proceeding to payment first');
+        setStep(3); // Go directly to payment step
       }
     } catch (err) {
       setError(err.message);
@@ -236,7 +220,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      const amountInCents = selectedPlan === "pro" ? 15000 : 30000; // R150 or R300
+      const amountInCents = selectedPlan === "pro" ? 2500 : 2500; // R25 for testing
 
       const sdk = new window.YocoSDK({
         publicKey: yocoPublicKey,
@@ -278,29 +262,50 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       console.log('✅ Payment successful! ID:', paymentId);
-      console.log('💾 Saving payment for user ID:', createdUserId);
       console.log('📋 Plan selected:', selectedPlan);
+      console.log('🔐 NOW creating account after payment...');
 
-      // 🔥 FIX: Store payment in a pending_payments table so we can retrieve it after email confirmation
-      // This is more reliable than user_metadata which may not persist properly before email confirmation
+      // ✅ SECURITY FIX: Create account AFTER payment succeeds
+      const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
+
+      const { data: authData, error: authError} = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${productionUrl}/app`,
+          data: {
+            store_name: storeName,
+            plan: selectedPlan,
+            payment_reference: paymentId,
+            payment_completed: true
+          }
+        }
+      });
+
+      if (authError) {
+        console.error('❌ Account creation failed after payment:', authError);
+        throw new Error(`Payment succeeded but account creation failed: ${authError.message}. Please contact support with payment ID: ${paymentId}`);
+      }
+
+      console.log('✅ Account created with user ID:', authData.user.id);
+
+      // Store payment in pending_payments table for webhook processing
       const { error: paymentError } = await supabase
         .from('pending_payments')
         .insert([{
-          user_id: createdUserId,
+          user_id: authData.user.id,
           email: email,
           store_name: storeName,
           plan: selectedPlan,
           payment_reference: paymentId,
-          amount_in_cents: selectedPlan === 'pro' ? 15000 : 30000,
+          amount_in_cents: selectedPlan === 'pro' ? 2500 : 2500, // R25 for testing
           payment_status: 'completed',
           created_at: new Date().toISOString()
         }]);
 
       if (paymentError) {
         console.error('❌ Failed to save payment reference:', paymentError);
-        // Don't throw - payment was successful, just log the error
-        console.warn('⚠️ Payment succeeded but couldn\'t save to pending_payments table');
-        console.warn('⚠️ User will need to contact support with payment ID:', paymentId);
+        console.warn('⚠️ Payment and account created, but couldn\'t save to pending_payments');
       } else {
         console.log('✅ Payment reference saved to pending_payments table');
       }
@@ -309,7 +314,7 @@ export default function Signup({ onBack, onSuccess }) {
       alert(`✅ Payment successful!\n\n💳 Payment ID: ${paymentId}\n\nYour ${selectedPlanData.name} subscription is confirmed!\n\n📧 Next steps:\n1. Check your email (${email}) and confirm your account\n2. Login to access your dashboard\n\nYour ${selectedPlanData.name} store will be created automatically when you login for the first time!`);
       onBack();
     } catch (err) {
-      setError("Payment succeeded but failed to save payment details: " + err.message);
+      setError("Error: " + err.message);
     } finally {
       setLoading(false);
       setProcessingPayment(false);
