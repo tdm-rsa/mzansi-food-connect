@@ -2468,7 +2468,7 @@ export default function App({ user }) {
                               ✅ Subdomain (yourstore.mzansifoodconnect.app)<br/>
                               ✅ Unlimited products<br/>
                               ✅ Basic analytics (revenue tracking)<br/>
-                              ✅ WhatsApp API integration<br/>
+                              ✅ WhatsApp notifications<br/>
                               ✅ Remove branding
                             </p>
                             <span className="plan-price" style={{ color: darkMode ? "#ffffff" : "#333" }}>R25 / month</span>

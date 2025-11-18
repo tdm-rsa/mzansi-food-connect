@@ -32,7 +32,7 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
         "Subdomain (yourstore.mzansifoodconnect.app)",
         "Unlimited products",
         "Basic analytics (revenue tracking)",
-        "WhatsApp API integration",
+        "WhatsApp notifications",
         "Remove branding",
         "Priority support"
       ]

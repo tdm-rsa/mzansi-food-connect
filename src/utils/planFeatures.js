@@ -7,7 +7,7 @@ export const PLAN_FEATURES = {
     hasAnalytics: false,
     hasBasicAnalytics: false,
     hasAdvancedAnalytics: false,
-    hasWhatsAppAPI: false,
+    hasWhatsApp: true, // Free WhatsApp web links
     hasCustomDomain: false,
     hasSubdomain: true,
     removeBranding: false,
@@ -20,7 +20,7 @@ export const PLAN_FEATURES = {
     hasAnalytics: true,
     hasBasicAnalytics: true,
     hasAdvancedAnalytics: false,
-    hasWhatsAppAPI: true,
+    hasWhatsApp: true, // Free WhatsApp web links
     hasCustomDomain: false,
     hasSubdomain: true,
     removeBranding: true,
@@ -33,11 +33,11 @@ export const PLAN_FEATURES = {
     hasAnalytics: true,
     hasBasicAnalytics: true,
     hasAdvancedAnalytics: true,
-    hasWhatsAppAPI: true,
+    hasWhatsApp: true, // Free WhatsApp web links
     hasCustomDomain: true,
     hasSubdomain: true,
     removeBranding: true,
-    templates: ['Modern Food', 'Traditional SA', 'Fast & Mobile'], // 3 templates (same as Pro)
+    templates: ['Modern Food', 'Traditional SA', 'Fast & Mobile'], // 3 templates
     support: 'dedicated'
   }
 };
