@@ -93,8 +93,15 @@
 }
 
 .btn-secondary {
-  border-color: rgba(255, 255, 255, 0.5);
-  color: #fff;
+  border-color: rgba(14, 165, 233, 0.6);
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #f8fafc;
+  box-shadow: 0 12px 25px rgba(14, 165, 233, 0.35);
+}
+
+.btn-secondary:hover {
+  border-color: rgba(14, 165, 233, 0.9);
+  box-shadow: 0 14px 35px rgba(14, 165, 233, 0.5);
 }
 
 .btn-large {

@@ -124,7 +124,7 @@ function Landing() {
       description: "Keep your subdomain and unlock all features",
       features: [
         "Everything in Free Trial",
-        "Up to 3 website templates",
+        "Up to 2 website templates",
         "Unlimited menu items",
         "Basic analytics",
         "Live Queue View for Customers on the website",
@@ -150,7 +150,7 @@ function Landing() {
         "Advanced Analytics, charts and reports",
         "API access e.g Automated WhatsApp messaging",
         "Unlimited Menu Items",
-        "First priority support",
+        "First priority support(WhatApp)",
         "Full branding control"
       ],
       cta: "Upgrade to Premium",

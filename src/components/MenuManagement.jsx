@@ -266,6 +266,10 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Beef Burger"
                   required
+                  style={{
+                    background: darkMode ? "rgba(9, 9, 17, 0.9)" : undefined,
+                    color: darkMode ? "#f8fafc" : undefined
+                  }}
                 />
               </div>
 
@@ -279,6 +283,10 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   placeholder="0.00"
                   required
+                  style={{
+                    background: darkMode ? "rgba(9, 9, 17, 0.9)" : undefined,
+                    color: darkMode ? "#f8fafc" : undefined
+                  }}
                 />
               </div>
 
@@ -290,6 +298,10 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="e.g., Burgers, Drinks, Sides"
+                  style={{
+                    background: darkMode ? "rgba(9, 9, 17, 0.9)" : undefined,
+                    color: darkMode ? "#f8fafc" : undefined
+                  }}
                 />
               </div>
 
@@ -301,6 +313,10 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Describe your dish..."
                   rows={3}
+                  style={{
+                    background: darkMode ? "rgba(9, 9, 17, 0.9)" : undefined,
+                    color: darkMode ? "#f8fafc" : undefined
+                  }}
                 />
               </div>
 
