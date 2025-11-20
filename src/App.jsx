@@ -1108,13 +1108,19 @@ export default function App({ user }) {
      Header
   ------------------------------------------------------- */
   const Header = () => (
-    <header className="header">
+    <header className="header header-centered">
       <div className="header-content">
-        <h1 style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <img src={logo} alt="Mzansi Food Connect" style={{ width: "40px", height: "40px" }} />
-          Mzansi Food Connect - Owner Portal
-        </h1>
-        <p>Business Management System</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", justifyContent: "center" }}>
+          <img
+            src={logo}
+            alt="Mzansi Food Connect"
+            style={{ width: "50px", height: "50px" }}
+          />
+          <div>
+            <h1>Mzansi Food Connect - Owner Portal</h1>
+            <p>Business Management System</p>
+          </div>
+        </div>
       </div>
 
       <div className="user-menu" style={{

@@ -40,6 +40,23 @@ body.dark .app {
   justify-content: space-between;
 }
 
+.header-centered {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+}
+
+.header-centered .header-content {
+  align-items: center;
+  text-align: center;
+}
+
+.header-centered .user-menu {
+  justify-content: center;
+}
+
 .header-content {
   display: flex;
   flex-direction: column;
