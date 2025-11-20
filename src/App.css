@@ -317,6 +317,22 @@ button:hover:not(:disabled) {
   justify-content: space-between;
 }
 
+.view-header h2 {
+  color: var(--color-text);
+}
+
+.view-header p {
+  color: var(--color-muted);
+}
+
+body.dark .view-header h2 {
+  color: #f8fafc;
+}
+
+body.dark .view-header p {
+  color: #cbd5e1;
+}
+
 .stat-value {
   font-family: var(--font-display);
   font-size: var(--fs-2xl);
