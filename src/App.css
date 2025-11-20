@@ -511,6 +511,37 @@ body.dark textarea::placeholder {
   background: var(--color-surface);
 }
 
+.qr-designer-card {
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  text-align: center;
+  color: #0f172a;
+  box-shadow: var(--shadow-soft);
+}
+
+.qr-designer-card label,
+.qr-designer-card p,
+.qr-designer-card small,
+.qr-designer-card input,
+.qr-designer-card select {
+  color: inherit;
+}
+
+.qr-designer-card input,
+.qr-designer-card select {
+  background: var(--color-surface);
+}
+
+.qr-designer-card button {
+  color: #fff;
+}
+
+body.dark .qr-designer-card {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+}
+
 .stack-sm { display: flex; flex-direction: column; gap: var(--space-sm); }
 .stack-md { display: flex; flex-direction: column; gap: var(--space-md); }
 .row-wrap { display: flex; flex-wrap: wrap; gap: var(--space-sm); }

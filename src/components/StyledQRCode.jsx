@@ -161,15 +161,7 @@ export default function StyledQRCode({ storeName }) {
     );
 
   return (
-    <div
-      style={{
-        background: "rgba(255,255,255,0.05)",
-        borderRadius: "16px",
-        padding: "1.5rem",
-        textAlign: "center",
-        color: "#fff",
-      }}
-    >
+    <div className="qr-designer-card">
       <h3 style={{ marginBottom: "1rem" }}>📱 QR Code Designer</h3>
 
       {/* QR Preview Card */}
