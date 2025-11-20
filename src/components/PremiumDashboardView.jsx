@@ -46,7 +46,7 @@ export default function PremiumDashboardView({
     <div className="dashboard premium-dashboard">
       <div className="premium-header">
         <div className="premium-header__row">
-          <div className="premium-brand">
+          <div className="premium-brand premium-brand--centered">
             <div className="premium-avatar">
               {storeInfo?.profile_picture_url ? (
                 <img
@@ -63,7 +63,7 @@ export default function PremiumDashboardView({
               <p className="premium-subtitle">Luxury business experience · All features unlocked</p>
             </div>
           </div>
-          <div className="premium-actions">
+          <div className="premium-actions premium-actions--center">
             <span className={`premium-chip ${isOpen ? "success" : "neutral"}`}>
               {isOpen ? "Open now" : "Currently closed"}
             </span>

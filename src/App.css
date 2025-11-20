@@ -749,16 +749,23 @@ body.dark .premium-dashboard {
   position: relative;
   z-index: 1;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-lg);
-  justify-content: space-between;
+  flex-direction: column;
+  gap: var(--space-md);
+  justify-content: center;
   align-items: center;
+  text-align: center;
 }
 
 .premium-brand {
   display: inline-flex;
   align-items: center;
   gap: var(--space-md);
+}
+
+.premium-brand--centered {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
 }
 
 .premium-avatar {
@@ -799,6 +806,11 @@ body.dark .premium-dashboard {
   display: inline-flex;
   gap: var(--space-sm);
   align-items: center;
+}
+
+.premium-actions--center {
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .premium-chip {
