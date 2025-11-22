@@ -129,11 +129,114 @@ export default function StyledQRCode({ storeName }) {
     }
   }, [whatsappQr, whatsappGroupLink, frameStyle, bgColor]);
 
-  const downloadQR = () => {
-    qr.download({
-      name: `${storeName}-QR`,
-      extension: "png",
+  const downloadQR = async () => {
+    // Create a canvas to design the full QR poster
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Set canvas size for print quality (A5 size at 300 DPI)
+    const width = 1748; // A5 width at 300 DPI
+    const height = 2480; // A5 height at 300 DPI
+    canvas.width = width;
+    canvas.height = height;
+
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, "#ffffff");
+    gradient.addColorStop(1, "#f8f9fa");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Load and draw MFC logo
+    const logo = new Image();
+    logo.crossOrigin = "anonymous";
+
+    await new Promise((resolve, reject) => {
+      logo.onload = resolve;
+      logo.onerror = reject;
+      logo.src = "/src/images/logo.png";
     });
+
+    // Draw logo at top (centered)
+    const logoWidth = 400;
+    const logoHeight = (logo.height / logo.width) * logoWidth;
+    ctx.drawImage(logo, (width - logoWidth) / 2, 100, logoWidth, logoHeight);
+
+    // Draw store name
+    ctx.fillStyle = color;
+    ctx.font = "bold 90px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(storeName, width / 2, logoHeight + 280);
+
+    // Draw tagline
+    ctx.fillStyle = "#666";
+    ctx.font = "48px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillText(tagline, width / 2, logoHeight + 380);
+
+    // Get QR code as blob and draw it
+    const qrBlob = await qr.getRawData("png");
+    const qrImage = new Image();
+
+    await new Promise((resolve, reject) => {
+      qrImage.onload = resolve;
+      qrImage.onerror = reject;
+      qrImage.src = URL.createObjectURL(qrBlob);
+    });
+
+    // Draw QR code (larger, centered)
+    const qrSize = 900;
+    const qrX = (width - qrSize) / 2;
+    const qrY = logoHeight + 480;
+
+    // Add white background with shadow for QR
+    ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 10;
+    ctx.fillStyle = "#ffffff";
+    const borderRadius = 40;
+    ctx.beginPath();
+    ctx.roundRect(qrX - 60, qrY - 60, qrSize + 120, qrSize + 120, borderRadius);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Draw QR code
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+
+    // Draw URL below QR
+    ctx.fillStyle = "#333";
+    ctx.font = "42px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    const displayUrl = storeUrl.replace(/^https?:\/\//, "");
+    ctx.fillText(displayUrl, width / 2, qrY + qrSize + 160);
+
+    // Draw footer text
+    ctx.fillStyle = color;
+    ctx.font = "bold 52px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillText("Scan to Order Online", width / 2, qrY + qrSize + 260);
+
+    // Add decorative line
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(width / 2 - 200, qrY + qrSize + 300);
+    ctx.lineTo(width / 2 + 200, qrY + qrSize + 300);
+    ctx.stroke();
+
+    // Download the canvas as PNG
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${storeName}-QR-Poster.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }, "image/png", 1.0);
   };
 
   const saveDesign = async () => {

@@ -4,6 +4,8 @@ import App from "./App.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 
+const SIGNUPS_ENABLED = false;
+
 export default function AppWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,10 +33,16 @@ export default function AppWrapper() {
 
   // Show signup or login page when not authenticated
   if (!user) {
-    if (showSignup) {
+    if (SIGNUPS_ENABLED && showSignup) {
       return <Signup onBack={() => setShowSignup(false)} />;
     }
-    return <Login onLogin={setUser} onSwitchToSignup={() => setShowSignup(true)} />;
+    return (
+      <Login
+        onLogin={setUser}
+        onSwitchToSignup={SIGNUPS_ENABLED ? () => setShowSignup(true) : undefined}
+        signupsEnabled={SIGNUPS_ENABLED}
+      />
+    );
   }
 
   // ✅ Only render dashboard when logged in

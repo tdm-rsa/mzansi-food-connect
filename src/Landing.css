@@ -161,6 +161,12 @@
   margin-bottom: var(--space-sm);
 }
 
+.signup-closed-text {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: var(--fs-xs);
+  margin-top: var(--space-xs);
+}
+
 .hero-trust {
   font-size: var(--fs-xs);
   color: rgba(255, 255, 255, 0.75);
@@ -272,6 +278,14 @@
 .plan-cta.secondary {
   border-color: rgba(255, 255, 255, 0.4);
   color: #fff;
+}
+
+.plan-cta.disabled {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.65);
+  cursor: not-allowed;
+  background: transparent;
 }
 
 /* -------------------------------------------------------------------------- */

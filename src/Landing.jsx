@@ -95,6 +95,7 @@ function Landing() {
 
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const signupsOpen = false;
 
   const pricingPlans = [
     {
@@ -201,11 +202,16 @@ function Landing() {
             Perfect for fast foods, eateries, shisanyamas, restaurants, and bakeries across South Africa.
           </p>
           <div className="hero-buttons">
-            <a href="/app" className="btn btn-primary">Start Free Today</a>
+            <a href="/app" className="btn btn-primary">Login to Dashboard</a>
             <a href="#features" className="btn btn-secondary">See Features</a>
           </div>
+          {!signupsOpen && (
+            <p className="signup-closed-text">
+              New store signups are temporarily paused while we finish testing. Existing stores can continue to log in.
+            </p>
+          )}
           <div className="hero-trust">
-            <p>✅ No credit card required • ✅ Setup in 5 minutes • ✅ 7-day free trial</p>
+            <p>⚡ Setup in minutes • 📱 Works on any device • 🇿🇦 Built for SA food businesses</p>
           </div>
         </div>
         <div className="hero-visual">
@@ -292,9 +298,13 @@ function Landing() {
                     </li>
                   ))}
                 </ul>
-                <a href="/app" className={`plan-cta ${plan.highlight ? 'primary' : 'secondary'}`}>
-                  {plan.cta}
-                </a>
+                {signupsOpen ? (
+                  <a href="/app" className={`plan-cta ${plan.highlight ? 'primary' : 'secondary'}`}>
+                    {plan.cta}
+                  </a>
+                ) : (
+                  <span className="plan-cta disabled">Signups temporarily closed</span>
+                )}
               </div>
             ))}
           </div>
@@ -339,9 +349,14 @@ function Landing() {
           <h2>Ready to Take Your Business Online?</h2>
           <p>Join South African food businesses growing their sales with Mzansi Food Connect</p>
           <div className="cta-buttons">
-            <a href="/" className="btn btn-primary btn-large">Start Free - No Credit Card</a>
+            <a href="/app" className="btn btn-primary btn-large">Login to Dashboard</a>
+            <a href="#features" className="btn btn-secondary btn-large">Explore Features</a>
           </div>
-          <p className="cta-subtext">Setup takes 5 minutes • Free forever plan available</p>
+          {signupsOpen ? (
+            <p className="cta-subtext">Setup takes 5 minutes • Free forever plan available</p>
+          ) : (
+            <p className="cta-subtext">New accounts are temporarily closed while we finish testing.</p>
+          )}
         </div>
       </section>
 

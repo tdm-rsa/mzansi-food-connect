@@ -3,7 +3,7 @@ import { supabase } from "./supabaseClient";
 import "./App.css";
 import logo from "./images/logo.png";
 
-export default function Login({ onLogin, onSwitchToSignup }) {
+export default function Login({ onLogin, onSwitchToSignup, signupsEnabled = true }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -179,13 +179,20 @@ export default function Login({ onLogin, onSwitchToSignup }) {
             <span>or</span>
           </div>
 
-          <button
-            type="button"
-            className="toggle-mode-btn"
-            onClick={onSwitchToSignup}
-          >
-            Don't have an account? Create one
-          </button>
+          {signupsEnabled ? (
+            <button
+              type="button"
+              className="toggle-mode-btn"
+              onClick={onSwitchToSignup}
+            >
+              Don't have an account? Create one
+            </button>
+          ) : (
+            <div className="signup-disabled-banner">
+              <h4>New signups are temporarily paused</h4>
+              <p>We're finalising testing. Existing stores can still sign in above.</p>
+            </div>
+          )}
 
           <div className="form-footer">
             <p>
