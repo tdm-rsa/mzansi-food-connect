@@ -19,7 +19,11 @@ export const useCart = (storeId = null) => {
       const parsed = raw ? JSON.parse(raw) : [];
       // Ensure qty exists
       return Array.isArray(parsed)
-        ? parsed.map((it) => ({ ...it, qty: Math.max(1, Number(it.qty) || 1) }))
+        ? parsed.map((it) => ({
+            ...it,
+            qty: Math.max(1, Number(it.qty) || 1),
+            instructions: typeof it.instructions === "string" ? it.instructions : "",
+          }))
         : [];
     } catch {
       return [];
@@ -43,15 +47,20 @@ export const useCart = (storeId = null) => {
     const price = Number(item.price) || 0;
     const qtyToAdd = Math.max(1, Number(item.qty) || 1);
     const image_url = item.image_url ?? item.image ?? item.imageUrl ?? null;
+    const instructions = typeof item.instructions === "string" ? item.instructions : "";
 
     setItems((prev) => {
       const idx = prev.findIndex((i) => i.id === id);
       if (idx !== -1) {
         const copy = prev.slice();
-        copy[idx] = { ...copy[idx], qty: (copy[idx].qty || 1) + qtyToAdd };
+        copy[idx] = {
+          ...copy[idx],
+          qty: (copy[idx].qty || 1) + qtyToAdd,
+          instructions: instructions || copy[idx].instructions || "",
+        };
         return copy;
       }
-      return [...prev, { id, name, price, qty: qtyToAdd, image_url }];
+      return [...prev, { id, name, price, qty: qtyToAdd, image_url, instructions }];
     });
   }, []);
 
@@ -75,6 +84,12 @@ export const useCart = (storeId = null) => {
 
   const clearCart = useCallback(() => setItems([]), []);
 
+  const updateItem = useCallback((id, updates) => {
+    setItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, ...updates } : it))
+    );
+  }, []);
+
   const getTotal = useCallback(() =>
     items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.qty) || 1), 0), [items]
   );
@@ -90,5 +105,6 @@ export const useCart = (storeId = null) => {
     clearCart,
     getTotal,
     getTotalItems,
+    updateItem,
   };
 };

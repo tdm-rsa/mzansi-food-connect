@@ -58,7 +58,7 @@ export default function Checkout() {
     setCustomerPhone(digits.length > 0 ? '+27' + digits : '');
   };
 
-  const { items, getTotal, clearCart } = cart;
+  const { items, getTotal, clearCart, updateItem } = cart;
 
   const total = getTotal();
   const totalInCents = Math.round(total * 100); // Yoco uses cents
@@ -185,6 +185,7 @@ export default function Checkout() {
               item: item.name,
               qty: item.qty,
               price: item.price,
+              instructions: item.instructions || "",
             })),
             total,
             payment_status: "paid",
@@ -287,6 +288,20 @@ export default function Checkout() {
                 <span className="checkout-item-price">
                   R{(item.price * item.qty).toFixed(2)}
                 </span>
+                <input
+                  type="text"
+                  placeholder="Add notes (hot, extra chilli, no sauce...)"
+                  value={item.instructions || ""}
+                  onChange={(e) => updateItem(item.id, { instructions: e.target.value })}
+                  style={{
+                    marginTop: "0.35rem",
+                    width: "100%",
+                    borderRadius: "8px",
+                    border: "1px solid #d1d5db",
+                    padding: "0.55rem 0.75rem",
+                    fontSize: "0.95rem",
+                  }}
+                />
               </div>
             ))}
           </div>

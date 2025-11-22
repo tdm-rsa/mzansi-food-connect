@@ -7,7 +7,7 @@ export default function CartSidebar({ cart, store }) {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { items, addItem, removeItem, clearCart, getTotal, getTotalItems } = cart;
+  const { items, addItem, removeItem, clearCart, getTotal, getTotalItems, updateItem } = cart;
 
   const toggleCart = () => setIsOpen(!isOpen);
 
@@ -100,6 +100,21 @@ export default function CartSidebar({ cart, store }) {
                           Remove
                         </button>
                       </div>
+
+                      <input
+                        type="text"
+                        placeholder="Add notes (hot, extra chilli, no sauce...)"
+                        value={item.instructions || ""}
+                        onChange={(e) => updateItem(item.id, { instructions: e.target.value })}
+                        style={{
+                          width: "100%",
+                          padding: "0.4rem 0.6rem",
+                          marginTop: "0.35rem",
+                          borderRadius: "8px",
+                          border: "1px solid #d1d5db",
+                          fontSize: "0.9rem",
+                        }}
+                      />
                     </div>
 
                     <p className="mfc-cart-item-subtotal">R{(item.price * item.qty).toFixed(2)}</p>
