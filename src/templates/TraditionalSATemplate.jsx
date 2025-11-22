@@ -563,14 +563,14 @@ export default function TraditionalSATemplate(props) {
                             border: "none"
                           }}
                         >
-                          ❌
+                          Remove
                         </button>
                       </div>
 
-                      {/* Special Instructions - Right below qty controls */}
+                      {/* Special Instructions */}
                       <input
                         type="text"
-                        placeholder="Special instructions (hot, no chilli, extra sauce)"
+                        placeholder="Add instructions (hot, no chilli, extra sauce...)"
                         value={c.instructions || ""}
                         onChange={(e) => {
                           setCart((prev) => {
@@ -581,13 +581,13 @@ export default function TraditionalSATemplate(props) {
                         }}
                         style={{
                           width: "100%",
-                          padding: "0.5rem",
-                          marginTop: "0.75rem",
-                          marginBottom: "0.5rem",
-                          borderRadius: "4px",
+                          padding: "0.6rem",
+                          marginTop: "0.5rem",
+                          borderRadius: "6px",
                           border: "2px solid #ff6b35",
-                          fontSize: "0.9rem",
-                          backgroundColor: "#fff"
+                          fontSize: "0.95rem",
+                          backgroundColor: "#fff",
+                          boxSizing: "border-box"
                         }}
                       />
                     </div>
