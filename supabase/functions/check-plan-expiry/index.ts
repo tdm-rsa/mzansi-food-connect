@@ -110,38 +110,54 @@ serve(async (req) => {
       }
 
       if (emailType && subject && html) {
-        // Send email via your email service (e.g., SendGrid, Resend, etc.)
-        // For now, we'll log it and save to database
         console.log(`📧 Sending ${emailType} to ${userEmail} for ${store.name}`);
 
-        // TODO: Integrate with your email provider here
-        // Example with Resend:
-        /*
-        const resendApiKey = Deno.env.get("RESEND_API_KEY");
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            from: "Mzansi Food Connect <noreply@mzansifoodconnect.app>",
-            to: userEmail,
-            subject: subject,
-            html: html
-          })
-        });
-        */
+        // Send email via Resend
+        try {
+          const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
-        // Log email sent
-        await supabase
-          .from("expiry_emails_sent")
-          .insert({
-            store_id: store.id,
-            email_type: emailType,
-            sent_to: userEmail,
-            sent_at: now.toISOString()
+          if (!resendApiKey) {
+            console.error("RESEND_API_KEY not set in environment variables");
+            throw new Error("RESEND_API_KEY not configured");
+          }
+
+          const emailResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${resendApiKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              from: "Mzansi Food Connect <noreply@mzansifoodconnect.app>",
+              to: userEmail,
+              subject: subject,
+              html: html
+            })
           });
+
+          if (!emailResponse.ok) {
+            const errorData = await emailResponse.text();
+            console.error("Resend API error:", errorData);
+            throw new Error(`Resend API failed: ${errorData}`);
+          }
+
+          const emailResult = await emailResponse.json();
+          console.log(`✅ Email sent successfully:`, emailResult);
+
+          // Log email sent to database
+          await supabase
+            .from("expiry_emails_sent")
+            .insert({
+              store_id: store.id,
+              email_type: emailType,
+              sent_to: userEmail,
+              sent_at: now.toISOString()
+            });
+
+        } catch (emailError) {
+          console.error(`Failed to send ${emailType} email:`, emailError);
+          // Don't throw - continue processing other stores
+        }
       }
     }
 
