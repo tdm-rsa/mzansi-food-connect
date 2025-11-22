@@ -80,13 +80,17 @@ serve(async (req) => {
 
           console.log("Subscription payment success:", { storeId, planType });
 
+          // Calculate expiration date (30 days from now for monthly billing)
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days
+
           // Update user's plan
           const { error } = await supabase
             .from("tenants")
             .update({
               plan: planType,
-              plan_started_at: new Date().toISOString(),
-              plan_expires_at: null, // Subscriptions don't expire
+              plan_started_at: now.toISOString(),
+              plan_expires_at: expiresAt.toISOString(), // Set 30-day expiration
               payment_reference: event.payload.id,
             })
             .eq("id", storeId);

@@ -20,6 +20,7 @@ import StarterDashboardView from "./components/StarterDashboardView.jsx";
 import ProDashboardView from "./components/ProDashboardView.jsx";
 import PremiumDashboardView from "./components/PremiumDashboardView.jsx";
 import UpgradePayment from "./components/UpgradePayment.jsx";
+import PlanExpiredModal from "./components/PlanExpiredModal.jsx";
 
 /* -------------------------------------------------------
    Helper: tiny badge pill component
@@ -2639,11 +2640,32 @@ export default function App({ user }) {
     }
   };
 
+  // Check if plan is expired
+  const planExpired = storeInfo && !isPlanActive(storeInfo);
+
   return (
     <div className="app">
       <Header />
       <main className="main">{renderView()}</main>
-      
+
+      {/* Plan Expired Modal - Blocks access until renewed */}
+      {planExpired && (
+        <PlanExpiredModal
+          storeInfo={storeInfo}
+          onRenewed={async () => {
+            // Reload store info after successful payment
+            const { data } = await supabase
+              .from("tenants")
+              .select("*")
+              .eq("owner_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .single();
+            if (data) setStoreInfo(data);
+          }}
+        />
+      )}
+
       {/* Estimated Duration Popup Modal */}
       {estimatingOrder && (
         <div 

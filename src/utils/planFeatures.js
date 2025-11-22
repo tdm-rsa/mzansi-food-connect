@@ -67,21 +67,17 @@ export function isPlanActive(storeInfo) {
 
   const plan = storeInfo.plan || 'trial';
 
-  // Paid plans are always active (unless expired - add payment check later)
-  if (plan === 'pro' || plan === 'premium') {
-    return true;
+  // ALL plans now check expiration (Pro/Premium must renew monthly)
+  if (!storeInfo.plan_expires_at) {
+    // No expiration set - legacy store or error
+    return plan === 'trial'; // Only trial can have no expiration temporarily
   }
 
-  // Trial: check expiration
-  if (plan === 'trial') {
-    if (!storeInfo.plan_expires_at) return true; // No expiration set yet
+  const expiresAt = new Date(storeInfo.plan_expires_at);
+  const now = new Date();
 
-    const expiresAt = new Date(storeInfo.plan_expires_at);
-    const now = new Date();
-    return now < expiresAt;
-  }
-
-  return false;
+  // Plan is active if expiration date is in the future
+  return now < expiresAt;
 }
 
 export function getDaysRemaining(storeInfo) {
