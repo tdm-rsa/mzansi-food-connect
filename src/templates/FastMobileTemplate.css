@@ -174,12 +174,15 @@
 
 .menu-card-image {
   aspect-ratio: 1 / 1;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 8px;
 }
 
 .menu-card-image img {
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+  border-radius: var(--radius-md);
 }
 
 .menu-card-content {
