@@ -172,6 +172,7 @@ export default function TraditionalSATemplate(props) {
         item: c.name,
         qty: c.qty || 1,
         price: c.price,
+        instructions: c.instructions || "",
       }));
 
       const orderNumber = generateOrderNumber();
@@ -548,12 +549,35 @@ export default function TraditionalSATemplate(props) {
                     <div className="cart-item-info">
                       <h4>{c.name}</h4>
                       <p>R{c.price}</p>
+
+                      {/* Special Instructions */}
+                      <input
+                        type="text"
+                        placeholder="Special instructions (e.g., hot, no chilli, extra sauce)"
+                        value={c.instructions || ""}
+                        onChange={(e) => {
+                          setCart((prev) => {
+                            const copy = [...prev];
+                            copy[i] = { ...copy[i], instructions: e.target.value };
+                            return copy;
+                          });
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "0.5rem",
+                          marginTop: "0.5rem",
+                          borderRadius: "4px",
+                          border: "1px solid #ddd",
+                          fontSize: "0.9rem"
+                        }}
+                      />
+
                       <div className="qty-row">
                         <button onClick={() => decQty(i)}>-</button>
                         <span>{c.qty || 1}</span>
                         <button onClick={() => incQty(i)}>+</button>
-                        <button 
-                          className="remove-item" 
+                        <button
+                          className="remove-item"
                           onClick={() => removeAt(i)}
                           style={{
                             background: "#ef4444",
