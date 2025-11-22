@@ -550,28 +550,6 @@ export default function TraditionalSATemplate(props) {
                       <h4>{c.name}</h4>
                       <p>R{c.price}</p>
 
-                      {/* Special Instructions */}
-                      <input
-                        type="text"
-                        placeholder="Special instructions (e.g., hot, no chilli, extra sauce)"
-                        value={c.instructions || ""}
-                        onChange={(e) => {
-                          setCart((prev) => {
-                            const copy = [...prev];
-                            copy[i] = { ...copy[i], instructions: e.target.value };
-                            return copy;
-                          });
-                        }}
-                        style={{
-                          width: "100%",
-                          padding: "0.5rem",
-                          marginTop: "0.5rem",
-                          borderRadius: "4px",
-                          border: "1px solid #ddd",
-                          fontSize: "0.9rem"
-                        }}
-                      />
-
                       <div className="qty-row">
                         <button onClick={() => decQty(i)}>-</button>
                         <span>{c.qty || 1}</span>
@@ -588,6 +566,30 @@ export default function TraditionalSATemplate(props) {
                           ❌
                         </button>
                       </div>
+
+                      {/* Special Instructions - Right below qty controls */}
+                      <input
+                        type="text"
+                        placeholder="Special instructions (hot, no chilli, extra sauce)"
+                        value={c.instructions || ""}
+                        onChange={(e) => {
+                          setCart((prev) => {
+                            const copy = [...prev];
+                            copy[i] = { ...copy[i], instructions: e.target.value };
+                            return copy;
+                          });
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "0.5rem",
+                          marginTop: "0.75rem",
+                          marginBottom: "0.5rem",
+                          borderRadius: "4px",
+                          border: "2px solid #ff6b35",
+                          fontSize: "0.9rem",
+                          backgroundColor: "#fff"
+                        }}
+                      />
                     </div>
                   </div>
                 ))
