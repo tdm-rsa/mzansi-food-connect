@@ -703,7 +703,7 @@ export default function TraditionalSATemplate(props) {
               <p style={{
                 fontSize: '1.1rem',
                 lineHeight: '1.6',
-                color: '#333',
+                color: '#e2e8f0',
                 whiteSpace: 'pre-wrap'
               }}>
                 {banner.specialsText}
@@ -728,7 +728,7 @@ export default function TraditionalSATemplate(props) {
               <p style={{
                 fontSize: '1.1rem',
                 lineHeight: '1.6',
-                color: '#333',
+                color: '#e2e8f0',
                 whiteSpace: 'pre-wrap'
               }}>
                 {state.instructions}
@@ -751,7 +751,6 @@ export default function TraditionalSATemplate(props) {
     </div>
   );
 }
-
 
 
 
