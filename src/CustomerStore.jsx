@@ -8,6 +8,8 @@ import { getSubdomain } from "./utils/subdomain";
 import ModernFoodTemplate from "./templates/ModernFoodTemplate";
 import TraditionalSATemplate from "./templates/TraditionalSATemplate";
 import FastMobileTemplate from "./templates/FastMobileTemplate";
+import GhostKitchenProTemplate from "./templates/GhostKitchenProTemplate";
+import LateNightFiestaTemplate from "./templates/LateNightFiestaTemplate";
 
 // Import cart hook and UI
 import { useCart } from "./hooks/useCart";
@@ -260,6 +262,10 @@ export default function CustomerStore() {
         return <TraditionalSATemplate {...commonProps} />;
       case "Fast & Mobile":
         return <FastMobileTemplate {...commonProps} />;
+      case "Ghost Kitchen Pro":
+        return <GhostKitchenProTemplate {...commonProps} />;
+      case "Late Night Fiesta":
+        return <LateNightFiestaTemplate {...commonProps} />;
       case "Modern Food":
       default:
         return <ModernFoodTemplate {...commonProps} />;

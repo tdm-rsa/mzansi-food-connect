@@ -1,6 +1,6 @@
 // PRO PLAN DASHBOARD - COMPLETE STANDALONE COMPONENT
 // This is for PRO accounts ONLY - R25/month
-// Features: 3 templates, unlimited products, BASIC analytics (numbers only), WhatsApp API, subdomain
+// Features: 2 templates, unlimited products, BASIC analytics (numbers only), WhatsApp API, subdomain
 
 import { useState } from "react";
 
@@ -294,7 +294,7 @@ export default function ProDashboardView({
             style={{ position: "relative" }}
           >
             <h4 style={{ marginBottom: ".25rem" }}>🌐 Web Templates</h4>
-            <p style={{ opacity: 0.8, margin: 0 }}>3 professional templates available</p>
+            <p style={{ opacity: 0.8, margin: 0 }}>2 professional templates available</p>
           </div>
 
           {/* 9. Settings */}

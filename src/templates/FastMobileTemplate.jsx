@@ -6,9 +6,39 @@ import GeneralAskModal from "../components/GeneralAskModal.jsx";
 import { generateOrderNumber } from "../utils/orderNumber";
 import "./FastMobileTemplate.css";
 
+const TEMPLATE_VARIANTS = {
+  fast: {
+    className: "",
+    vars: {},
+  },
+  ghost: {
+    className: "ghost-theme",
+    vars: {
+      '--fm-bg': 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 35%), radial-gradient(circle at 80% 0%, rgba(6,182,212,0.18), transparent 40%), #050505',
+      '--fm-surface': 'rgba(12, 12, 16, 0.9)',
+      '--fm-border': 'rgba(255,255,255,0.08)',
+      '--fm-primary': '#cbd5e1',
+      '--fm-accent': '#06b6d4',
+    },
+  },
+  fiesta: {
+    className: "fiesta-theme",
+    vars: {
+      '--fm-bg': 'radial-gradient(circle at 10% 10%, rgba(244, 114, 182, 0.22), transparent 30%), radial-gradient(circle at 90% 0%, rgba(34, 211, 238, 0.25), transparent 40%), #0b1021',
+      '--fm-surface': 'rgba(18, 18, 40, 0.92)',
+      '--fm-border': 'rgba(255,255,255,0.14)',
+      '--fm-primary': '#f472b6',
+      '--fm-accent': '#22d3ee',
+    },
+  },
+};
+
 export default function FastMobileTemplate(props) {
-  const { state, storeId, cart: extCart } = props;
+  const { state, storeId, cart: extCart, variant = "fast" } = props;
   const { header, banner, menuItems, about, yoco_public_key, yoco_secret_key } = state;
+  const theme = TEMPLATE_VARIANTS[variant] || TEMPLATE_VARIANTS.fast;
+  const rootStyle = theme?.vars && Object.keys(theme.vars).length ? theme.vars : undefined;
+  const variantClass = theme?.className || "";
 
   // DEBUG: Log what data the template receives
   useEffect(() => {
@@ -284,7 +314,7 @@ export default function FastMobileTemplate(props) {
   };
 
   return (
-    <div className="fast-page">
+    <div className={`fast-page ${variantClass}`.trim()} style={rootStyle}>
       {/* HEADER */}
       <header className="fast-header">
         <div className="fast-left">
@@ -738,7 +768,6 @@ export default function FastMobileTemplate(props) {
     </div>
   );
 }
-
 
 
 

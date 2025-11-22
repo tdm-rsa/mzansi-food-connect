@@ -1247,20 +1247,30 @@ export default function App({ user }) {
       /* ---------------------- Web Templates ---------------------- */
       case "webtemplates": {
         const templates = [
-          { id: 1, name: "Modern Food", desc: "Clean, minimal theme with vibrant highlights", preview: "🍱" },
-          { id: 2, name: "Traditional SA", desc: "Warm, cultural look inspired by shisanyama", preview: "🔥" },
-          { id: 3, name: "Fast & Mobile", desc: "Optimized for mobile users and quick orders", preview: "⚡" },
+          { id: 1, name: "Modern Food", desc: "Clean, minimal theme with vibrant highlights", preview: "Plate" },
+          { id: 2, name: "Traditional SA", desc: "Warm, cultural look inspired by shisanyama", preview: "Braai" },
+          { id: 3, name: "Fast & Mobile", desc: "Optimized for mobile users and quick orders", preview: "Fast" },
+          { id: 4, name: "Ghost Kitchen Pro", desc: "Dark, delivery-first look built for ghost kitchens", preview: "Ghost" },
+          { id: 5, name: "Late Night Fiesta", desc: "Neon street-food vibe with promo chips", preview: "Fiesta" },
         ];
 
         // Check which templates are available for current plan
         const allowedTemplates = planFeatures.templates || ['Modern Food'];
         const isTemplateLocked = (templateName) => !allowedTemplates.includes(templateName);
+        const totalTemplates = templates.length;
+        const availableCount = allowedTemplates.length;
+        const proTemplatesCount = getPlanFeatures('pro').templates.length;
+        const planLabel = (() => {
+          if (storeInfo?.plan === 'premium') return `Premium Plan: All ${totalTemplates} templates available`;
+          if (storeInfo?.plan === 'pro') return `Pro Plan: ${availableCount} of ${totalTemplates} templates available`;
+          return `Free Trial: ${availableCount} of ${totalTemplates} templates available`;
+        })();
 
         return (
           <div className="template-view">
             <div className="view-header">
-              <button className="back-btn" onClick={() => setCurrentView("dashboard")}>← Back</button>
-              <h2>🌐 Storefront Templates</h2>
+              <button className="back-btn" onClick={() => setCurrentView("dashboard")}>?+? Back</button>
+              <h2>dYO? Storefront Templates</h2>
               <p>Choose and activate your website look</p>
             </div>
 
@@ -1272,11 +1282,7 @@ export default function App({ user }) {
               borderRadius: "10px",
               marginBottom: "2rem"
             }}>
-              <p style={{ margin: 0, color: "#667eea", fontWeight: "600" }}>
-                {storeInfo?.plan === 'trial' && '📦 Free Trial: 1 Template Available'}
-                {storeInfo?.plan === 'pro' && '🚀 Pro Plan: 2 Templates Available'}
-                {storeInfo?.plan === 'premium' && '👑 Premium Plan: All 3 Templates Available'}
-              </p>
+              <p style={{ margin: 0, color: "#667eea", fontWeight: "600" }}>{planLabel}</p>
             </div>
 
             <div className="templates-management">
@@ -1315,7 +1321,7 @@ export default function App({ user }) {
                             zIndex: 10,
                           }}
                         >
-                          🔒 {storeInfo?.plan === 'trial' ? 'Pro' : 'Premium'} Only
+                          dY"' {storeInfo?.plan === 'trial' ? 'Pro' : 'Premium'} Only
                         </div>
                       )}
 
@@ -1341,7 +1347,7 @@ export default function App({ user }) {
                         <h4>{t.name}</h4>
                         <p>{t.desc}</p>
                         <div className={`template-status ${t.name === activeTemplate ? "active" : locked ? "locked" : ""}`}>
-                          {locked ? "🔒 Locked" : t.name === activeTemplate ? "Active" : "Inactive"}
+                          {locked ? "Locked" : t.name === activeTemplate ? "Active" : "Inactive"}
                         </div>
                       </div>
 
@@ -1401,12 +1407,12 @@ export default function App({ user }) {
                 color: "white"
               }}>
                 <h3 style={{ color: "white", marginBottom: "1rem" }}>
-                  {storeInfo?.plan === 'trial' ? '🚀 Want More Templates?' : '👑 Unlock Premium Templates'}
+                  {storeInfo?.plan === 'trial' ? 'dYs? Want More Templates?' : 'dY`` Unlock Premium Templates'}
                 </h3>
                 <p style={{ color: "rgba(255,255,255,0.9)", marginBottom: "1.5rem" }}>
                   {storeInfo?.plan === 'trial'
-                    ? 'Upgrade to Pro for 3 professional templates, or Premium for advanced analytics'
-                    : 'Upgrade to Premium for advanced analytics with charts'}
+                    ? `Upgrade to Pro for ${proTemplatesCount} professional templates, or Premium for all ${totalTemplates} plus advanced analytics`
+                    : `Upgrade to Premium for all ${totalTemplates} templates and advanced analytics`}
                 </p>
                 {storeInfo?.plan === 'trial' && (
                   <button

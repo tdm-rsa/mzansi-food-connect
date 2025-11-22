@@ -14,6 +14,8 @@ import { getSubdomain } from "./utils/subdomain.js";
 import ModernFoodTemplate from "./templates/ModernFoodTemplate.jsx";
 import TraditionalSATemplate from "./templates/TraditionalSATemplate.jsx";
 import FastMobileTemplate from "./templates/FastMobileTemplate.jsx";
+import GhostKitchenProTemplate from "./templates/GhostKitchenProTemplate.jsx";
+import LateNightFiestaTemplate from "./templates/LateNightFiestaTemplate.jsx";
 
 import "./index.css";
 import { supabase } from "./supabaseClient";
@@ -82,6 +84,10 @@ function StorefrontRouter() {
       return <TraditionalSATemplate state={state} storeId={state.store_id} />;
     case "Fast & Mobile":
       return <FastMobileTemplate state={state} storeId={state.store_id} />;
+    case "Ghost Kitchen Pro":
+      return <GhostKitchenProTemplate state={state} storeId={state.store_id} />;
+    case "Late Night Fiesta":
+      return <LateNightFiestaTemplate state={state} storeId={state.store_id} />;
     case "Modern Food":
     default:
       return <ModernFoodTemplate state={state} storeId={state.store_id} />;
@@ -150,7 +156,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </BrowserRouter>
   </React.StrictMode>
 );
-
 
 
 

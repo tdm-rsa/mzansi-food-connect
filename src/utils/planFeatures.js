@@ -24,7 +24,7 @@ export const PLAN_FEATURES = {
     hasCustomDomain: false,
     hasSubdomain: true,
     removeBranding: true,
-    templates: ['Modern Food', 'Traditional SA'], // 2 templates - Fast & Mobile locked for Premium only
+    templates: ['Modern Food', 'Traditional SA'], // 2 templates - Fast & Mobile and new variants are Premium-only
     support: 'priority'
   },
   premium: {
@@ -37,7 +37,13 @@ export const PLAN_FEATURES = {
     hasCustomDomain: true,
     hasSubdomain: true,
     removeBranding: true,
-    templates: ['Modern Food', 'Traditional SA', 'Fast & Mobile'], // 3 templates
+    templates: [
+      'Modern Food',
+      'Traditional SA',
+      'Fast & Mobile',
+      'Ghost Kitchen Pro',
+      'Late Night Fiesta'
+    ], // 5 templates
     support: 'dedicated'
   }
 };

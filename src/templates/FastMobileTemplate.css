@@ -17,6 +17,79 @@
   gap: var(--space-xl);
 }
 
+.fast-page.ghost-theme {
+  letter-spacing: 0.2px;
+}
+
+.fast-page.ghost-theme .fast-banner {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, rgba(6, 182, 212, 0.08), rgba(12, 12, 16, 0.95));
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+}
+
+.fast-page.ghost-theme .fast-header {
+  background: rgba(8, 8, 12, 0.9);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.fast-page.ghost-theme .menu-card {
+  background: linear-gradient(180deg, rgba(18, 18, 22, 0.95), rgba(12, 12, 16, 0.9));
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.fast-page.ghost-theme .menu-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.fast-page.ghost-theme .fast-about {
+  background: rgba(10, 10, 14, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.fast-page.ghost-theme .fab-cart {
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  color: #04131b;
+}
+
+.fast-page.fiesta-theme {
+  color: #f8fafc;
+}
+
+.fast-page.fiesta-theme .fast-banner {
+  background: linear-gradient(150deg, rgba(244, 114, 182, 0.18), rgba(34, 211, 238, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+}
+
+.fast-page.fiesta-theme .fast-header {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(244, 114, 182, 0.12));
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.fast-page.fiesta-theme .menu-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: radial-gradient(circle at 20% 15%, rgba(244, 114, 182, 0.08), transparent 45%), rgba(18, 18, 40, 0.92);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.55);
+}
+
+.fast-page.fiesta-theme .menu-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(34, 211, 238, 0.35);
+}
+
+.fast-page.fiesta-theme .fast-about {
+  background: linear-gradient(180deg, rgba(16, 12, 35, 0.92), rgba(11, 16, 33, 0.9));
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.fast-page.fiesta-theme .fab-cart {
+  background: conic-gradient(from 120deg, #22d3ee, #f472b6, #22d3ee);
+  color: #0b1021;
+  box-shadow: 0 12px 30px rgba(34, 211, 238, 0.35);
+}
+
 .fast-header {
   border-radius: var(--radius-xl);
   padding: var(--space-md);
