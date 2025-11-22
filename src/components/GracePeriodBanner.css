@@ -1,0 +1,200 @@
+.grace-period-banner {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-left: 6px solid #ff9800;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+  animation: pulseWarning 2s infinite;
+}
+
+@keyframes pulseWarning {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(255, 152, 0, 0.4);
+  }
+}
+
+.grace-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.grace-icon {
+  font-size: 3rem;
+  animation: shake 1s infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(15deg); }
+}
+
+.grace-message {
+  flex: 1;
+}
+
+.grace-message h3 {
+  color: #e65100;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.grace-message p {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.grace-message strong {
+  color: #d84315;
+  font-weight: 700;
+}
+
+.grace-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-renew-now {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  white-space: nowrap;
+}
+
+.btn-renew-now:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.grace-countdown {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #ffb74d;
+}
+
+.countdown-circle {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.countdown-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.countdown-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+  opacity: 0.9;
+}
+
+.grace-warnings {
+  flex: 1;
+}
+
+.grace-warnings h4 {
+  color: #e65100;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.grace-warnings ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.grace-warnings li {
+  padding: 0.4rem 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Dark mode */
+body.dark .grace-period-banner {
+  background: linear-gradient(135deg, #3e2723 0%, #4e342e 100%);
+  border-left-color: #ff9800;
+}
+
+body.dark .grace-message h3 {
+  color: #ffb74d;
+}
+
+body.dark .grace-message p {
+  color: #b0b0b0;
+}
+
+body.dark .grace-message strong {
+  color: #ff9800;
+}
+
+body.dark .grace-countdown {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: #ff9800;
+}
+
+body.dark .grace-warnings h4 {
+  color: #ffb74d;
+}
+
+body.dark .grace-warnings li {
+  color: #b0b0b0;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .grace-banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grace-icon {
+    font-size: 2rem;
+  }
+
+  .grace-countdown {
+    flex-direction: column;
+  }
+
+  .countdown-circle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .countdown-number {
+    font-size: 2rem;
+  }
+
+  .btn-renew-now {
+    width: 100%;
+  }
+}

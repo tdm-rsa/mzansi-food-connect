@@ -77,7 +77,42 @@ export function isPlanActive(storeInfo) {
   const now = new Date();
 
   // Plan is active if expiration date is in the future
-  return now < expiresAt;
+  if (now < expiresAt) {
+    return true;
+  }
+
+  // GRACE PERIOD: 3 days after expiration with limited access
+  const gracePeriodDays = 3;
+  const gracePeriodEnd = new Date(expiresAt.getTime() + (gracePeriodDays * 24 * 60 * 60 * 1000));
+
+  // If within grace period, plan is still "active" but with warnings
+  return now < gracePeriodEnd;
+}
+
+export function isInGracePeriod(storeInfo) {
+  if (!storeInfo || !storeInfo.plan_expires_at) return false;
+
+  const expiresAt = new Date(storeInfo.plan_expires_at);
+  const now = new Date();
+
+  // Grace period starts after expiration
+  if (now < expiresAt) return false;
+
+  // Grace period lasts 3 days
+  const gracePeriodEnd = new Date(expiresAt.getTime() + (3 * 24 * 60 * 60 * 1000));
+
+  return now < gracePeriodEnd;
+}
+
+export function getGracePeriodDaysLeft(storeInfo) {
+  if (!isInGracePeriod(storeInfo)) return 0;
+
+  const expiresAt = new Date(storeInfo.plan_expires_at);
+  const gracePeriodEnd = new Date(expiresAt.getTime() + (3 * 24 * 60 * 60 * 1000));
+  const now = new Date();
+
+  const daysLeft = Math.ceil((gracePeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, daysLeft);
 }
 
 export function getDaysRemaining(storeInfo) {

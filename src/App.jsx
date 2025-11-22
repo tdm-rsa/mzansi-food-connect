@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { supabase } from "./supabaseClient";
-import { getPlanFeatures, canAccessFeature, isPlanActive, getDaysRemaining } from "./utils/planFeatures";
+import { getPlanFeatures, canAccessFeature, isPlanActive, getDaysRemaining, isInGracePeriod } from "./utils/planFeatures";
 import { sendOrderConfirmation, sendOrderReady, sendOrderFetched, sendWhatsAppMessage } from "./utils/whatsapp";
 import logo from "./images/logo.png";
 
@@ -21,6 +21,7 @@ import ProDashboardView from "./components/ProDashboardView.jsx";
 import PremiumDashboardView from "./components/PremiumDashboardView.jsx";
 import UpgradePayment from "./components/UpgradePayment.jsx";
 import PlanExpiredModal from "./components/PlanExpiredModal.jsx";
+import GracePeriodBanner from "./components/GracePeriodBanner.jsx";
 
 /* -------------------------------------------------------
    Helper: tiny badge pill component
@@ -2646,6 +2647,26 @@ export default function App({ user }) {
   return (
     <div className="app">
       <Header />
+
+      {/* Grace Period Banner - Shows warning during 3-day grace period */}
+      {isInGracePeriod(storeInfo) && (
+        <GracePeriodBanner
+          storeInfo={storeInfo}
+          user={user}
+          onRenewed={async () => {
+            // Reload store info after successful payment
+            const { data } = await supabase
+              .from("tenants")
+              .select("*")
+              .eq("owner_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .single();
+            if (data) setStoreInfo(data);
+          }}
+        />
+      )}
+
       <main className="main">{renderView()}</main>
 
       {/* Plan Expired Modal - Blocks access until renewed */}
