@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import QRCodeStyling from "qr-code-styling";
 import { supabase } from "../supabaseClient";
+import logo from "../images/logo.png";
 
 export default function StyledQRCode({ storeName }) {
   const ref = useRef(null);
@@ -148,19 +149,19 @@ export default function StyledQRCode({ storeName }) {
     ctx.fillRect(0, 0, width, height);
 
     // Load and draw MFC logo
-    const logo = new Image();
-    logo.crossOrigin = "anonymous";
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
 
     await new Promise((resolve, reject) => {
-      logo.onload = resolve;
-      logo.onerror = reject;
-      logo.src = "/src/images/logo.png";
+      logoImg.onload = resolve;
+      logoImg.onerror = reject;
+      logoImg.src = logo;
     });
 
     // Draw logo at top (centered)
     const logoWidth = 400;
-    const logoHeight = (logo.height / logo.width) * logoWidth;
-    ctx.drawImage(logo, (width - logoWidth) / 2, 100, logoWidth, logoHeight);
+    const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+    ctx.drawImage(logoImg, (width - logoWidth) / 2, 100, logoWidth, logoHeight);
 
     // Draw store name
     ctx.fillStyle = color;
