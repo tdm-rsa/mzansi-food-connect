@@ -148,7 +148,6 @@ export default function Checkout() {
             item: item.name,
             qty: item.qty,
             price: item.price,
-            instructions: item.instructions || "",
             preferences: item.selectedPreferences || [],
           })),
           total,
@@ -263,20 +262,6 @@ export default function Checkout() {
                     ))}
                   </div>
                 )}
-                <input
-                  type="text"
-                  placeholder="Add notes (hot, extra chilli, no sauce...)"
-                  value={item.instructions || ""}
-                  onChange={(e) => updateItem(item.id, { instructions: e.target.value })}
-                  style={{
-                    marginTop: "0.35rem",
-                    width: "100%",
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                    padding: "0.55rem 0.75rem",
-                    fontSize: "0.95rem",
-                  }}
-                />
               </div>
             ))}
           </div>

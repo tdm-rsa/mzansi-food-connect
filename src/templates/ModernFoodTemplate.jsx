@@ -212,7 +212,6 @@ export default function ModernFoodTemplate(props) {
         item: c.name,
         qty: c.qty || 1,
         price: c.price,
-        instructions: c.instructions || "",
         preferences: c.selectedPreferences || [],
       }));
 
@@ -580,35 +579,6 @@ export default function ModernFoodTemplate(props) {
                         </button>
                       </div>
 
-                      {Array.isArray(c.availablePreferences) && c.availablePreferences.length > 0 && (
-                        <div style={{ marginTop: "0.75rem" }}>
-                          <p style={{ margin: "0 0 0.4rem", fontWeight: 600 }}>Preferences</p>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                            {c.availablePreferences.map((pref) => (
-                              <label
-                                key={pref}
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: "0.35rem",
-                                  padding: "0.35rem 0.55rem",
-                                  border: "1px solid #e2e8f0",
-                                  borderRadius: "8px",
-                                  background: (c.selectedPreferences || []).includes(pref) ? "rgba(102,126,234,0.12)" : "#fff",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={(c.selectedPreferences || []).includes(pref)}
-                                  onChange={() => togglePreference(i, pref)}
-                                />
-                                <span>{pref}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))

@@ -31,16 +31,7 @@ export default function CartSidebar({ cart, store }) {
   const totalItems = getTotalItems();
   const totalPrice = getTotal();
 
-  const togglePreference = (item, pref) => {
-    const selected = new Set(item.selectedPreferences || []);
-    if (selected.has(pref)) {
-      if (selected.size <= 1) return; // keep at least one
-      selected.delete(pref);
-    } else {
-      selected.add(pref);
-    }
-    updateItem(item.id, { selectedPreferences: Array.from(selected) });
-  };
+  const togglePreference = () => {}; // preferences UI removed
 
   return (
     <div className="mfc-cart-root">
@@ -111,36 +102,6 @@ export default function CartSidebar({ cart, store }) {
                           Remove
                         </button>
                       </div>
-
-                      {Array.isArray(item.availablePreferences) && item.availablePreferences.length > 0 && (
-                        <div style={{ marginTop: "0.45rem" }}>
-                          <p style={{ margin: "0 0 0.35rem", fontWeight: 600 }}>Preferences</p>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-                            {item.availablePreferences.map((pref) => (
-                              <label
-                                key={pref}
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: "0.3rem",
-                                  padding: "0.3rem 0.5rem",
-                                  border: "1px solid #e2e8f0",
-                                  borderRadius: "8px",
-                                  background: (item.selectedPreferences || []).includes(pref) ? "rgba(102,126,234,0.12)" : "#fff",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={(item.selectedPreferences || []).includes(pref)}
-                                  onChange={() => togglePreference(item, pref)}
-                                />
-                                <span>{pref}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <p className="mfc-cart-item-subtotal">R{(item.price * item.qty).toFixed(2)}</p>
