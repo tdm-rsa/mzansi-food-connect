@@ -63,6 +63,19 @@ export default function Checkout() {
   const total = getTotal();
   const totalInCents = Math.round(total * 100); // Yoco uses cents
 
+  const togglePreference = (itemId, pref) => {
+    const item = items.find((it) => it.id === itemId);
+    if (!item) return;
+    const selected = new Set(item.selectedPreferences || []);
+    if (selected.has(pref)) {
+      if (selected.size <= 1) return;
+      selected.delete(pref);
+    } else {
+      selected.add(pref);
+    }
+    updateItem(itemId, { selectedPreferences: Array.from(selected) });
+  };
+
   /* -------------------------------------------------------
      Fetch Store Data to get Yoco keys
   ------------------------------------------------------- */
@@ -136,6 +149,7 @@ export default function Checkout() {
             qty: item.qty,
             price: item.price,
             instructions: item.instructions || "",
+            preferences: item.selectedPreferences || [],
           })),
           total,
           orderNumber
@@ -223,6 +237,32 @@ export default function Checkout() {
                 <span className="checkout-item-price">
                   R{(item.price * item.qty).toFixed(2)}
                 </span>
+                {Array.isArray(item.availablePreferences) && item.availablePreferences.length > 0 && (
+                  <div style={{ marginTop: "0.35rem", display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                    {item.availablePreferences.map((pref) => (
+                      <label
+                        key={pref}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                          padding: "0.3rem 0.5rem",
+                          border: "1px solid #d1d5db",
+                          borderRadius: "8px",
+                          background: (item.selectedPreferences || []).includes(pref) ? "rgba(102,126,234,0.12)" : "#fff",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={(item.selectedPreferences || []).includes(pref)}
+                          onChange={() => togglePreference(item.id, pref)}
+                        />
+                        <span>{pref}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
                 <input
                   type="text"
                   placeholder="Add notes (hot, extra chilli, no sauce...)"

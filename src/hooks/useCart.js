@@ -12,19 +12,29 @@ export const useCart = (storeId = null) => {
     [storeId]
   );
 
-  // items: [{ id, name, price, qty }]
+  // items: [{ id, name, price, qty, availablePreferences?, selectedPreferences?, instructions? }]
   const [items, setItems] = useState(() => {
     try {
       const raw = localStorage.getItem(storageKey);
       const parsed = raw ? JSON.parse(raw) : [];
       // Ensure qty exists
-      return Array.isArray(parsed)
-        ? parsed.map((it) => ({
-            ...it,
-            qty: Math.max(1, Number(it.qty) || 1),
-            instructions: typeof it.instructions === "string" ? it.instructions : "",
-          }))
-        : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map((it) => {
+        const availablePreferences = Array.isArray(it.availablePreferences) ? it.availablePreferences : [];
+        const selectedPreferences = Array.isArray(it.selectedPreferences) ? it.selectedPreferences : [];
+        const normalizedSelected =
+          availablePreferences.length > 0 && selectedPreferences.length === 0
+            ? [availablePreferences[0]]
+            : selectedPreferences;
+
+        return {
+          ...it,
+          qty: Math.max(1, Number(it.qty) || 1),
+          instructions: typeof it.instructions === "string" ? it.instructions : "",
+          availablePreferences,
+          selectedPreferences: normalizedSelected,
+        };
+      });
     } catch {
       return [];
     }
@@ -48,6 +58,16 @@ export const useCart = (storeId = null) => {
     const qtyToAdd = Math.max(1, Number(item.qty) || 1);
     const image_url = item.image_url ?? item.image ?? item.imageUrl ?? null;
     const instructions = typeof item.instructions === "string" ? item.instructions : "";
+    const availablePreferences = Array.isArray(item.availablePreferences)
+      ? item.availablePreferences
+      : Array.isArray(item.preferences)
+        ? item.preferences
+        : [];
+    const selectedPreferences = Array.isArray(item.selectedPreferences)
+      ? item.selectedPreferences
+      : availablePreferences.length > 0
+        ? [availablePreferences[0]]
+        : [];
 
     setItems((prev) => {
       const idx = prev.findIndex((i) => i.id === id);
@@ -57,10 +77,23 @@ export const useCart = (storeId = null) => {
           ...copy[idx],
           qty: (copy[idx].qty || 1) + qtyToAdd,
           instructions: instructions || copy[idx].instructions || "",
+          availablePreferences: availablePreferences.length ? availablePreferences : (copy[idx].availablePreferences || []),
+          selectedPreferences: selectedPreferences.length
+            ? selectedPreferences
+            : (copy[idx].selectedPreferences || []),
         };
         return copy;
       }
-      return [...prev, { id, name, price, qty: qtyToAdd, image_url, instructions }];
+      return [...prev, {
+        id,
+        name,
+        price,
+        qty: qtyToAdd,
+        image_url,
+        instructions,
+        availablePreferences,
+        selectedPreferences,
+      }];
     });
   }, []);
 

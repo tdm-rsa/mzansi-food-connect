@@ -42,16 +42,23 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
     category: "",
     description: "",
     image_url: "",
+    preferences: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
   const resetForm = () => {
-    setFormData({ name: "", price: "", category: "", description: "", image_url: "" });
+    setFormData({ name: "", price: "", category: "", description: "", image_url: "", preferences: "" });
     setImageFile(null);
     setImagePreview(null);
     setEditingItem(null);
   };
+
+  const parsePreferences = (raw) =>
+    raw
+      .split(/[\n,]+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -95,6 +102,7 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
         category: formData.category.trim() || "General",
         description: formData.description.trim(),
         image_url: imageUrl,
+        preferences: parsePreferences(formData.preferences),
       };
 
       if (editingItem) {
@@ -133,6 +141,7 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
       category: item.category || "",
       description: item.description || "",
       image_url: item.image_url || "",
+      preferences: Array.isArray(item.preferences) ? item.preferences.join(", ") : "",
     });
     setImagePreview(item.image_url || null);
     setShowAddModal(true);
@@ -196,6 +205,13 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
                   <span className="item-category">{item.category || "General"}</span>
                   <span className="item-price">R{item.price}</span>
                 </div>
+                {Array.isArray(item.preferences) && item.preferences.length > 0 && (
+                  <div className="item-preferences">
+                    {item.preferences.map((p, idx) => (
+                      <span key={idx} className="preference-pill">{p}</span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="item-actions">
                 <button className="btn-edit" onClick={() => handleEdit(item)}>
@@ -291,6 +307,20 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="e.g., Burgers, Drinks, Sides"
                 />
+              </div>
+
+              {/* Preferences */}
+              <div className="form-group">
+                <label>Preferences (one per line or comma separated)</label>
+                <textarea
+                  value={formData.preferences}
+                  onChange={(e) => setFormData({ ...formData, preferences: e.target.value })}
+                  placeholder="e.g.\nHot & spicy\nExtra sauce\nNo chilli"
+                  rows={3}
+                />
+                <small style={{ opacity: 0.75 }}>
+                  These show as checkboxes in the cart. Leave blank if the item has no preferences.
+                </small>
               </div>
 
               {/* Description */}

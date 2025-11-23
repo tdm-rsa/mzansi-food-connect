@@ -21,11 +21,23 @@ export default function TraditionalSATemplate(props) {
   // ✅ Cart state with localStorage persistence
   const cartStorageKey = `cart_${storeId}`;
 
+  const normalizeCartItems = (items) =>
+    (items || []).map((it) => {
+      const availablePreferences = Array.isArray(it.availablePreferences) ? it.availablePreferences : [];
+      const selectedPreferences =
+        Array.isArray(it.selectedPreferences) && it.selectedPreferences.length
+          ? it.selectedPreferences
+          : availablePreferences.length
+            ? [availablePreferences[0]]
+            : [];
+      return { ...it, availablePreferences, selectedPreferences };
+    });
+
   const [cart, setCart] = useState(() => {
     // Load cart from localStorage on mount
     try {
       const savedCart = localStorage.getItem(cartStorageKey);
-      return savedCart ? JSON.parse(savedCart) : [];
+      return savedCart ? normalizeCartItems(JSON.parse(savedCart)) : [];
     } catch (error) {
       console.error('Failed to load cart from localStorage:', error);
       return [];
@@ -37,7 +49,7 @@ export default function TraditionalSATemplate(props) {
     try {
       const savedCart = localStorage.getItem(cartStorageKey);
       if (savedCart) {
-        const cartItems = JSON.parse(savedCart);
+        const cartItems = normalizeCartItems(JSON.parse(savedCart));
         return cartItems.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
       }
     } catch (error) {
@@ -78,8 +90,21 @@ export default function TraditionalSATemplate(props) {
 
   // ✅ Cart Helpers
   const addToCart = (item) => {
+    const availablePreferences = Array.isArray(item.preferences)
+      ? item.preferences.filter((p) => typeof p === "string" && p.trim())
+      : [];
+    const selectedPreferences = availablePreferences.length ? [availablePreferences[0]] : [];
+
     if (extCart?.addItem) {
-      extCart.addItem({ id: item.id, name: item.name, price: item.price, qty: 1, image_url: item.image_url });
+      extCart.addItem({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        qty: 1,
+        image_url: item.image_url,
+        availablePreferences,
+        selectedPreferences,
+      });
       return;
     }
     setCart((prev) => {
@@ -89,7 +114,15 @@ export default function TraditionalSATemplate(props) {
           x.id === item.id ? { ...x, qty: (x.qty || 1) + 1 } : x
         );
       }
-      return [...prev, { ...item, qty: 1 }];
+      return [
+        ...prev,
+        {
+          ...item,
+          qty: 1,
+          availablePreferences,
+          selectedPreferences,
+        }
+      ];
     });
     setTotal((t) => t + item.price);
   };
@@ -117,6 +150,22 @@ export default function TraditionalSATemplate(props) {
     const item = cart[i];
     setCart((prev) => prev.filter((_, idx) => idx !== i));
     setTotal((t) => t - item.price * (item.qty || 1));
+  };
+
+  const togglePreference = (cartIndex, pref) => {
+    setCart((prev) => {
+      const copy = [...prev];
+      const current = copy[cartIndex];
+      const selected = new Set(current.selectedPreferences || []);
+      if (selected.has(pref)) {
+        if (selected.size <= 1) return prev;
+        selected.delete(pref);
+      } else {
+        selected.add(pref);
+      }
+      copy[cartIndex] = { ...current, selectedPreferences: Array.from(selected) };
+      return copy;
+    });
   };
 
   const clearCart = () => {
@@ -173,6 +222,7 @@ export default function TraditionalSATemplate(props) {
         qty: c.qty || 1,
         price: c.price,
         instructions: c.instructions || "",
+        preferences: c.selectedPreferences || [],
       }));
 
       const orderNumber = generateOrderNumber();
@@ -567,29 +617,35 @@ export default function TraditionalSATemplate(props) {
                         </button>
                       </div>
 
-                      {/* Special Instructions */}
-                      <input
-                        type="text"
-                        placeholder="Add instructions (hot, no chilli, extra sauce...)"
-                        value={c.instructions || ""}
-                        onChange={(e) => {
-                          setCart((prev) => {
-                            const copy = [...prev];
-                            copy[i] = { ...copy[i], instructions: e.target.value };
-                            return copy;
-                          });
-                        }}
-                        style={{
-                          width: "100%",
-                          padding: "0.6rem",
-                          marginTop: "0.5rem",
-                          borderRadius: "6px",
-                          border: "2px solid #ff6b35",
-                          fontSize: "0.95rem",
-                          backgroundColor: "#fff",
-                          boxSizing: "border-box"
-                        }}
-                      />
+                      {Array.isArray(c.availablePreferences) && c.availablePreferences.length > 0 && (
+                        <div style={{ marginTop: "0.75rem" }}>
+                          <p style={{ margin: "0 0 0.4rem", fontWeight: 700 }}>Preferences</p>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                            {c.availablePreferences.map((pref) => (
+                              <label
+                                key={pref}
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "0.35rem",
+                                  padding: "0.35rem 0.55rem",
+                                  border: "1px solid #d6d3d1",
+                                  borderRadius: "8px",
+                                  background: (c.selectedPreferences || []).includes(pref) ? "rgba(234,179,8,0.18)" : "#fff",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={(c.selectedPreferences || []).includes(pref)}
+                                  onChange={() => togglePreference(i, pref)}
+                                />
+                                <span>{pref}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
@@ -777,8 +833,4 @@ export default function TraditionalSATemplate(props) {
     </div>
   );
 }
-
-
-
-
 

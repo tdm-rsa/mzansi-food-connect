@@ -1486,7 +1486,7 @@ export default function App({ user }) {
                       <ul style={{ marginTop: ".3rem" }}>
                         {o.items.map((it, idx) => (
                           <li key={idx}>
-                            {it.qty || 1} × {it.item || it.name} — R{it.price}
+                            {it.qty || 1} x {it.item || it.name} - R{it.price}{Array.isArray(it.preferences) && it.preferences.length > 0 ? ` (${it.preferences.join(", ")})` : ""}
                           </li>
                         ))}
                       </ul>
@@ -1604,7 +1604,7 @@ export default function App({ user }) {
                       <ul style={{ marginTop: ".3rem" }}>
                         {o.items.map((it, idx) => (
                           <li key={idx}>
-                            {it.qty || 1} × {it.item || it.name} — R{it.price}
+                            {it.qty || 1} x {it.item || it.name} - R{it.price}{Array.isArray(it.preferences) && it.preferences.length > 0 ? ` (${it.preferences.join(", ")})` : ""}
                           </li>
                         ))}
                       </ul>
@@ -1775,7 +1775,7 @@ export default function App({ user }) {
                       <ul style={{ marginTop: ".3rem" }}>
                         {o.items.map((it, idx) => (
                           <li key={idx}>
-                            {it.qty || 1} × {it.item || it.name} — R{it.price}
+                            {it.qty || 1} x {it.item || it.name} - R{it.price}{Array.isArray(it.preferences) && it.preferences.length > 0 ? ` (${it.preferences.join(", ")})` : ""}
                           </li>
                         ))}
                       </ul>

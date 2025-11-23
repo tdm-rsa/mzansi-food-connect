@@ -135,6 +135,22 @@
   background: #fee;
 }
 
+.item-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.preference-pill {
+  background: rgba(102, 126, 234, 0.12);
+  color: #4f46e5;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(79, 70, 229, 0.18);
+}
+
 /* Empty State */
 .empty-state {
   grid-column: 1 / -1;
