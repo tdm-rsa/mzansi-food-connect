@@ -30,6 +30,7 @@ export const useCart = (storeId = null) => {
         return {
           ...it,
           qty: Math.max(1, Number(it.qty) || 1),
+          instructions: typeof it.instructions === "string" ? it.instructions : "",
           availablePreferences,
           selectedPreferences: normalizedSelected,
         };
@@ -56,6 +57,7 @@ export const useCart = (storeId = null) => {
     const price = Number(item.price) || 0;
     const qtyToAdd = Math.max(1, Number(item.qty) || 1);
     const image_url = item.image_url ?? item.image ?? item.imageUrl ?? null;
+    const instructions = typeof item.instructions === "string" ? item.instructions : "";
     const availablePreferences = Array.isArray(item.availablePreferences)
       ? item.availablePreferences
       : Array.isArray(item.preferences)
@@ -74,6 +76,7 @@ export const useCart = (storeId = null) => {
         copy[idx] = {
           ...copy[idx],
           qty: (copy[idx].qty || 1) + qtyToAdd,
+          instructions: instructions || copy[idx].instructions || "",
           availablePreferences: availablePreferences.length ? availablePreferences : (copy[idx].availablePreferences || []),
           selectedPreferences: selectedPreferences.length
             ? selectedPreferences
@@ -87,6 +90,7 @@ export const useCart = (storeId = null) => {
         price,
         qty: qtyToAdd,
         image_url,
+        instructions,
         availablePreferences,
         selectedPreferences,
       }];

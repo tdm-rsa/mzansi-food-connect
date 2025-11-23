@@ -34,26 +34,29 @@ export async function sendWhatsAppMessage(phoneNumber, message) {
   const apiUrl = `https://api.ultramsg.com/${ULTRAMSG_INSTANCE_ID}/messages/chat`;
 
   try {
+    // Ultramsg expects x-www-form-urlencoded, not JSON
+    const payload = new URLSearchParams({
+      token: ULTRAMSG_TOKEN,
+      to: finalPhone,
+      body: message,
+    });
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({
-        token: ULTRAMSG_TOKEN,
-        to: finalPhone,
-        body: message,
-      }),
+      body: payload,
     });
 
     const data = await response.json();
 
-    if (response.ok && data.sent === 'true') {
+    if (response.ok && (data.sent === 'true' || data.status === 'success')) {
       console.log('✅ WhatsApp message sent successfully to', finalPhone);
       return { success: true, data };
     } else {
-      console.error('❌ Failed to send WhatsApp message:', data);
-      return { success: false, error: data.error || 'Unknown error' };
+      console.error('❌ Failed to send WhatsApp message:', { status: response.status, data });
+      return { success: false, error: data.error || data.message || `HTTP ${response.status}` };
     }
   } catch (error) {
     console.error('❌ Error sending WhatsApp message:', error);
