@@ -108,130 +108,63 @@ export default function Checkout() {
   }, []);
 
   /* -------------------------------------------------------
-     Handle Yoco Payment
+     Handle Yoco Payment (Checkout API)
   ------------------------------------------------------- */
   const handleYocoPayment = async () => {
-    if (!yocoPublicKey) {
-      toast.error('Payment is not configured. Please contact the store.');
-      return;
-    }
-
-    if (!window.YocoSDK) {
-      toast.warning('Payment system is loading. Please try again in a moment.');
-      return;
-    }
-
     setProcessingPayment(true);
-
-    try {
-      const sdk = new window.YocoSDK({
-        publicKey: yocoPublicKey,
-      });
-
-      // Create checkout
-      sdk.showPopup({
-        amountInCents: totalInCents,
-        currency: 'ZAR',
-        name: store?.name || 'Mzansi Food Connect',
-        description: `Order from ${store?.name}`,
-        metadata: {
-          customerName: customerName,
-          customerPhone: customerPhone,
-          storeSlug: slug,
-          storeId: store?.id || '',
-        },
-        callback: async function (result) {
-          if (result.error) {
-            console.error('Yoco payment error:', result.error);
-            toast.error(`Payment failed: ${result.error.message}\nPlease try again or contact the store.`);
-            setProcessingPayment(false);
-            return;
-          }
-
-          // Payment successful
-          console.log('💳 Yoco payment successful:', result);
-          await createOrder(result.id);
-        },
-      });
-    } catch (err) {
-      console.error('Yoco SDK error:', err);
-      toast.error('Payment initialization failed. Please try again.');
-      setProcessingPayment(false);
-    }
-  };
-
-  /* -------------------------------------------------------
-     Create Order after Payment Success
-  ------------------------------------------------------- */
-  const createOrder = async (paymentId) => {
     setLoading(true);
 
     try {
-      console.log('💳 Payment successful! ID:', paymentId);
-
-      // Generate order number in format: C067, F873, etc (random letter + 3 digits)
+      // Generate order number
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-      const randomDigits = Math.floor(Math.random() * 900) + 100; // 100-999
+      const randomDigits = Math.floor(Math.random() * 900) + 100;
       const orderNumber = `${randomLetter}${randomDigits}`;
 
-      // Create order directly (Yoco SDK doesn't trigger webhooks, only Checkout API does)
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert([
-          {
-            store_id: store.id,
-            customer_name: customerName,
-            phone: customerPhone,
-            items: items.map((item) => ({
-              item: item.name,
-              qty: item.qty,
-              price: item.price,
-              instructions: item.instructions || "",
-            })),
-            total,
-            payment_status: "paid",
-            payment_reference: paymentId,
-            order_number: orderNumber,
-            status: "pending",
-            estimated_time: 0,
-          },
-        ])
-        .select()
-        .single();
+      console.log('🔄 Creating Yoco checkout session...');
 
-      if (orderError) {
-        console.error('❌ Order creation error:', orderError);
-        throw orderError;
+      // Call Supabase Edge Function to create checkout session
+      const { data, error } = await supabase.functions.invoke('create-yoco-checkout', {
+        body: {
+          storeId: store.id,
+          storeName: store.name,
+          storeSlug: slug,
+          customerName: customerName,
+          customerPhone: customerPhone,
+          items: items.map((item) => ({
+            item: item.name,
+            qty: item.qty,
+            price: item.price,
+            instructions: item.instructions || "",
+          })),
+          total,
+          orderNumber
+        }
+      });
+
+      if (error) {
+        console.error('Checkout creation error:', error);
+        throw error;
       }
 
-      console.log('✅ Order created:', orderData);
+      if (!data || !data.redirectUrl) {
+        throw new Error('No redirect URL received from payment provider');
+      }
 
-      // Clear cart
-      clearCart();
+      console.log('✅ Checkout session created, redirecting to Yoco...');
 
-      // Show success message with order number
-      toast.success(
-        `Payment Successful!\n\nOrder Number: ${orderNumber}\nTotal: R${total.toFixed(2)}\n\nYou'll receive a WhatsApp notification when your order is ready!`,
-        6000
-      );
+      // Redirect to Yoco hosted checkout page
+      window.location.href = data.redirectUrl;
 
-      // Redirect to store after delay
-      setTimeout(() => {
-        navigate(`/store/${slug}`);
-      }, 2000);
     } catch (err) {
-      console.error("Order creation error:", err);
-      toast.error(
-        `Payment was successful but order creation failed.\n\nPlease contact ${store?.name} with your payment ID:\n${paymentId}`,
-        8000
-      );
-      setError("Failed to create order. Please contact the store with your payment reference.");
-    } finally {
-      setLoading(false);
+      console.error('Payment initialization error:', err);
+      toast.error('Failed to initialize payment. Please try again.');
       setProcessingPayment(false);
+      setLoading(false);
     }
   };
+
+  // Note: Order creation is now handled by the webhook after payment confirmation
 
   /* -------------------------------------------------------
      Validation

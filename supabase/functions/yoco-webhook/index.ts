@@ -71,7 +71,7 @@ serve(async (req) => {
     // Handle different event types
     switch (event.type) {
       case "payment.succeeded": {
-        // One-time payment succeeded
+        // One-time payment succeeded (SDK popup payments)
         const { metadata } = event.payload;
 
         // Check if this is a subscription upgrade payment
@@ -103,24 +103,48 @@ serve(async (req) => {
 
           console.log(`✅ Updated store ${storeId} to ${planType} plan`);
         }
-        // Check if this is a product order payment
-        else if (metadata?.storeSlug && metadata?.customerName) {
-          const paymentId = event.payload.id;
-          console.log("Product order payment success:", { paymentId, metadata });
+        break;
+      }
 
-          // Find pending order by payment reference
+      case "checkout.payment.succeeded": {
+        // Checkout API payment succeeded (hosted checkout page)
+        const { metadata } = event.payload;
+        const checkoutId = event.payload.id;
+
+        console.log("Checkout payment succeeded:", { checkoutId, metadata });
+
+        // Check if this is a product order payment
+        if (metadata?.checkoutType === "product_order" && metadata?.orderNumber) {
+          console.log("Product order payment via Checkout API:", { checkoutId, metadata });
+
+          // Find pending order by order number
           const { data: pendingOrder, error: findError } = await supabase
             .from("pending_orders")
             .select("*")
-            .eq("payment_reference", paymentId)
+            .eq("order_number", metadata.orderNumber)
             .single();
 
           if (findError || !pendingOrder) {
             console.error("Pending order not found:", findError);
-            throw new Error(`No pending order found for payment ${paymentId}`);
+            throw new Error(`No pending order found for order number ${metadata.orderNumber}`);
           }
 
           console.log("Found pending order:", pendingOrder);
+
+          // Check if order already created (prevent duplicates)
+          const { data: existingOrder } = await supabase
+            .from("orders")
+            .select("id")
+            .eq("order_number", metadata.orderNumber)
+            .single();
+
+          if (existingOrder) {
+            console.log("Order already exists, skipping creation");
+            return new Response(JSON.stringify({ success: true, message: "Order already processed" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
 
           // Create the actual order
           const { data: orderData, error: orderError } = await supabase
@@ -132,7 +156,7 @@ serve(async (req) => {
               items: pendingOrder.items,
               total: pendingOrder.total,
               payment_status: "paid",
-              payment_reference: paymentId,
+              payment_reference: checkoutId,
               order_number: pendingOrder.order_number,
               status: "pending",
               estimated_time: 0,
@@ -145,7 +169,7 @@ serve(async (req) => {
             throw orderError;
           }
 
-          console.log(`✅ Created order ${orderData.order_number} for payment ${paymentId}`);
+          console.log(`✅ Created order ${orderData.order_number} for checkout ${checkoutId}`);
 
           // Mark pending order as completed
           await supabase

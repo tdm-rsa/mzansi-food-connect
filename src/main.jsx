@@ -9,6 +9,8 @@ import Checkout from "./Checkout.jsx";
 import LiveQueue from "./LiveQueue.jsx";
 import Landing from "./Landing.jsx";
 import ResetPassword from "./ResetPassword.jsx";
+import PaymentSuccess from "./PaymentSuccess.jsx";
+import PaymentFailed from "./PaymentFailed.jsx";
 import { getSubdomain } from "./utils/subdomain.js";
 
 import ModernFoodTemplate from "./templates/ModernFoodTemplate.jsx";
@@ -112,6 +114,12 @@ function AppRouter() {
         {/* Live Queue Page */}
         <Route path="/queue" element={<LiveQueue />} />
 
+        {/* Payment Success Page */}
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+
+        {/* Payment Failed Page */}
+        <Route path="/payment-failed" element={<PaymentFailed />} />
+
         {/* Catch all - redirect to store home */}
         <Route path="*" element={<CustomerStore />} />
       </Routes>
@@ -130,6 +138,12 @@ function AppRouter() {
 
       {/* Password Reset Page */}
       <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Payment Success Page */}
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+
+      {/* Payment Failed Page */}
+      <Route path="/payment-failed" element={<PaymentFailed />} />
 
       {/* Legacy landing route (redirect to home) */}
       <Route path="/landing" element={<Landing />} />
