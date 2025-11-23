@@ -161,71 +161,114 @@ export default function Checkout() {
   };
 
   /* -------------------------------------------------------
-     Create Order after Payment Success
+     Create Order after Payment Success (Webhook-verified)
   ------------------------------------------------------- */
   const createOrder = async (paymentId) => {
     setLoading(true);
 
     try {
+      console.log('💳 Payment successful! ID:', paymentId);
+      console.log('⏳ Waiting for Yoco webhook to confirm payment...');
+
       // Generate order number in format: C067, F873, etc (random letter + 3 digits)
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const randomLetter = letters[Math.floor(Math.random() * letters.length)];
       const randomDigits = Math.floor(Math.random() * 900) + 100; // 100-999
       const orderNumber = `${randomLetter}${randomDigits}`;
 
-      // Create order in Supabase
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert([
-          {
-            store_id: store.id,
-            customer_name: customerName,
-            phone: customerPhone,
-            items: items.map((item) => ({
-              item: item.name,
-              qty: item.qty,
-              price: item.price,
-              instructions: item.instructions || "",
-            })),
-            total,
-            payment_status: "paid",
-            payment_reference: paymentId,
-            order_number: orderNumber,
-            status: "pending",
-            estimated_time: 0,
-          },
-        ])
-        .select()
-        .single();
+      // ✅ SECURITY FIX: Don't create order immediately - let webhook handle it
+      // Store order in pending_orders table for webhook to process
+      const { error: pendingError } = await supabase
+        .from("pending_orders")
+        .insert([{
+          store_id: store.id,
+          customer_name: customerName,
+          phone: customerPhone,
+          items: items.map((item) => ({
+            item: item.name,
+            qty: item.qty,
+            price: item.price,
+            instructions: item.instructions || "",
+          })),
+          total,
+          payment_reference: paymentId,
+          order_number: orderNumber,
+          status: 'pending',
+        }]);
 
-      if (orderError) {
-        console.error('❌ Order creation error:', orderError);
-        throw orderError;
+      if (pendingError) {
+        throw pendingError;
       }
 
-      console.log('✅ Order created:', orderData);
+      console.log('✅ Pending order recorded. Waiting for webhook confirmation...');
 
-      // Clear cart
-      clearCart();
+      // Poll for webhook to process the payment (with timeout)
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds (30 attempts × 1 second)
 
-      // Show success message with order number
-      toast.success(
-        `Payment Successful!\n\nOrder Number: ${orderNumber}\nTotal: R${total.toFixed(2)}\n\nYou'll receive a WhatsApp notification when your order is ready!`,
-        6000
-      );
+      const checkOrder = async () => {
+        const { data: createdOrder } = await supabase
+          .from("orders")
+          .select("*")
+          .eq("payment_reference", paymentId)
+          .single();
 
-      // Redirect to store after delay
-      setTimeout(() => {
-        navigate(`/store/${slug}`);
-      }, 2000);
+        if (createdOrder) {
+          // Webhook processed successfully!
+          console.log('✅ Webhook confirmed! Order created:', createdOrder.order_number);
+
+          // Clear cart
+          clearCart();
+
+          // Show success message with order number
+          toast.success(
+            `Payment Successful!\n\nOrder Number: ${createdOrder.order_number}\nTotal: R${total.toFixed(2)}\n\nYou'll receive a WhatsApp notification when your order is ready!`,
+            6000
+          );
+
+          // Redirect to store after delay
+          setTimeout(() => {
+            navigate(`/store/${slug}`);
+          }, 2000);
+
+          return true;
+        }
+        return false;
+      };
+
+      // Poll every 1 second for up to 30 seconds
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        const success = await checkOrder();
+
+        if (success || attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+
+          if (!success) {
+            console.warn('⚠️ Webhook timeout. Payment may still be processing.');
+            toast.warning(
+              `⚠️ Payment received but verification is taking longer than expected.\n\nYour order will be created shortly. Please check back in a moment.\n\nOrder Number: ${orderNumber}\nPayment ID: ${paymentId}`,
+              10000
+            );
+
+            // Still redirect after timeout
+            setTimeout(() => {
+              navigate(`/store/${slug}`);
+            }, 3000);
+          }
+
+          setLoading(false);
+          setProcessingPayment(false);
+        }
+      }, 1000);
+
     } catch (err) {
-      console.error("Order creation error:", err);
+      console.error('❌ Order processing error:', err);
       toast.error(
-        `Payment was successful but order creation failed.\n\nPlease contact ${store?.name} with your payment ID:\n${paymentId}`,
+        `Payment was successful but order processing failed.\n\nPlease contact ${store?.name} with your payment ID:\n${paymentId}`,
         8000
       );
-      setError("Failed to create order. Please contact the store with your payment reference.");
-    } finally {
+      setError("Failed to process order. Please contact the store with your payment reference.");
       setLoading(false);
       setProcessingPayment(false);
     }

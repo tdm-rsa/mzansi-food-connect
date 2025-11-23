@@ -4,7 +4,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const YOCO_WEBHOOK_SECRET = "whsec_QkI5RTBCMThCRjBGQUQ4MDg1NUIwQ0M5Njg5QkI4NTI=";
+// Get webhook secret from environment variable (supports both test and live mode)
+const YOCO_WEBHOOK_SECRET = Deno.env.get("YOCO_WEBHOOK_SECRET") || "whsec_QkI5RTBCMThCRjBGQUQ4MDg1NUIwQ0M5Njg5QkI4NTI=";
 
 serve(async (req) => {
   try {
@@ -101,6 +102,56 @@ serve(async (req) => {
           }
 
           console.log(`✅ Updated store ${storeId} to ${planType} plan`);
+        }
+        // Check if this is a product order payment
+        else if (metadata?.storeSlug && metadata?.customerName) {
+          const paymentId = event.payload.id;
+          console.log("Product order payment success:", { paymentId, metadata });
+
+          // Find pending order by payment reference
+          const { data: pendingOrder, error: findError } = await supabase
+            .from("pending_orders")
+            .select("*")
+            .eq("payment_reference", paymentId)
+            .single();
+
+          if (findError || !pendingOrder) {
+            console.error("Pending order not found:", findError);
+            throw new Error(`No pending order found for payment ${paymentId}`);
+          }
+
+          console.log("Found pending order:", pendingOrder);
+
+          // Create the actual order
+          const { data: orderData, error: orderError } = await supabase
+            .from("orders")
+            .insert([{
+              store_id: pendingOrder.store_id,
+              customer_name: pendingOrder.customer_name,
+              phone: pendingOrder.phone,
+              items: pendingOrder.items,
+              total: pendingOrder.total,
+              payment_status: "paid",
+              payment_reference: paymentId,
+              order_number: pendingOrder.order_number,
+              status: "pending",
+              estimated_time: 0,
+            }])
+            .select()
+            .single();
+
+          if (orderError) {
+            console.error("Failed to create order:", orderError);
+            throw orderError;
+          }
+
+          console.log(`✅ Created order ${orderData.order_number} for payment ${paymentId}`);
+
+          // Mark pending order as completed
+          await supabase
+            .from("pending_orders")
+            .update({ status: "completed" })
+            .eq("id", pendingOrder.id);
         }
         break;
       }
