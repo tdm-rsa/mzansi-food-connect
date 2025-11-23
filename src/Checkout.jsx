@@ -340,8 +340,8 @@ export default function Checkout() {
           )}
           <p className="checkout-secure">🔒 Secure payment powered by Yoco</p>
         </div>
+        </div>
       </div>
-    </div>
 
       {/* Toast Notifications */}
       {toast.toasts.map(t => (
