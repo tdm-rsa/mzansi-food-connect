@@ -148,6 +148,7 @@ export default function Checkout() {
             item: item.name,
             qty: item.qty,
             price: item.price,
+            instructions: item.instructions || "",
             preferences: item.selectedPreferences || [],
           })),
           total,
