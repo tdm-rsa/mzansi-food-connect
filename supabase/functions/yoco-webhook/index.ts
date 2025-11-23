@@ -177,6 +177,50 @@ serve(async (req) => {
             .update({ status: "completed" })
             .eq("id", pendingOrder.id);
         }
+        // Check if this is a subscription upgrade payment
+        else if (metadata?.checkoutType === "subscription_upgrade" && metadata?.storeId) {
+          const storeId = metadata.storeId;
+          const planType = metadata.upgradeTo;
+
+          console.log("Subscription upgrade payment via Checkout API:", { checkoutId, storeId, planType });
+
+          // Check if already upgraded (prevent duplicates)
+          const { data: currentStore } = await supabase
+            .from("tenants")
+            .select("plan, payment_reference")
+            .eq("id", storeId)
+            .single();
+
+          if (currentStore?.plan === planType && currentStore?.payment_reference === checkoutId) {
+            console.log("Store already upgraded, skipping");
+            return new Response(JSON.stringify({ success: true, message: "Upgrade already processed" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
+          // Calculate expiration date (30 days from now for monthly billing)
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days
+
+          // Update store plan
+          const { error } = await supabase
+            .from("tenants")
+            .update({
+              plan: planType,
+              plan_started_at: now.toISOString(),
+              plan_expires_at: expiresAt.toISOString(),
+              payment_reference: checkoutId,
+            })
+            .eq("id", storeId);
+
+          if (error) {
+            console.error("Failed to upgrade store:", error);
+            throw error;
+          }
+
+          console.log(`✅ Upgraded store ${storeId} to ${planType} plan via Checkout API`);
+        }
         break;
       }
 

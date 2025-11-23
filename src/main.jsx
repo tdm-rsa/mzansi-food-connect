@@ -11,6 +11,8 @@ import Landing from "./Landing.jsx";
 import ResetPassword from "./ResetPassword.jsx";
 import PaymentSuccess from "./PaymentSuccess.jsx";
 import PaymentFailed from "./PaymentFailed.jsx";
+import UpgradeSuccess from "./UpgradeSuccess.jsx";
+import UpgradeFailed from "./UpgradeFailed.jsx";
 import { getSubdomain } from "./utils/subdomain.js";
 
 import ModernFoodTemplate from "./templates/ModernFoodTemplate.jsx";
@@ -144,6 +146,12 @@ function AppRouter() {
 
       {/* Payment Failed Page */}
       <Route path="/payment-failed" element={<PaymentFailed />} />
+
+      {/* Upgrade Success Page */}
+      <Route path="/upgrade-success" element={<UpgradeSuccess />} />
+
+      {/* Upgrade Failed Page */}
+      <Route path="/upgrade-failed" element={<UpgradeFailed />} />
 
       {/* Legacy landing route (redirect to home) */}
       <Route path="/landing" element={<Landing />} />

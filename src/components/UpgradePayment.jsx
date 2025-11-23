@@ -10,18 +10,7 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
   const [error, setError] = useState("");
   const [processingPayment, setProcessingPayment] = useState(false);
 
-  const yocoKey = import.meta.env.VITE_YOCO_PUBLIC_KEY;
-
-  // Load Yoco SDK
-  useEffect(() => {
-    if (!document.getElementById('yoco-sdk')) {
-      const script = document.createElement('script');
-      script.id = 'yoco-sdk';
-      script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
+  // No longer need Yoco SDK - using Checkout API instead
 
   const planDetails = {
     pro: {
@@ -59,132 +48,48 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
   }
 
   async function handleYocoPayment() {
-    if (!yocoKey) {
-      setError('⚠️ Payment is not configured. Please contact support.');
-      return;
-    }
-
-    if (!window.YocoSDK) {
-      setError('⚠️ Payment system is loading. Please try again in a moment.');
-      return;
-    }
-
     setProcessingPayment(true);
+    setLoading(true);
     setError("");
 
     try {
-      const sdk = new window.YocoSDK({
-        publicKey: yocoKey,
-      });
+      console.log('🔄 Creating subscription checkout session...');
 
-      // Create checkout
-      sdk.showPopup({
-        amountInCents: plan.priceInCents,
-        currency: 'ZAR',
-        name: 'Mzansi Food Connect',
-        description: `${plan.name} Plan Subscription`,
-        metadata: {
+      // Call Supabase Edge Function to create checkout session
+      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
+        body: {
           storeId: storeInfo.id,
           storeName: storeInfo.name,
-          upgradeFrom: storeInfo.plan,
-          upgradeTo: targetPlan,
+          targetPlan: targetPlan,
           userEmail: user.email,
-        },
-        callback: async function (result) {
-          if (result.error) {
-            console.error('Yoco payment error:', result.error);
-            setError('❌ Payment failed: ' + result.error.message);
-            setProcessingPayment(false);
-            return;
-          }
-
-          // Payment successful
-          console.log('💳 Yoco payment successful:', result);
-          await upgradeStore(result.id);
-        },
+          currentPlan: storeInfo.plan,
+          amount: plan.price
+        }
       });
-    } catch (err) {
-      console.error('Yoco SDK error:', err);
-      setError('⚠️ Payment initialization failed. Please try again.');
-      setProcessingPayment(false);
-    }
-  }
 
-  async function upgradeStore(paymentId) {
-    setLoading(true);
-
-    try {
-      console.log('💳 Payment successful! ID:', paymentId);
-      console.log('⏳ Waiting for Yoco webhook to confirm payment...');
-
-      // ✅ SECURITY FIX: Don't upgrade immediately - let webhook handle it
-      // Store payment in pending_payments table for webhook to process
-      const { error: pendingError } = await supabase
-        .from("pending_payments")
-        .insert([{
-          user_id: user.id,
-          plan: targetPlan,
-          payment_reference: paymentId,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-        }]);
-
-      if (pendingError) {
-        throw pendingError;
+      if (error) {
+        console.error('Checkout creation error:', error);
+        throw error;
       }
 
-      console.log('✅ Payment recorded. Waiting for webhook confirmation...');
+      if (!data || !data.redirectUrl) {
+        throw new Error('No redirect URL received from payment provider');
+      }
 
-      // Poll for webhook to process the payment (with timeout)
-      let attempts = 0;
-      const maxAttempts = 30; // 30 seconds (30 attempts × 1 second)
+      console.log('✅ Checkout session created, redirecting to Yoco...');
 
-      const checkPayment = async () => {
-        const { data: updatedStore } = await supabase
-          .from("tenants")
-          .select("plan, payment_reference")
-          .eq("id", storeInfo.id)
-          .single();
-
-        if (updatedStore?.plan === targetPlan && updatedStore?.payment_reference === paymentId) {
-          // Webhook processed successfully!
-          console.log('✅ Webhook confirmed! Store upgraded to:', targetPlan);
-
-          alert(`✅ Upgrade successful!\n\nYour store has been upgraded to ${plan.name} plan!\n\nAll ${plan.name} features are now active.\n\nThank you for upgrading!`);
-
-          if (onSuccess) {
-            onSuccess(updatedStore);
-          }
-          return true;
-        }
-        return false;
-      };
-
-      // Poll every 1 second for up to 30 seconds
-      const pollInterval = setInterval(async () => {
-        attempts++;
-        const success = await checkPayment();
-
-        if (success || attempts >= maxAttempts) {
-          clearInterval(pollInterval);
-
-          if (!success) {
-            console.warn('⚠️ Webhook timeout. Payment may still be processing.');
-            alert(`⚠️ Payment received but verification is taking longer than expected.\n\nPlease refresh the page in a moment to see your upgraded plan.\n\nIf the upgrade doesn't appear after 2 minutes, please contact support with payment ID: ${paymentId}`);
-          }
-
-          setLoading(false);
-          setProcessingPayment(false);
-        }
-      }, 1000);
+      // Redirect to Yoco hosted checkout page
+      window.location.href = data.redirectUrl;
 
     } catch (err) {
-      console.error('❌ Upgrade error:', err);
-      setError(`Failed to process upgrade: ${err.message}`);
-      setLoading(false);
+      console.error('Payment initialization error:', err);
+      setError('⚠️ Failed to initialize payment. Please try again.');
       setProcessingPayment(false);
+      setLoading(false);
     }
   }
+
+  // Note: Upgrade is now handled by webhook after payment confirmation
 
   return (
     <div style={{
@@ -250,37 +155,25 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
           🔒 Secure payment powered by Yoco
         </p>
 
-        {yocoKey ? (
-          <button
-            onClick={handleYocoPayment}
-            disabled={loading || processingPayment}
-            className="btn-primary"
-            style={{
-              width: "100%",
-              padding: "1rem",
-              fontSize: "1rem",
-              fontWeight: "600",
-              cursor: (loading || processingPayment) ? "not-allowed" : "pointer",
-              opacity: (loading || processingPayment) ? 0.6 : 1,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              border: "none",
-              borderRadius: "8px",
-              color: "white"
-            }}
-          >
-            {processingPayment ? "Processing..." : `Pay R${plan.price} - Upgrade to ${plan.name}`}
-          </button>
-        ) : (
-          <div style={{
-            background: "#f443361a",
-            border: "1px solid #f44336",
-            borderRadius: "8px",
+        <button
+          onClick={handleYocoPayment}
+          disabled={loading || processingPayment}
+          className="btn-primary"
+          style={{
+            width: "100%",
             padding: "1rem",
-            color: "#f44336"
-          }}>
-            ⚠️ Yoco is not configured. Please contact support.
-          </div>
-        )}
+            fontSize: "1rem",
+            fontWeight: "600",
+            cursor: (loading || processingPayment) ? "not-allowed" : "pointer",
+            opacity: (loading || processingPayment) ? 0.6 : 1,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            border: "none",
+            borderRadius: "8px",
+            color: "white"
+          }}
+        >
+          {processingPayment ? "Processing..." : `Pay R${plan.price} - Upgrade to ${plan.name}`}
+        </button>
 
         {onCancel && (
           <button
