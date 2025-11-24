@@ -41,19 +41,10 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get store's plan and Yoco keys
-    // Pro plans use platform keys (webhook works), Premium plans use their own keys
-    const { data: store } = await supabase
-      .from("tenants")
-      .select("yoco_secret_key, plan")
-      .eq("id", storeId)
-      .single();
-
-    // Pro stores ALWAYS use platform keys so webhook works
-    // Premium stores can use their own keys (requires custom webhook setup)
-    const yocoSecretKey = (store?.plan === 'premium' && store?.yoco_secret_key)
-      ? store.yoco_secret_key
-      : Deno.env.get("VITE_YOCO_SECRET_KEY");
+    // CRITICAL: ALL stores (Pro and Premium) MUST use platform Yoco keys for product orders
+    // This ensures our webhook receives payment notifications and orders are created
+    // Custom Yoco keys would send webhooks to store's account (not configured), breaking order creation
+    const yocoSecretKey = Deno.env.get("VITE_YOCO_SECRET_KEY");
 
     if (!yocoSecretKey) {
       throw new Error("Yoco secret key not configured");
