@@ -51,7 +51,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "pro",
       name: "Pro",
       subtitle: "For Growing Businesses",
-      price: "R135",
+      price: "R4",
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
@@ -68,7 +68,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "premium",
       name: "Premium",
       subtitle: "Custom Domain Included",
-      price: "R185",
+      price: "R6",
       period: "per month",
       description: "Professional solution with your own domain",
       features: [
@@ -125,7 +125,7 @@ export default function Signup({ onBack, onSuccess }) {
 
         if (authError) throw authError;
 
-        alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour 7-day free trial will be created automatically when you login for the first time!`);
+        alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour Free Trial (training ground) will be created automatically when you login for the first time!`);
         onBack();
       } else {
         // For Pro/Premium - GO TO PAYMENT FIRST (don't create account yet!)
@@ -140,10 +140,10 @@ export default function Signup({ onBack, onSuccess }) {
   }
 
   async function createStore(userId, plan, paymentRef) {
-    // Calculate plan_expires_at for trial (7 days from now), NULL for paid plans
+    // Calculate plan_expires_at: trial = null (forever), paid plans = 30 days from now
     const planExpiresAt = plan === 'trial'
-      ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      : null;
+      ? null // Trial never expires - training ground
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // Pro/Premium = 30 days
 
     // 🔥 Generate clean slug from store name (no random suffix)
     const baseSlug = storeName
@@ -222,7 +222,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      const amountInCents = selectedPlan === "pro" ? 13500 : 18500; // R135 Pro, R185 Premium
+      const amountInCents = selectedPlan === "pro" ? 400 : 600; // R4 Pro, R6 Premium
 
       const sdk = new window.YocoSDK({
         publicKey: yocoPublicKey,
@@ -300,7 +300,7 @@ export default function Signup({ onBack, onSuccess }) {
           store_name: storeName,
           plan: selectedPlan,
           payment_reference: paymentId,
-          amount_in_cents: selectedPlan === 'pro' ? 13500 : 18500, // R135 Pro, R185 Premium
+          amount_in_cents: selectedPlan === 'pro' ? 400 : 600, // R4 Pro, R6 Premium
           payment_status: 'completed',
           created_at: new Date().toISOString()
         }]);
