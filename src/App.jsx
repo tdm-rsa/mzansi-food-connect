@@ -1530,8 +1530,8 @@ export default function App({ user }) {
 
                     <div style={{ marginTop: ".75rem", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
                       {o.status === "pending" && o.phone && (
-                        <button 
-                          className="btn-primary" 
+                        <button
+                          className="btn-primary"
                           onClick={() => {
                             setEstimatingOrder(o);
                             setSelectedDuration(null);
@@ -1545,53 +1545,41 @@ export default function App({ user }) {
                         </button>
                       )}
                       {o.status === "confirmed" && o.estimated_time && (
-                        <>
-                          <span style={{
-                            padding: "0.5rem 0.75rem",
+                        <span style={{
+                          padding: "0.5rem 0.75rem",
+                          background: "linear-gradient(135deg, #10b981, #059669)",
+                          color: "white",
+                          borderRadius: "8px",
+                          fontSize: "0.85rem",
+                          fontWeight: "600"
+                        }}>
+                          ✅ Confirmed - {o.estimated_time >= 60 ? `${Math.floor(o.estimated_time / 60)}h` : `${o.estimated_time}min`}
+                        </span>
+                      )}
+                      {o.status !== "completed" && o.phone && (
+                        <button
+                          className="btn-primary"
+                          onClick={() => markReady(o.id)}
+                          style={{
+                            background: "linear-gradient(135deg, #0ea5e9, #0284c7)",
+                            color: "white"
+                          }}
+                        >
+                          📩 Mark Ready
+                        </button>
+                      )}
+                      {o.status !== "completed" && (
+                        <button
+                          className="btn-secondary"
+                          onClick={() => markOrderDone(o.id)}
+                          style={{
                             background: "linear-gradient(135deg, #10b981, #059669)",
                             color: "white",
-                            borderRadius: "8px",
-                            fontSize: "0.85rem",
-                            fontWeight: "600"
-                          }}>
-                            ✅ Confirmed - {o.estimated_time >= 60 ? `${Math.floor(o.estimated_time / 60)}h` : `${o.estimated_time}min`}
-                          </span>
-                          <button 
-                            className="btn-primary" 
-                            onClick={() => markReady(o.id)}
-                            style={{
-                              background: "linear-gradient(135deg, #0ea5e9, #0284c7)",
-                              color: "white"
-                            }}
-                          >
-                            📩 Mark Ready & Send Fetch
-                          </button>
-                        </>
-                      )}
-                      {o.status === "ready" && (
-                        <div style={{ width: "100%" }}>
-                          <p style={{ 
-                            margin: "0 0 0.5rem 0", 
-                            fontSize: "0.85rem", 
-                            fontWeight: "600", 
-                            color: "#059669",
-                            textAlign: "center"
-                          }}>
-                            ☝️ Click Done when order is fetched
-                          </p>
-                          <button 
-                            className="btn-secondary" 
-                            onClick={() => markOrderDone(o.id)}
-                            style={{
-                              background: "linear-gradient(135deg, #10b981, #059669)",
-                              color: "white",
-                              border: "none",
-                              width: "100%"
-                            }}
-                          >
-                            ✅ Done
-                          </button>
-                        </div>
+                            border: "none"
+                          }}
+                        >
+                          ✅ Done
+                        </button>
                       )}
                     </div>
                   </div>
@@ -1648,8 +1636,8 @@ export default function App({ user }) {
 
                     <div style={{ marginTop: ".75rem", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
                       {o.status === "pending" && o.phone && (
-                        <button 
-                          className="btn-primary" 
+                        <button
+                          className="btn-primary"
                           onClick={() => {
                             setEstimatingOrder(o);
                             setSelectedDuration(null);
@@ -1674,9 +1662,9 @@ export default function App({ user }) {
                           ✅ Confirmed - {o.estimated_time >= 60 ? `${Math.floor(o.estimated_time / 60)}h` : `${o.estimated_time}min`}
                         </span>
                       )}
-                      {(o.status === "confirmed" || o.status === "ready") && o.phone && (
-                        <button 
-                          className="btn-primary" 
+                      {o.status !== "completed" && o.phone && (
+                        <button
+                          className="btn-primary"
                           onClick={() => markReady(o.id)}
                           style={{
                             background: "linear-gradient(135deg, #0ea5e9, #0284c7)",
@@ -1686,30 +1674,18 @@ export default function App({ user }) {
                           📩 Mark Ready
                         </button>
                       )}
-                      {o.status === "ready" && (
-                        <div style={{ width: "100%" }}>
-                          <p style={{ 
-                            margin: "0 0 0.5rem 0", 
-                            fontSize: "0.85rem", 
-                            fontWeight: "600", 
-                            color: "#059669",
-                            textAlign: "center"
-                          }}>
-                            ☝️ Click Done when order is fetched
-                          </p>
-                          <button 
-                            className="btn-secondary" 
-                            onClick={() => markOrderDone(o.id)}
-                            style={{
-                              background: "linear-gradient(135deg, #10b981, #059669)",
-                              color: "white",
-                              border: "none",
-                              width: "100%"
-                            }}
-                          >
-                            ✅ Done
-                          </button>
-                        </div>
+                      {o.status !== "completed" && (
+                        <button
+                          className="btn-secondary"
+                          onClick={() => markOrderDone(o.id)}
+                          style={{
+                            background: "linear-gradient(135deg, #10b981, #059669)",
+                            color: "white",
+                            border: "none"
+                          }}
+                        >
+                          ✅ Done
+                        </button>
                       )}
                     </div>
                   </div>
