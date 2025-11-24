@@ -67,6 +67,13 @@ serve(async (req) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
+    // Generate slug from store name
+    const slug = storeName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 50);
+
     // Create tenant record with correct column names
     const { data: tenantData, error: tenantError } = await supabase
       .from('tenants')
@@ -74,6 +81,7 @@ serve(async (req) => {
         owner_id: userId,
         name: storeName,
         business_name: storeName,
+        slug: slug,
         owner_email: email,
         contact_email: email,
         plan: plan,

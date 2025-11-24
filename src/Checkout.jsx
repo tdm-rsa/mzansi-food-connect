@@ -85,14 +85,28 @@ export default function Checkout() {
 
   useEffect(() => {
     async function loadStore() {
+      console.log('🔍 Loading store with slug:', slug);
+
+      if (!slug) {
+        console.error('❌ No slug provided');
+        setError("Store slug not provided");
+        setStoreLoaded(true);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("tenants")
         .select("*")
         .eq("slug", slug)
         .single();
 
+      console.log('📦 Store data:', data);
+      console.log('❌ Store error:', error);
+
       if (error || !data) {
-        setError("Store not found");
+        console.error('Store not found for slug:', slug, error);
+        setError(`Store not found: ${slug}`);
+        setStoreLoaded(true);
         return;
       }
 
