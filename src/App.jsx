@@ -2403,66 +2403,92 @@ export default function App({ user }) {
               </div>
             </div>
 
-            {/* Yoco Integration */}
-            <div className="settings-section">
-              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>💰 Yoco Integration</h3>
-              <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
-                Connect your Yoco account to accept customer payments
-              </p>
+            {/* Yoco Integration - Only for Pro/Premium */}
+            {planFeatures.canConfigurePayments && (
+              <div className="settings-section">
+                <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>💰 Yoco Integration</h3>
+                <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                  Connect your Yoco account to accept customer payments
+                </p>
 
-              <div className="form-group">
-                <label htmlFor="yoco-public" style={{ color: darkMode ? "#ffffff" : "#333" }}>
-                  Yoco Public Key
-                </label>
-                <input
-                  id="yoco-public"
-                  type="text"
-                  className="form-input"
-                  placeholder="pk_live_xxxxxxxxxxxxx"
-                  value={yocoPublicKey}
-                  onChange={(e) => setYocoPublicKey(e.target.value)}
-                />
+                <div className="form-group">
+                  <label htmlFor="yoco-public" style={{ color: darkMode ? "#ffffff" : "#333" }}>
+                    Yoco Public Key
+                  </label>
+                  <input
+                    id="yoco-public"
+                    type="text"
+                    className="form-input"
+                    placeholder="pk_live_xxxxxxxxxxxxx"
+                    value={yocoPublicKey}
+                    onChange={(e) => setYocoPublicKey(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="yoco-secret" style={{ color: darkMode ? "#ffffff" : "#333" }}>
+                    Yoco Secret Key
+                  </label>
+                  <input
+                    id="yoco-secret"
+                    type="password"
+                    className="form-input"
+                    placeholder="sk_live_xxxxxxxxxxxxx"
+                    value={yocoSecretKey}
+                    onChange={(e) => setYocoSecretKey(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  onClick={handleSaveYocoKeys}
+                  className="btn-primary"
+                  disabled={savingYoco}
+                >
+                  {savingYoco ? "Saving..." : "Save Yoco Keys"}
+                </button>
+
+                <div style={{
+                  marginTop: "1.5rem",
+                  padding: "1rem",
+                  background: darkMode ? "#1e293b" : "#eff6ff",
+                  borderRadius: "8px",
+                  fontSize: "0.85rem",
+                  color: darkMode ? "#93c5fd" : "#1e40af"
+                }}>
+                  <strong>📌 How to get your Yoco keys:</strong>
+                  <ol style={{ margin: "0.5rem 0 0 0", paddingLeft: "1.5rem" }}>
+                    <li>Go to <a href="https://portal.yoco.com/" target="_blank" rel="noopener noreferrer" style={{ color: darkMode ? "#60a5fa" : "#2563eb" }}>Yoco Portal</a></li>
+                    <li>Click Settings → Developers</li>
+                    <li>Copy your Live Public Key and Live Secret Key</li>
+                    <li>Paste them here and click "Save"</li>
+                  </ol>
+                </div>
               </div>
+            )}
 
-              <div className="form-group">
-                <label htmlFor="yoco-secret" style={{ color: darkMode ? "#ffffff" : "#333" }}>
-                  Yoco Secret Key
-                </label>
-                <input
-                  id="yoco-secret"
-                  type="password"
-                  className="form-input"
-                  placeholder="sk_live_xxxxxxxxxxxxx"
-                  value={yocoSecretKey}
-                  onChange={(e) => setYocoSecretKey(e.target.value)}
-                />
+            {/* Trial Mode Notice - Show for trial users */}
+            {storeInfo?.plan === 'trial' && (
+              <div className="settings-section">
+                <div style={{
+                  padding: "1.5rem",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                  borderRadius: "12px",
+                  color: "white"
+                }}>
+                  <h3 style={{ margin: "0 0 0.5rem 0", color: "white" }}>🧪 Trial Mode - Training Ground</h3>
+                  <p style={{ margin: "0 0 1rem 0", fontSize: "0.95rem" }}>
+                    You're using platform test keys for payments. This is a training environment to learn how everything works.
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: "1.5rem", fontSize: "0.9rem" }}>
+                    <li>✅ Your store is fully functional with test payments</li>
+                    <li>✅ Messages and WhatsApp work perfectly</li>
+                    <li>✅ Practice managing orders and menus</li>
+                    <li>⚠️ Customers can only make TEST payments (no real money)</li>
+                    <li>🚀 Upgrade to Pro/Premium to accept real payments with your own Yoco account</li>
+                  </ul>
+                </div>
               </div>
-
-              <button
-                onClick={handleSaveYocoKeys}
-                className="btn-primary"
-                disabled={savingYoco}
-              >
-                {savingYoco ? "Saving..." : "Save Yoco Keys"}
-              </button>
-
-              <div style={{
-                marginTop: "1.5rem",
-                padding: "1rem",
-                background: darkMode ? "#1e293b" : "#eff6ff",
-                borderRadius: "8px",
-                fontSize: "0.85rem",
-                color: darkMode ? "#93c5fd" : "#1e40af"
-              }}>
-                <strong>📌 How to get your Yoco keys:</strong>
-                <ol style={{ margin: "0.5rem 0 0 0", paddingLeft: "1.5rem" }}>
-                  <li>Go to <a href="https://portal.yoco.com/" target="_blank" rel="noopener noreferrer" style={{ color: darkMode ? "#60a5fa" : "#2563eb" }}>Yoco Portal</a></li>
-                  <li>Click Settings → Developers</li>
-                  <li>Copy your Live Public Key and Live Secret Key</li>
-                  <li>Paste them here and click "Save"</li>
-                </ol>
-              </div>
-            </div>
+            )}
 
             {/* QR Code */}
             <div className="settings-section">

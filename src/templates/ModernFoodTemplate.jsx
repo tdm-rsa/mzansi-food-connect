@@ -374,6 +374,20 @@ export default function ModernFoodTemplate(props) {
           <div className={`store-status ${banner.isOpen ? "open" : "closed"}`}>
             {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
           </div>
+          {banner.isTrialMode && (
+            <div style={{
+              padding: "0.5rem 1rem",
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "white",
+              borderRadius: "25px",
+              fontWeight: "600",
+              fontSize: "0.85rem",
+              boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
+              border: "2px solid rgba(255, 255, 255, 0.3)"
+            }}>
+              🧪 TRIAL MODE - Test Payments Only
+            </div>
+          )}
           {banner.showQueue && (
             <div>
               <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />

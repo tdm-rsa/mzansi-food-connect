@@ -208,6 +208,7 @@ export default function CustomerStore() {
         isOpen: isOpen,
         showQueue: storeData.show_queue !== false,
         bgDataUrl: storeData.banner_url,
+        isTrialMode: storeData.plan === 'trial', // Show trial badge
       },
       products: {
         layout: storeData.product_layout || "grid3",

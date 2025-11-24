@@ -7,12 +7,14 @@ export const PLAN_FEATURES = {
     hasAnalytics: false,
     hasBasicAnalytics: false,
     hasAdvancedAnalytics: false,
-    hasWhatsApp: true, // Free WhatsApp web links
+    hasWhatsApp: true,
     hasCustomDomain: false,
     hasSubdomain: true,
     removeBranding: false,
     templates: ['Modern Food'], // Only 1 template
-    support: 'email'
+    support: 'email',
+    canConfigurePayments: false, // Cannot add own Yoco keys - uses platform test keys
+    isTestMode: true // All payments are test mode only
   },
   pro: {
     name: 'Pro',
@@ -20,12 +22,14 @@ export const PLAN_FEATURES = {
     hasAnalytics: true,
     hasBasicAnalytics: true,
     hasAdvancedAnalytics: false,
-    hasWhatsApp: true, // Free WhatsApp web links
+    hasWhatsApp: true,
     hasCustomDomain: false,
     hasSubdomain: true,
     removeBranding: true,
-    templates: ['Modern Food', 'Traditional SA'], // 2 templates - Fast & Mobile and new variants are Premium-only
-    support: 'priority'
+    templates: ['Modern Food', 'Traditional SA'], // 2 templates
+    support: 'priority',
+    canConfigurePayments: true, // Can add own Yoco keys for real payments
+    isTestMode: false // Real payments enabled
   },
   premium: {
     name: 'Premium',
@@ -33,7 +37,7 @@ export const PLAN_FEATURES = {
     hasAnalytics: true,
     hasBasicAnalytics: true,
     hasAdvancedAnalytics: true,
-    hasWhatsApp: true, // Free WhatsApp web links
+    hasWhatsApp: true,
     hasCustomDomain: true,
     hasSubdomain: true,
     removeBranding: true,
@@ -44,7 +48,9 @@ export const PLAN_FEATURES = {
       'Ghost Kitchen Pro',
       'Late Night Fiesta'
     ], // 5 templates
-    support: 'dedicated'
+    support: 'dedicated',
+    canConfigurePayments: true, // Can add own Yoco keys for real payments
+    isTestMode: false // Real payments enabled
   }
 };
 

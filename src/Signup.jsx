@@ -33,16 +33,18 @@ export default function Signup({ onBack, onSuccess }) {
     {
       id: "trial",
       name: "Free Trial",
-      subtitle: "7 Days Free",
+      subtitle: "Training Ground",
       price: "R0",
-      period: "for 7 days",
-      description: "Try it free - no credit card required",
+      period: "forever",
+      description: "Full access with test payments - no credit card required",
       features: [
         "Subdomain (storename.mzansifoodconnect.app)",
-        "Up to 30 products",
-        "Order management",
-        "Store designer",
-        "Manual WhatsApp messaging"
+        "Up to 10 products",
+        "Full order management system",
+        "Store designer & customization",
+        "WhatsApp notifications (test mode)",
+        "Test payments only - Learn the platform",
+        "Perfect for training & demos"
       ]
     },
     {
