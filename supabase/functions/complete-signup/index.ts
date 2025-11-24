@@ -67,16 +67,18 @@ serve(async (req) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    // Create tenant record
+    // Create tenant record with correct column names
     const { data: tenantData, error: tenantError } = await supabase
       .from('tenants')
       .insert([{
-        id: userId,
-        store_name: storeName,
-        email: email,
+        owner_id: userId,
+        name: storeName,
+        business_name: storeName,
+        owner_email: email,
+        contact_email: email,
         plan: plan,
-        expires_at: expiresAt.toISOString(),
-        created_at: new Date().toISOString()
+        plan_expires_at: expiresAt.toISOString(),
+        plan_started_at: new Date().toISOString()
       }])
       .select()
       .single();
