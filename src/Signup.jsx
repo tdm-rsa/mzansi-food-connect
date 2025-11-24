@@ -442,6 +442,25 @@ export default function Signup({ onBack, onSuccess }) {
                   required
                   className="form-input"
                 />
+                <small style={{
+                  display: "block",
+                  marginTop: "0.5rem",
+                  padding: "0.75rem",
+                  background: "#fff3cd",
+                  border: "1px solid #ffc107",
+                  borderRadius: "6px",
+                  color: "#856404",
+                  fontSize: "0.875rem",
+                  lineHeight: "1.4"
+                }}>
+                  ⚠️ <strong>Important:</strong> Your store URL will be based on this name and <strong>cannot be changed later</strong>.
+                  Choose carefully! Example: "Mama's Kitchen" → <code style={{
+                    background: "#f8f9fa",
+                    padding: "0.2rem 0.4rem",
+                    borderRadius: "3px",
+                    fontSize: "0.85rem"
+                  }}>mamas-kitchen.mzansifoodconnect.app</code>
+                </small>
               </div>
 
               <div className="form-group">
