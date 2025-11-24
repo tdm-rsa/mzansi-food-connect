@@ -371,9 +371,14 @@ export default function ModernFoodTemplate(props) {
         <h2 style={{ fontSize: `${banner.fontSize || 28}px` }}>{banner.bannerText}</h2>
 
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
-          <div className={`store-status ${banner.isOpen ? "open" : "closed"}`}>
-            {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
+        <div className={`store-status ${banner.isOpen ? "open" : "closed"}`}>
+          {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
+        </div>
+        {banner.showQueue && (
+          <div style={{ marginTop: "0.65rem" }}>
+            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
           </div>
+        )}
           {banner.isOpen && state.estimated_time > 0 && (
             <div style={{
               padding: "0.5rem 1rem",
@@ -399,10 +404,6 @@ export default function ModernFoodTemplate(props) {
             >
               📢 Announcements
             </button>
-          )}
-
-          {banner.showQueue && (
-            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
           )}
 
           {state.show_instructions && state.instructions && (

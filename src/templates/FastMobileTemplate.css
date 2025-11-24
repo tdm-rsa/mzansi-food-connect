@@ -244,7 +244,8 @@
 .fab-cart {
   position: fixed;
   inset-inline-end: var(--space-lg);
-  inset-block-end: var(--space-lg);
+  inset-block-start: var(--space-lg);
+  inset-block-end: auto;
   inline-size: clamp(3rem, 12vw, 4rem);
   block-size: clamp(3rem, 12vw, 4rem);
   border-radius: 50%;

@@ -33,8 +33,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-sm);
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  position: relative;
+  padding-right: clamp(4rem, 12vw, 6rem);
 }
 
 .sa-left {
@@ -53,6 +55,9 @@
 }
 
 .cart-toggle {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
   display: inline-flex;
   align-items: center;
   gap: var(--space-3xs);

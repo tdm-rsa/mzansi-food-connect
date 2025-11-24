@@ -28,14 +28,26 @@
   flex-wrap: wrap;
   gap: var(--space-sm);
   align-items: center;
-  justify-content: space-between;
-  padding: var(--space-sm) var(--space-md);
+  justify-content: flex-start;
+  padding: var(--space-sm) clamp(var(--space-md), 4vw, var(--space-xl));
 }
 
 .header-left {
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
+}
+
+.header-actions {
+  margin-left: auto;
+  position: relative;
+  min-inline-size: clamp(6rem, 12vw, 8rem);
+}
+
+.header-actions {
+  margin-left: auto;
+  position: relative;
+  min-inline-size: clamp(6rem, 12vw, 8rem);
 }
 
 .store-logo {
@@ -53,6 +65,9 @@
 }
 
 .cart-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: inline-flex;
   align-items: center;
   gap: var(--space-3xs);

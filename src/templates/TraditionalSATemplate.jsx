@@ -387,6 +387,11 @@ export default function TraditionalSATemplate(props) {
         <div className={`store-status ${banner.isOpen ? "open" : "closed"}`}>
           {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
         </div>
+        {banner.showQueue && (
+          <div style={{ marginTop: "0.65rem" }}>
+            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
+          </div>
+        )}
 
         {/* Banner Action Buttons */}
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem", justifyContent: "center" }}>
@@ -398,10 +403,6 @@ export default function TraditionalSATemplate(props) {
             >
               📢 Announcements
             </button>
-          )}
-
-          {banner.showQueue && (
-            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
           )}
 
           {state.show_instructions && state.instructions && (
