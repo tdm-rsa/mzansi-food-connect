@@ -382,14 +382,16 @@ export default function FastMobileTemplate(props) {
       {/* BANNER */}
       <section className="fast-banner">
         <h2 style={{ fontSize: `${banner.fontSize || 28}px` }}>{banner.bannerText}</h2>
-        <div className={`status ${banner.isOpen ? "open" : "closed"}`}>
-          {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
-        </div>
-        {banner.showQueue && (
-          <div style={{ marginTop: "0.65rem" }}>
-            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", justifyContent: "center", alignItems: "center" }}>
+          <div className={`status ${banner.isOpen ? "open" : "closed"}`}>
+            {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
           </div>
-        )}
+          {banner.showQueue && (
+            <div>
+              <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
+            </div>
+          )}
+        </div>
 
         {/* Banner Action Buttons */}
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem", justifyContent: "center" }}>
