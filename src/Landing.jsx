@@ -94,7 +94,7 @@ function Landing() {
     {
       name: "Pro",
       subtitle: "For Growing Businesses",
-      price: "R4",
+      price: "R2.50",
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
@@ -115,7 +115,7 @@ function Landing() {
     {
       name: "Premium",
       subtitle: "Custom Domain Included",
-      price: "R6",
+      price: "R3.00",
       period: "per month",
       description: "Professional solution with your own domain (e.g., www.yourstore.co.za)",
       features: [
@@ -289,7 +289,7 @@ function Landing() {
             <a href="/app" className="btn btn-primary btn-large">Get Started Now</a>
             <a href="#features" className="btn btn-secondary btn-large">Explore Features</a>
           </div>
-          <p className="cta-subtext">Setup takes 5 minutes • Free forever plan available • Plans from R4/month</p>
+          <p className="cta-subtext">Setup takes 5 minutes • Free forever plan available • Plans from R2.50/month</p>
         </div>
       </section>
 

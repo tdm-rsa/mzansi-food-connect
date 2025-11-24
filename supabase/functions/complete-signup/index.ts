@@ -98,7 +98,7 @@ serve(async (req) => {
 
       if (resendApiKey) {
         const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-        const planPrice = plan === 'pro' ? 'R4' : 'R6';
+        const planPrice = plan === 'pro' ? 'R2.50' : 'R3.00';
 
         const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",

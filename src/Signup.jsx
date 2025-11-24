@@ -212,7 +212,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      const amountInCents = selectedPlan === "pro" ? 400 : 600; // R4 Pro, R6 Premium
+      const amountInCents = selectedPlan === "pro" ? 250 : 300; // R2.50 Pro, R3.00 Premium
 
       console.log('💳 Creating Yoco Checkout session for subscription signup...');
 
