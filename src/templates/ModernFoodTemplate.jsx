@@ -370,28 +370,26 @@ export default function ModernFoodTemplate(props) {
       <section className="store-banner">
         <h2 style={{ fontSize: `${banner.fontSize || 28}px` }}>{banner.bannerText}</h2>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", justifyContent: "center", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
-            <div className={`store-status ${banner.isOpen ? "open" : "closed"}`}>
-              {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
-            </div>
-            {banner.isOpen && state.estimated_time > 0 && (
-              <div style={{
-                padding: "0.5rem 1rem",
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                color: "white",
-                borderRadius: "25px",
-                fontWeight: "600",
-                fontSize: "0.9rem",
-                boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)"
-              }}>
-                ⏱️ Wait time: ~{state.estimated_time} min
-              </div>
-            )}
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+          <div className={`store-status ${banner.isOpen ? "open" : "closed"}`}>
+            {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
           </div>
           {banner.showQueue && (
             <div>
               <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
+            </div>
+          )}
+          {banner.isOpen && state.estimated_time > 0 && (
+            <div style={{
+              padding: "0.5rem 1rem",
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "white",
+              borderRadius: "25px",
+              fontWeight: "600",
+              fontSize: "0.9rem",
+              boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)"
+            }}>
+              ⏱️ Wait time: ~{state.estimated_time} min
             </div>
           )}
         </div>

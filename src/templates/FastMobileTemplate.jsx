@@ -382,7 +382,7 @@ export default function FastMobileTemplate(props) {
       {/* BANNER */}
       <section className="fast-banner">
         <h2 style={{ fontSize: `${banner.fontSize || 28}px` }}>{banner.bannerText}</h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", justifyContent: "center", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
           <div className={`status ${banner.isOpen ? "open" : "closed"}`}>
             {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
           </div>
