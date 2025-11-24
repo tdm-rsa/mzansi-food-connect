@@ -548,60 +548,6 @@ export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null
                       />
                     </div>
 
-                    {/* Profile Picture */}
-                    <div className="control-group">
-                      <label>Profile Picture</label>
-                      <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "0.75rem" }}>
-                        Upload your profile picture to display in the dashboard header
-                      </p>
-                      <div className="file-upload-area">
-                        <input
-                          type="file"
-                          id="profile-upload"
-                          accept="image/*"
-                          className="file-input"
-                          onChange={async (e) => {
-                            const file = e.target.files[0];
-                            if (!file) return;
-                            try {
-                              setSaving(true);
-                              const url = await uploadImage(file, "profiles", store.id);
-                              await updateStoreData({ profile_picture_url: url });
-                              alert("✅ Profile picture uploaded successfully!");
-                            } catch (err) {
-                              alert("❌ Failed to upload profile picture: " + err.message);
-                            } finally {
-                              setSaving(false);
-                            }
-                          }}
-                        />
-                        <label htmlFor="profile-upload" className="file-label">
-                          {store.profile_picture_url ? "Change Profile Picture" : "Upload Profile Picture"}
-                        </label>
-                      </div>
-                      {store.profile_picture_url && (
-                        <div className="uploaded-preview">
-                          <img
-                            src={store.profile_picture_url}
-                            alt="profile"
-                            style={{
-                              borderRadius: "50%",
-                              width: "100px",
-                              height: "100px",
-                              objectFit: "cover",
-                              border: "3px solid #e5e7eb"
-                            }}
-                          />
-                          <button
-                            className="remove-btn"
-                            onClick={() => saveChanges({ profile_picture_url: null })}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
                     {/* Social Links */}
                     <div className="control-group">
                       <label>Social Media Links</label>

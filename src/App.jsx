@@ -1153,9 +1153,40 @@ export default function App({ user }) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: "0.5rem",
+          gap: "0.75rem",
           minWidth: "fit-content"
         }}>
+          {/* Profile Picture */}
+          {storeInfo?.profile_picture_url ? (
+            <img
+              src={storeInfo.profile_picture_url}
+              alt="Profile"
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "3px solid rgba(255, 255, 255, 0.3)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
+              }}
+            />
+          ) : (
+            <div style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #667eea, #764ba2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "2rem",
+              border: "3px solid rgba(255, 255, 255, 0.3)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
+            }}>
+              👤
+            </div>
+          )}
+
           {/* Plan Badge */}
           {storeInfo && (
             <div style={{
@@ -1165,9 +1196,9 @@ export default function App({ user }) {
                   ? "linear-gradient(135deg, #ffd700, #ff6b35)"
                   : "linear-gradient(135deg, #94a3b8, #64748b)",
               color: "white",
-              padding: "0.65rem 1.25rem",
-              borderRadius: "25px",
-              fontSize: "1rem",
+              padding: "0.5rem 1rem",
+              borderRadius: "20px",
+              fontSize: "0.9rem",
               fontWeight: "700",
               textTransform: "uppercase",
               letterSpacing: "0.5px",
@@ -1177,9 +1208,14 @@ export default function App({ user }) {
               {storeInfo.plan === 'pro' ? '🚀 Pro' : storeInfo.plan === 'premium' ? '👑 Premium' : '📦 Starter'}
             </div>
           )}
-          {/* Store Name */}
-          <span className="user-name" style={{ textAlign: "center" }}>
-            {storeInfo?.name || 'My Store'}
+
+          {/* Owner Name */}
+          <span className="user-name" style={{
+            textAlign: "center",
+            fontWeight: "600",
+            fontSize: "1.1rem"
+          }}>
+            {storeInfo?.owner_name || user?.email?.split('@')[0] || 'Owner'}
           </span>
         </div>
 
@@ -2082,6 +2118,112 @@ export default function App({ user }) {
                 >
                   Update Name
                 </button>
+              </div>
+            </div>
+
+            {/* Profile Picture */}
+            <div className="settings-section">
+              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>📸 Profile Picture</h3>
+              <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                Upload your profile picture (shown in dashboard header)
+              </p>
+              {storeInfo?.profile_picture_url && (
+                <div style={{ marginBottom: "1rem" }}>
+                  <img
+                    src={storeInfo.profile_picture_url}
+                    alt="Profile"
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "3px solid #e5e7eb"
+                    }}
+                  />
+                </div>
+              )}
+              <div style={{ display: "flex", gap: "0.75rem", maxWidth: "500px", alignItems: "center" }}>
+                <input
+                  type="file"
+                  id="profile-picture-upload"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    if (!storeInfo?.id) {
+                      showToast("⚠️ Store not loaded yet. Please wait.", "#f44336");
+                      return;
+                    }
+
+                    try {
+                      showToast("📤 Uploading profile picture...", "#2196f3");
+
+                      // Upload to Supabase Storage
+                      const fileExt = file.name.split('.').pop();
+                      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+                      const filePath = `profiles/${fileName}`;
+
+                      const { error: uploadError } = await supabase.storage
+                        .from("store-assets")
+                        .upload(filePath, file, {
+                          upsert: true,
+                          cacheControl: '3600'
+                        });
+
+                      if (uploadError) throw uploadError;
+
+                      // Get public URL
+                      const { data: { publicUrl } } = supabase.storage
+                        .from("store-assets")
+                        .getPublicUrl(filePath);
+
+                      // Update database
+                      const { error: updateError } = await supabase
+                        .from("tenants")
+                        .update({ profile_picture_url: publicUrl })
+                        .eq("id", storeInfo.id);
+
+                      if (updateError) throw updateError;
+
+                      setStoreInfo({ ...storeInfo, profile_picture_url: publicUrl });
+                      showToast("✅ Profile picture updated successfully!", "#4caf50");
+                    } catch (error) {
+                      showToast(`❌ Failed to upload: ${error.message}`, "#f44336");
+                      console.error('Upload error:', error);
+                    }
+                  }}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={() => document.getElementById("profile-picture-upload").click()}
+                >
+                  {storeInfo?.profile_picture_url ? "Change Picture" : "Upload Picture"}
+                </button>
+                {storeInfo?.profile_picture_url && (
+                  <button
+                    className="btn-secondary"
+                    onClick={async () => {
+                      if (!storeInfo?.id) return;
+                      try {
+                        const { error } = await supabase
+                          .from("tenants")
+                          .update({ profile_picture_url: null })
+                          .eq("id", storeInfo.id);
+
+                        if (error) throw error;
+
+                        setStoreInfo({ ...storeInfo, profile_picture_url: null });
+                        showToast("✅ Profile picture removed", "#4caf50");
+                      } catch (error) {
+                        showToast(`❌ Failed to remove: ${error.message}`, "#f44336");
+                      }
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             </div>
 
