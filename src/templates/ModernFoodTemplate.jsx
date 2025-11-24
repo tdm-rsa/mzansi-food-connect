@@ -423,8 +423,7 @@ export default function ModernFoodTemplate(props) {
           >
             💬 Ask a Question
           </button>
-        </div>
-      </section>
+        </div>      </section>
 
       {/* ===== Menu ===== */}
       <section className="store-menu">
