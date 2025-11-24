@@ -232,6 +232,7 @@ export default function CustomerStore() {
       yoco_public_key: storeData.yoco_public_key || "",
       yoco_secret_key: storeData.yoco_secret_key || "",
       slug: slug,
+      isTrialAccount: storeData.plan === 'trial', // NEW: Disable checkout for trial accounts
     };
 
     console.log("🎨 Rendering template:", storeData.active_template);

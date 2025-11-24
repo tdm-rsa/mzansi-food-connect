@@ -115,12 +115,30 @@ export default function CartSidebar({ cart, store }) {
                   <span className="mfc-cart-total-price">R{totalPrice.toFixed(2)}</span>
                 </div>
 
-                <button
-                  className="mfc-cart-checkout-btn"
-                  onClick={handleCheckout}
-                >
-                  Proceed to Checkout
-                </button>
+                {store.isTrialAccount ? (
+                  <div style={{
+                    background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                    color: "white",
+                    padding: "1rem",
+                    borderRadius: "8px",
+                    marginBottom: "1rem",
+                    textAlign: "center"
+                  }}>
+                    <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.95rem" }}>
+                      🧪 This is a Trial Store
+                    </p>
+                    <p style={{ margin: 0, fontSize: "0.85rem", opacity: 0.9 }}>
+                      Checkout is disabled in training mode. This store owner needs to upgrade to Pro (R4/mo) or Premium (R6/mo) to accept real payments.
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    className="mfc-cart-checkout-btn"
+                    onClick={handleCheckout}
+                  >
+                    Proceed to Checkout
+                  </button>
+                )}
 
                 <button
                   className="mfc-cart-clear-btn"
