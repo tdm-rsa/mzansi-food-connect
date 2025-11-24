@@ -69,31 +69,6 @@ function Landing() {
     }
   ];
 
-  const testimonials = [
-    {
-      id: 1,
-      name: "Sipho's Braai Spot",
-      location: "Soweto, Johannesburg",
-      text: "Since going online with Mzansi Food Connect, my orders doubled! Customers love ordering ahead.",
-      business: "Shisanyama"
-    },
-    {
-      id: 2,
-      name: "Mama's Kitchen",
-      location: "Khayelitsha, Cape Town",
-      text: "The WhatsApp notifications are perfect. I get orders while cooking and customers pay online.",
-      business: "Home Bakery"
-    },
-    {
-      id: 3,
-      name: "Thabo's Fast Foods",
-      location: "Durban Central",
-      text: "My customers love the online menu. They can see prices and photos before ordering.",
-      business: "Takeaway Restaurant"
-    }
-  ];
-
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const signupsOpen = false;
 
@@ -183,7 +158,6 @@ function Landing() {
           <div className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-            <a href="#testimonials" onClick={() => setMobileMenuOpen(false)}>Success Stories</a>
             <a href="/app" className="btn-login">Login</a>
           </div>
         </div>
@@ -311,37 +285,6 @@ function Landing() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="testimonials" className="testimonials-section">
-        <div className="container">
-          <h2 className="section-title">Success Stories from Real Businesses</h2>
-          <p className="section-subtitle">See how food businesses are growing with Mzansi Food Connect</p>
-          <div className="testimonials-container">
-            <div className="testimonial-active">
-              <div className="testimonial-content">
-                <div className="quote-icon">"</div>
-                <p className="testimonial-text">{testimonials[activeTestimonial].text}</p>
-                <div className="testimonial-author">
-                  <div>
-                    <strong>{testimonials[activeTestimonial].name}</strong>
-                    <span className="business-type">{testimonials[activeTestimonial].business}</span>
-                  </div>
-                  <span className="location">📍 {testimonials[activeTestimonial].location}</span>
-                </div>
-              </div>
-            </div>
-            <div className="testimonial-dots">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  className={`dot ${index === activeTestimonial ? 'active' : ''}`}
-                  onClick={() => setActiveTestimonial(index)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="cta-section">
