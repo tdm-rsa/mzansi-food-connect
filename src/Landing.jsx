@@ -86,8 +86,7 @@ function Landing() {
         "WhatsApp notifications",
         "Store designer",
         "Customers order online",
-        "Customers send messages",
-        "Customer pickup notifications"
+        "Customers send messages"
       ],
       cta: "Start 7-Day Trial",
       highlight: false
@@ -106,6 +105,7 @@ function Landing() {
         "Live Queue View for Customers on the website",
         "Remove branding",
         "Customers order online",
+        "API access e.g Automated WhatsApp messaging",
         "Customers send messages on the website",
         "A dashbord to manage orders, menu , Store design and more"
       
