@@ -16,9 +16,7 @@ WHERE email = 'your-email@example.com'; -- REPLACE WITH YOUR EMAIL
 -- 2. If email_confirmed_at is NULL, manually confirm the email
 -- Replace 'USER_ID_FROM_ABOVE' with the actual ID from step 1
 UPDATE auth.users
-SET
-  email_confirmed_at = NOW(),
-  confirmed_at = NOW()
+SET email_confirmed_at = NOW()
 WHERE email = 'your-email@example.com' -- REPLACE WITH YOUR EMAIL
   AND email_confirmed_at IS NULL;
 
@@ -27,7 +25,6 @@ SELECT
   id,
   email,
   email_confirmed_at,
-  confirmed_at,
   raw_user_meta_data->>'plan' as plan
 FROM auth.users
 WHERE email = 'your-email@example.com'; -- REPLACE WITH YOUR EMAIL
