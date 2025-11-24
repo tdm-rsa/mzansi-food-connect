@@ -28,7 +28,7 @@
   flex-wrap: wrap;
   gap: var(--space-sm);
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   padding: var(--space-sm) clamp(var(--space-md), 4vw, var(--space-xl));
 }
 
@@ -39,15 +39,9 @@
 }
 
 .header-actions {
-  margin-left: auto;
-  position: relative;
-  min-inline-size: clamp(6rem, 12vw, 8rem);
-}
-
-.header-actions {
-  margin-left: auto;
-  position: relative;
-  min-inline-size: clamp(6rem, 12vw, 8rem);
+  display: inline-flex;
+  gap: var(--space-sm);
+  align-items: center;
 }
 
 .store-logo {
@@ -58,16 +52,7 @@
   box-shadow: var(--shadow-soft);
 }
 
-.header-actions {
-  display: inline-flex;
-  gap: var(--space-sm);
-  align-items: center;
-}
-
 .cart-toggle {
-  position: absolute;
-  top: 0;
-  right: 0;
   display: inline-flex;
   align-items: center;
   gap: var(--space-3xs);
@@ -78,6 +63,7 @@
   color: #fff;
   font-weight: 700;
   box-shadow: var(--shadow-soft);
+  cursor: pointer;
 }
 
 .cart-count {
