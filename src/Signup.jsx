@@ -207,16 +207,6 @@ export default function Signup({ onBack, onSuccess }) {
   }
 
   async function handleYocoPayment() {
-    if (!yocoPublicKey) {
-      setError('⚠️ Payment is not configured. Please contact support.');
-      return;
-    }
-
-    if (!window.YocoSDK) {
-      setError('⚠️ Payment system is loading. Please try again in a moment.');
-      return;
-    }
-
     setProcessingPayment(true);
     setError("");
 
@@ -224,36 +214,45 @@ export default function Signup({ onBack, onSuccess }) {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
       const amountInCents = selectedPlan === "pro" ? 400 : 600; // R4 Pro, R6 Premium
 
-      const sdk = new window.YocoSDK({
-        publicKey: yocoPublicKey,
-      });
+      console.log('💳 Creating Yoco Checkout session for subscription signup...');
 
-      // Create checkout
-      sdk.showPopup({
-        amountInCents: amountInCents,
-        currency: 'ZAR',
-        name: 'Mzansi Food Connect',
-        description: `${selectedPlanData.name} Plan Subscription`,
-        metadata: {
+      // Use create-subscription-checkout Edge Function for REAL PAYMENTS
+      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
+        body: {
+          storeId: `new-signup-${Date.now()}`,
           storeName: storeName,
-          email: email,
-          plan: selectedPlan,
-        },
-        callback: async function (result) {
-          if (result.error) {
-            console.error('Yoco payment error:', result.error);
-            setError('❌ Payment failed: ' + result.error.message);
-            setProcessingPayment(false);
-            return;
-          }
-
-          // Payment successful
-          console.log('💳 Yoco payment successful:', result);
-          await savePaymentReference(result.id, selectedPlanData);
-        },
+          targetPlan: selectedPlan,
+          userEmail: email,
+          currentPlan: 'none',
+          amount: amountInCents / 100
+        }
       });
+
+      if (error) {
+        console.error('Checkout creation error:', error);
+        throw error;
+      }
+
+      if (!data || !data.redirectUrl) {
+        throw new Error('No redirect URL received from payment provider');
+      }
+
+      console.log('✅ Checkout session created, redirecting to Yoco...');
+
+      // Store signup data in localStorage before redirect
+      localStorage.setItem('pendingSignup', JSON.stringify({
+        email,
+        storeName,
+        password,
+        plan: selectedPlan,
+        timestamp: Date.now()
+      }));
+
+      // Redirect to Yoco hosted checkout page (REAL PAYMENT with LIVE keys)
+      window.location.href = data.redirectUrl;
+
     } catch (err) {
-      console.error('Yoco SDK error:', err);
+      console.error('Payment initialization error:', err);
       setError('⚠️ Payment initialization failed. Please try again.');
       setProcessingPayment(false);
     }
