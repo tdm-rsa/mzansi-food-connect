@@ -28,6 +28,8 @@ serve(async (req) => {
       orderNumber
     } = await req.json();
 
+    console.log("📝 Checkout request:", { storeId, storeName, storeSlug, orderNumber, total });
+
     // Validate inputs
     if (!storeId || !customerName || !customerPhone || !items || !total) {
       return new Response(
@@ -43,14 +45,17 @@ serve(async (req) => {
 
     // CRITICAL: ALL stores (Pro and Premium) MUST use platform Yoco keys for product orders
     // This ensures our webhook receives payment notifications and orders are created
-    // Custom Yoco keys would send webhooks to store's account (not configured), breaking order creation
     const yocoSecretKey = Deno.env.get("VITE_YOCO_SECRET_KEY");
 
     if (!yocoSecretKey) {
+      console.error("❌ VITE_YOCO_SECRET_KEY not configured");
       throw new Error("Yoco secret key not configured");
     }
 
+    console.log("✅ Using platform Yoco key");
+
     // Create pending order first
+    console.log("📝 Creating pending order...");
     const { error: pendingError } = await supabase
       .from("pending_orders")
       .insert([{
@@ -65,13 +70,64 @@ serve(async (req) => {
       }]);
 
     if (pendingError) {
-      console.error("Failed to create pending order:", pendingError);
+      console.error("❌ Failed to create pending order:", pendingError);
       throw pendingError;
     }
 
+    console.log("✅ Pending order created:", orderNumber);
+
     // Create Yoco checkout session
     const totalInCents = Math.round(total * 100);
-    const appUrl = Deno.env.get("APP_URL") || "https://app.mzansifoodconnect.app";
+    
+    // Determine the correct base URL for redirects
+    // Check if store has a subdomain configured
+    const { data: storeData } = await supabase
+      .from("tenants")
+      .select("subdomain")
+      .eq("id", storeId)
+      .single();
+
+    let baseUrl;
+    if (storeData?.subdomain) {
+      // Use subdomain URL
+      baseUrl = `https://${storeData.subdomain}.mzansifoodconnect.app`;
+      console.log("🌐 Using subdomain URL:", baseUrl);
+    } else {
+      // Use path-based URL
+      baseUrl = Deno.env.get("APP_URL") || "https://app.mzansifoodconnect.app";
+      console.log("🌐 Using main domain URL:", baseUrl);
+    }
+
+    console.log("💰 Amount in cents:", totalInCents);
+
+    const checkoutPayload = {
+      amount: totalInCents,
+      currency: "ZAR",
+      successUrl: storeData?.subdomain 
+        ? `${baseUrl}/payment-success?orderNumber=${orderNumber}`
+        : `${baseUrl}/payment-success?orderNumber=${orderNumber}&slug=${storeSlug}`,
+      cancelUrl: storeData?.subdomain
+        ? `${baseUrl}/`
+        : `${baseUrl}/store/${storeSlug}`,
+      failureUrl: storeData?.subdomain
+        ? `${baseUrl}/payment-failed?orderNumber=${orderNumber}`
+        : `${baseUrl}/payment-failed?orderNumber=${orderNumber}&slug=${storeSlug}`,
+      metadata: {
+        storeId: storeId,
+        storeName: storeName,
+        storeSlug: storeSlug,
+        customerName: customerName,
+        customerPhone: customerPhone,
+        orderNumber: orderNumber,
+        checkoutType: "product_order"
+      }
+    };
+
+    console.log("🔄 Creating Yoco checkout session...", {
+      amount: checkoutPayload.amount,
+      successUrl: checkoutPayload.successUrl,
+      metadata: checkoutPayload.metadata
+    });
 
     const checkoutResponse = await fetch("https://payments.yoco.com/api/checkouts", {
       method: "POST",
@@ -79,39 +135,29 @@ serve(async (req) => {
         "Authorization": `Bearer ${yocoSecretKey}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        amount: totalInCents,
-        currency: "ZAR",
-        successUrl: `${appUrl}/payment-success?orderNumber=${orderNumber}&slug=${storeSlug}`,
-        cancelUrl: `${appUrl}/store/${storeSlug}`,
-        failureUrl: `${appUrl}/payment-failed?orderNumber=${orderNumber}&slug=${storeSlug}`,
-        metadata: {
-          storeId: storeId,
-          storeName: storeName,
-          storeSlug: storeSlug,
-          customerName: customerName,
-          customerPhone: customerPhone,
-          orderNumber: orderNumber,
-          checkoutType: "product_order"
-        }
-      })
+      body: JSON.stringify(checkoutPayload)
     });
 
     if (!checkoutResponse.ok) {
       const errorData = await checkoutResponse.text();
-      console.error("Yoco API error:", errorData);
+      console.error("❌ Yoco API error:", errorData);
       throw new Error(`Yoco checkout creation failed: ${errorData}`);
     }
 
     const checkoutData = await checkoutResponse.json();
 
-    console.log("✅ Checkout session created:", checkoutData.id);
+    console.log("✅ Checkout session created:", {
+      checkoutId: checkoutData.id,
+      redirectUrl: checkoutData.redirectUrl
+    });
 
     // Update pending order with checkout ID
     await supabase
       .from("pending_orders")
       .update({ payment_reference: checkoutData.id })
       .eq("order_number", orderNumber);
+
+    console.log("✅ Updated pending order with checkout ID");
 
     return new Response(
       JSON.stringify({
@@ -127,7 +173,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error("Error creating checkout:", error);
+    console.error("❌ Error creating checkout:", error);
     return new Response(
       JSON.stringify({
         error: error.message || "Failed to create checkout session"
