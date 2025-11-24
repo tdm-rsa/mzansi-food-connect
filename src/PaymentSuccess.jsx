@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
+import { useCart } from "./hooks/useCart";
+import { getSubdomain } from "./utils/subdomain";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -10,6 +12,13 @@ export default function PaymentSuccess() {
 
   const orderNumber = searchParams.get('orderNumber');
   const slug = searchParams.get('slug');
+  
+  // Get subdomain slug if exists, otherwise use path slug
+  const subdomainSlug = getSubdomain();
+  const effectiveSlug = subdomainSlug || slug;
+  
+  // Get cart to clear it
+  const cart = useCart(effectiveSlug);
 
   useEffect(() => {
     async function verifyPayment() {
@@ -32,6 +41,11 @@ export default function PaymentSuccess() {
         if (order) {
           setOrderData(order);
           setStatus('success');
+          
+          // Clear cart when order is confirmed
+          console.log("✅ Order confirmed, clearing cart for slug:", effectiveSlug);
+          cart.clearCart();
+          
           return true;
         }
         return false;
@@ -51,7 +65,7 @@ export default function PaymentSuccess() {
     }
 
     verifyPayment();
-  }, [orderNumber]);
+  }, [orderNumber, effectiveSlug]);
 
   if (status === 'verifying') {
     return (
@@ -82,7 +96,7 @@ export default function PaymentSuccess() {
             You'll receive a WhatsApp notification when your order is ready!
           </p>
           <button
-            onClick={() => navigate(`/store/${slug}`)}
+            onClick={() => navigate(effectiveSlug ? (subdomainSlug ? '/' : `/store/${effectiveSlug}`) : '/')}
             style={styles.button}
           >
             Back to Store
@@ -108,7 +122,7 @@ export default function PaymentSuccess() {
             Your order will appear shortly. Please check back in a moment.
           </p>
           <button
-            onClick={() => navigate(`/store/${slug}`)}
+            onClick={() => navigate(effectiveSlug ? (subdomainSlug ? '/' : `/store/${effectiveSlug}`) : '/')}
             style={styles.button}
           >
             Back to Store
@@ -127,7 +141,7 @@ export default function PaymentSuccess() {
           We couldn't verify your payment. Please contact support if you were charged.
         </p>
         <button
-          onClick={() => navigate(`/store/${slug}`)}
+          onClick={() => navigate(effectiveSlug ? (subdomainSlug ? '/' : `/store/${effectiveSlug}`) : '/')}
           style={styles.button}
         >
           Back to Store
