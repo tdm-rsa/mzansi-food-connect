@@ -388,17 +388,11 @@ export default function TraditionalSATemplate(props) {
           <div className={`store-status ${banner.isOpen ? "open" : "closed"}`}>
             {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
           </div>
-          {banner.showQueue && (
-            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
-          )}
+          {/* Live Queue removed from banner for this template */}
         </div>
 
         {/* Banner Action Buttons */}
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem", justifyContent: "center" }}>
-          {banner.showQueue && (
-            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
-          )}
-
           {banner.specialsText && (
             <button
               className="queue-btn"
