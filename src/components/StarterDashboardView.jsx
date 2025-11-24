@@ -162,7 +162,7 @@ export default function StarterDashboardView({
             style={{ position: "relative" }}
           >
             <h4 style={{ marginBottom: ".25rem" }}>📋 Menu Management</h4>
-            <p style={{ opacity: 0.8, margin: 0 }}>Add and edit food items (Max 30)</p>
+            <p style={{ opacity: 0.8, margin: 0 }}>Add and edit food items (Max 10)</p>
           </div>
 
           {/* 3. Notifications */}

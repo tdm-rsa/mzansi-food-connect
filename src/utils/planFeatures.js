@@ -3,7 +3,7 @@
 export const PLAN_FEATURES = {
   trial: {
     name: 'Free Trial',
-    maxProducts: 30,
+    maxProducts: 10,
     hasAnalytics: false,
     hasBasicAnalytics: false,
     hasAdvancedAnalytics: false,
