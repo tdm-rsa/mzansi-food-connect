@@ -4,7 +4,7 @@ import App from "./App.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 
-const SIGNUPS_ENABLED = false;
+const SIGNUPS_ENABLED = true;
 
 export default function AppWrapper() {
   const [user, setUser] = useState(null);
