@@ -90,6 +90,105 @@ serve(async (req) => {
 
     console.log(`✅ Tenant created for ${storeName}`);
 
+    // Send welcome email via Resend
+    try {
+      const resendApiKey = Deno.env.get("RESEND_API_KEY");
+
+      if (resendApiKey) {
+        const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+        const planPrice = plan === 'pro' ? 'R4' : 'R6';
+
+        const emailResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "Mzansi Food Connect <noreply@mzansifoodconnect.app>",
+            to: email,
+            subject: `Welcome to Mzansi Food Connect ${planName} Plan! 🎉`,
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <style>
+                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+                  .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+                  .highlight { background: #fff; padding: 20px; border-left: 4px solid #667eea; margin: 20px 0; }
+                  .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+                  .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h1 style="margin: 0;">🎉 Welcome to Mzansi Food Connect!</h1>
+                    <p style="margin: 10px 0 0 0; font-size: 18px;">Your ${planName} account is ready</p>
+                  </div>
+                  <div class="content">
+                    <h2>Hi ${storeName}! 👋</h2>
+                    <p>Your payment of <strong>${planPrice}/month</strong> has been successfully processed. Welcome to the Mzansi Food Connect family!</p>
+
+                    <div class="highlight">
+                      <h3 style="margin-top: 0;">✅ Your Account Details</h3>
+                      <p><strong>Store Name:</strong> ${storeName}</p>
+                      <p><strong>Email:</strong> ${email}</p>
+                      <p><strong>Plan:</strong> ${planName} (${planPrice}/month)</p>
+                      <p><strong>Status:</strong> Active for 30 days</p>
+                    </div>
+
+                    <h3>🚀 Get Started</h3>
+                    <p>You can now log in to your dashboard and start building your online store:</p>
+
+                    <div style="text-align: center;">
+                      <a href="https://app.mzansifoodconnect.app/app" class="button">Log In to Dashboard</a>
+                    </div>
+
+                    <h3>📋 Next Steps:</h3>
+                    <ul>
+                      <li>Add your products and menu items</li>
+                      <li>Customize your store design</li>
+                      <li>Set up your delivery options</li>
+                      <li>Share your store link with customers</li>
+                    </ul>
+
+                    <div class="highlight">
+                      <h3 style="margin-top: 0;">💡 Need Help?</h3>
+                      <p>Contact our support team at <a href="mailto:support@mzansifoodconnect.app">support@mzansifoodconnect.app</a></p>
+                    </div>
+
+                    <p>Thank you for choosing Mzansi Food Connect. We're excited to help you grow your business! 🌟</p>
+                  </div>
+                  <div class="footer">
+                    <p>Mzansi Food Connect - Empowering South African Food Businesses</p>
+                    <p>Your plan will renew in 30 days for ${planPrice}</p>
+                  </div>
+                </div>
+              </body>
+              </html>
+            `
+          })
+        });
+
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.text();
+          console.error("Failed to send welcome email:", errorData);
+          // Don't fail the whole signup if email fails
+        } else {
+          console.log(`✅ Welcome email sent to ${email}`);
+        }
+      } else {
+        console.log("⚠️ RESEND_API_KEY not configured, skipping welcome email");
+      }
+    } catch (emailError) {
+      console.error("Error sending welcome email:", emailError);
+      // Don't fail the whole signup if email fails
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
