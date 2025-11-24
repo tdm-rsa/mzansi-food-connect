@@ -387,14 +387,16 @@ export default function FastMobileTemplate(props) {
             {banner.isOpen ? "🟢 Open Now" : "🔴 Closed"}
           </div>
           {banner.showQueue && (
-            <div>
-              <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
-            </div>
+            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
           )}
         </div>
 
         {/* Banner Action Buttons */}
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem", justifyContent: "center" }}>
+          {banner.showQueue && (
+            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
+          )}
+
           {banner.specialsText && (
             <button
               className="queue-btn"

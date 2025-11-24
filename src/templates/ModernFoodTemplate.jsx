@@ -394,8 +394,12 @@ export default function ModernFoodTemplate(props) {
           )}
         </div>
 
-        {/* Banner Action Buttons */}
+{/* Banner Action Buttons */}
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem", justifyContent: "center" }}>
+          {banner.showQueue && (
+            <LiveQueueButton storeInfo={{ id: storeId, name: header.storeName, slug: state.slug }} />
+          )}
+
           {banner.specialsText && (
             <button
               className="queue-btn"
