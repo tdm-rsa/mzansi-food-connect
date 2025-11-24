@@ -70,66 +70,65 @@ function Landing() {
   ];
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const signupsOpen = false;
+  const signupsOpen = true;
 
   const pricingPlans = [
     {
       name: "Free Trial",
-      subtitle: "7 Days Free",
+      subtitle: "Training Ground",
       price: "R0",
-      period: "for 7 days",
-      description: "Try it free with your own subdomain (e.g., yourstore.mzansifoodconnect.app)",
+      period: "forever",
+      description: "Full platform access with test payments - perfect for learning (e.g., yourstore.mzansifoodconnect.app)",
       features: [
         "Your own subdomain",
-        "Unlimited menu items",
+        "Up to 10 products",
         "Order management",
-        "WhatsApp notifications",
+        "WhatsApp notifications (test mode)",
         "Store designer",
-        "Customers order online",
-        "Customers send messages"
+        "Test payments only",
+        "Perfect for training & demos"
       ],
-      cta: "Start 7-Day Trial",
+      cta: "Start Free Trial",
       highlight: false
     },
     {
       name: "Pro",
-      subtitle: "Subdomain",
-      price: "R135",
+      subtitle: "For Growing Businesses",
+      price: "R4",
       period: "per month",
-      description: "Keep your subdomain and unlock all features",
+      description: "Everything you need to run your food business",
       features: [
         "Everything in Free Trial",
         "Up to 2 website templates",
-        "Unlimited menu items",
-        "Basic analytics",
-        "Live Queue View for Customers on the website",
+        "Unlimited products",
+        "Basic analytics (revenue tracking)",
+        "Live Queue View for Customers",
         "Remove branding",
-        "Customers order online",
-        "API access e.g Automated WhatsApp messaging",
-        "Customers send messages on the website",
-        "A dashbord to manage orders, menu , Store design and more"
-      
+        "Real payments with your own Yoco keys",
+        "WhatsApp notifications",
+        "Priority support"
+
       ],
-      cta: "Upgrade to Pro",
+      cta: "Get Started with Pro",
       highlight: true
     },
     {
       name: "Premium",
-      subtitle: "Subdomain (temporary)",
-      price: "R185",
+      subtitle: "Custom Domain Included",
+      price: "R6",
       period: "per month",
-      description: "Bring your own domain (e.g., www.yourstore.co.za)",
+      description: "Professional solution with your own domain (e.g., www.yourstore.co.za)",
       features: [
         "Everything in Pro",
-        "Custom domain support (coming soon)",
+        "Custom domain support",
         "5 Professional templates",
         "Advanced Analytics, charts and reports",
-        "API access e.g Automated WhatsApp messaging",
+        "Automated WhatsApp messaging",
         "Unlimited Menu Items",
-        "First priority support(WhatApp)",
+        "Dedicated support (WhatsApp)",
         "Full branding control"
       ],
-      cta: "Upgrade to Premium",
+      cta: "Get Started with Premium",
       highlight: false
     }
   ];
@@ -176,14 +175,9 @@ function Landing() {
             Perfect for fast foods, eateries, shisanyamas, restaurants, and bakeries across South Africa.
           </p>
           <div className="hero-buttons">
-            <a href="/app" className="btn btn-primary">Login to Dashboard</a>
-            <a href="#features" className="btn btn-secondary">See Features</a>
+            <a href="/app" className="btn btn-primary">Get Started Now</a>
+            <a href="#pricing" className="btn btn-secondary">View Pricing</a>
           </div>
-          {!signupsOpen && (
-            <p className="signup-closed-text">
-              New store signups are temporarily paused while we finish testing. Existing stores can continue to log in.
-            </p>
-          )}
           <div className="hero-trust">
             <p>⚡ Setup in minutes • 📱 Works on any device • 🇿🇦 Built for SA food businesses</p>
           </div>
@@ -292,14 +286,10 @@ function Landing() {
           <h2>Ready to Take Your Business Online?</h2>
           <p>Join South African food businesses growing their sales with Mzansi Food Connect</p>
           <div className="cta-buttons">
-            <a href="/app" className="btn btn-primary btn-large">Login to Dashboard</a>
+            <a href="/app" className="btn btn-primary btn-large">Get Started Now</a>
             <a href="#features" className="btn btn-secondary btn-large">Explore Features</a>
           </div>
-          {signupsOpen ? (
-            <p className="cta-subtext">Setup takes 5 minutes • Free forever plan available</p>
-          ) : (
-            <p className="cta-subtext">New accounts are temporarily closed while we finish testing.</p>
-          )}
+          <p className="cta-subtext">Setup takes 5 minutes • Free forever plan available • Plans from R4/month</p>
         </div>
       </section>
 
