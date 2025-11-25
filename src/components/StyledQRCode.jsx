@@ -636,36 +636,6 @@ export default function StyledQRCode({ storeName }) {
           </small>
         </div>
 
-        {/* WhatsApp Group Link */}
-        <div>
-          <label>WhatsApp Group Link (optional)</label>
-          <input
-            type="text"
-            className="design-select"
-            placeholder="https://chat.whatsapp.com/..."
-            value={whatsappGroupLink}
-            onChange={(e) => setWhatsappGroupLink(e.target.value)}
-          />
-          <small style={{ color: "#999", fontSize: "0.75rem", display: "block", marginTop: "0.25rem" }}>
-            Create a WhatsApp group, then get the invite link to add here
-          </small>
-        </div>
-
-        {/* Yoco Payment Link */}
-        <div>
-          <label>Yoco Payment Link (for QR code payments)</label>
-          <input
-            type="text"
-            className="design-select"
-            placeholder="https://pay.yoco.com/..."
-            value={yocoPaymentLink}
-            onChange={(e) => setYocoPaymentLink(e.target.value)}
-          />
-          <small style={{ color: "#999", fontSize: "0.75rem", display: "block", marginTop: "0.25rem" }}>
-            Get this from your Yoco Business Portal → Payment Links. Must support open amounts.
-          </small>
-        </div>
-
         {/* Logo Upload */}
         <div>
           <label>Upload Logo</label>
@@ -773,6 +743,32 @@ export default function StyledQRCode({ storeName }) {
         <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
           Print this QR and display at your store. Customers scan to join your WhatsApp group for updates and offers.
         </p>
+
+        {/* WhatsApp Group Link Input */}
+        <div style={{ marginTop: "1.5rem" }}>
+          <label style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.9rem", fontWeight: "600", display: "block", marginBottom: "0.5rem" }}>
+            WhatsApp Group Link (optional)
+          </label>
+          <input
+            type="text"
+            className="design-select"
+            placeholder="https://chat.whatsapp.com/..."
+            value={whatsappGroupLink}
+            onChange={(e) => setWhatsappGroupLink(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "0.7rem",
+              borderRadius: "8px",
+              border: "1px solid rgba(255,255,255,0.2)",
+              background: "rgba(255,255,255,0.1)",
+              color: "#fff",
+              fontSize: "0.9rem",
+            }}
+          />
+          <small style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.75rem", display: "block", marginTop: "0.5rem" }}>
+            Create a WhatsApp group, then get the invite link to add here
+          </small>
+        </div>
       </div>
 
       {/* 3️⃣ YOCO PAYMENT QR CODE - PURPLE THEME */}
@@ -830,6 +826,32 @@ export default function StyledQRCode({ storeName }) {
         <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
           Print this QR and display at your store counter. Customers scan, enter amount, and pay directly to your Yoco account.
         </p>
+
+        {/* Yoco Payment Link Input */}
+        <div style={{ marginTop: "1.5rem" }}>
+          <label style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.9rem", fontWeight: "600", display: "block", marginBottom: "0.5rem" }}>
+            Yoco Payment Link (for QR code payments)
+          </label>
+          <input
+            type="text"
+            className="design-select"
+            placeholder="https://pay.yoco.com/..."
+            value={yocoPaymentLink}
+            onChange={(e) => setYocoPaymentLink(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "0.7rem",
+              borderRadius: "8px",
+              border: "1px solid rgba(255,255,255,0.2)",
+              background: "rgba(255,255,255,0.1)",
+              color: "#fff",
+              fontSize: "0.9rem",
+            }}
+          />
+          <small style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.75rem", display: "block", marginTop: "0.5rem" }}>
+            Get this from your Yoco Business Portal → Payment Links. Must support open amounts.
+          </small>
+        </div>
       </div>
     </div>
   );
