@@ -62,7 +62,7 @@ export default function PlanExpiredModal({ storeInfo, onRenewed }) {
                 setShowPayment(true);
               }}
             >
-              Upgrade to Pro (R135/month)
+              Upgrade to Pro (R2.50/month)
             </button>
             <button
               className="btn-renew btn-premium"
@@ -72,7 +72,7 @@ export default function PlanExpiredModal({ storeInfo, onRenewed }) {
                 setShowPayment(true);
               }}
             >
-              Upgrade to Premium (R185/month)
+              Upgrade to Premium (R3.00/month)
             </button>
           </div>
         ) : (
@@ -81,7 +81,7 @@ export default function PlanExpiredModal({ storeInfo, onRenewed }) {
               className="btn-renew"
               onClick={() => setShowPayment(true)}
             >
-              Renew {planName} Plan (R{plan === 'pro' ? '135' : '185'}/month)
+              Renew {planName} Plan (R{plan === 'pro' ? '2.50' : '3.00'}/month)
             </button>
 
             {plan === 'premium' && (
@@ -92,7 +92,7 @@ export default function PlanExpiredModal({ storeInfo, onRenewed }) {
                   setShowPayment(true);
                 }}
               >
-                Downgrade to Pro (R135/month)
+                Downgrade to Pro (R2.50/month)
               </button>
             )}
           </div>
