@@ -412,6 +412,104 @@ export default function StyledQRCode({ storeName }) {
     }
   };
 
+  const downloadWhatsappQR = async () => {
+    try {
+      if (!whatsappQr) {
+        alert("WhatsApp QR code not ready. Please add your WhatsApp group link first.");
+        return;
+      }
+
+      // Create a canvas for the WhatsApp group QR poster
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas size for print quality
+      const width = 1748;
+      const height = 2480;
+      canvas.width = width;
+      canvas.height = height;
+
+      // Background gradient (WhatsApp green theme)
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, "#25D366");
+      gradient.addColorStop(1, "#128C7E");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw "Join Our Group" heading
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 140px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Join Our Group", width / 2, 300);
+
+      // Get WhatsApp QR code as blob and draw it
+      const whatsappBlob = await whatsappQr.getRawData("png");
+      const whatsappImage = new Image();
+
+      await new Promise((resolve, reject) => {
+        whatsappImage.onload = resolve;
+        whatsappImage.onerror = reject;
+        whatsappImage.src = URL.createObjectURL(whatsappBlob);
+      });
+
+      // Draw QR code (larger, centered)
+      const qrSize = 1000;
+      const qrX = (width - qrSize) / 2;
+      const qrY = 450;
+
+      // Add white background with shadow for QR
+      ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+      ctx.shadowBlur = 50;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 15;
+      ctx.fillStyle = "#ffffff";
+      const borderRadius = 50;
+      ctx.beginPath();
+      ctx.roundRect(qrX - 80, qrY - 80, qrSize + 160, qrSize + 160, borderRadius);
+      ctx.fill();
+
+      // Reset shadow
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+
+      // Draw QR code
+      ctx.drawImage(whatsappImage, qrX, qrY, qrSize, qrSize);
+
+      // Draw store name below QR
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 100px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(storeName, width / 2, qrY + qrSize + 220);
+
+      // Draw instructions
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.font = "56px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.fillText("Scan • Join • Get updates & offers", width / 2, qrY + qrSize + 340);
+
+      // Add WhatsApp branding
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+      ctx.font = "48px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.fillText("WhatsApp Group", width / 2, height - 150);
+
+      // Download the canvas as PNG
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert("Failed to create WhatsApp QR. Please try again.");
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${storeName}-WhatsApp-Group-QR.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }, "image/png", 1.0);
+    } catch (error) {
+      console.error("Error creating WhatsApp group QR:", error);
+      alert(`Failed to create WhatsApp QR: ${error.message}`);
+    }
+  };
+
   const saveDesign = async () => {
     if (!storeId) return;
     const { error } = await supabase
@@ -661,14 +759,7 @@ export default function StyledQRCode({ storeName }) {
           </div>
 
           <button
-            onClick={() => {
-              if (whatsappQr) {
-                whatsappQr.download({
-                  name: `${storeName}-WhatsApp-Group-QR`,
-                  extension: "png",
-                });
-              }
-            }}
+            onClick={downloadWhatsappQR}
             style={{
               background: "#25D366",
               border: "none",
@@ -682,6 +773,10 @@ export default function StyledQRCode({ storeName }) {
           >
             ⬇️ Download WhatsApp QR
           </button>
+
+          <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
+            Print this QR and display at your store. Customers scan to join your WhatsApp group for updates and offers.
+          </p>
         </div>
       )}
 
