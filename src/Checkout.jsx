@@ -6,7 +6,6 @@ import { useCart } from "./hooks/useCart";
 import { useToast } from "./hooks/useToast";
 import { getSubdomain } from "./utils/subdomain";
 import Toast from "./components/Toast";
-import QRCodePayment from "./components/QRCodePayment";
 import "./Checkout.css";
 
 export default function Checkout() {
@@ -23,8 +22,6 @@ export default function Checkout() {
   const [phoneDisplay, setPhoneDisplay] = useState("+27 "); // Display value with formatting
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState(null); // null, 'card', 'qr'
-  const [showQRPayment, setShowQRPayment] = useState(false);
 
   // 🔥 Format phone input like Luno: +27 XX XXX XXXX
   const handlePhoneChange = (e) => {
@@ -195,33 +192,6 @@ export default function Checkout() {
     }
   };
 
-  /* -------------------------------------------------------
-     Handle QR Code Payment
-  ------------------------------------------------------- */
-  const handleQRPayment = () => {
-    setPaymentMethod('qr');
-    setShowQRPayment(true);
-  };
-
-  const handleQRSuccess = (order) => {
-    console.log('✅ QR payment successful:', order);
-    toast.success('Payment successful! Your order has been placed.');
-    clearCart();
-
-    // Navigate to success page
-    setTimeout(() => {
-      navigate(subdomainSlug
-        ? `/payment-success?orderNumber=${order.order_number}`
-        : `/payment-success?orderNumber=${order.order_number}&slug=${slug}`
-      );
-    }, 1500);
-  };
-
-  const handleQRCancel = () => {
-    setShowQRPayment(false);
-    setPaymentMethod(null);
-  };
-
   // Note: Order creation is now handled by the webhook after payment confirmation
 
   /* -------------------------------------------------------
@@ -353,71 +323,23 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* Payment Options */}
-        {!showQRPayment ? (
-          <div className="checkout-payment">
-            <h2 style={{ marginBottom: '1rem', textAlign: 'center' }}>💳 Choose Payment Method</h2>
-
-            {isValid ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {/* Card Payment Button */}
-                <button
-                  onClick={handleYocoPayment}
-                  className="paystack-button"
-                  disabled={loading || processingPayment}
-                  style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <span>💳</span>
-                  {processingPayment ? "Processing..." : `Pay with Card - R${total.toFixed(2)}`}
-                </button>
-
-                {/* QR Code Payment Button */}
-                <button
-                  onClick={handleQRPayment}
-                  className="paystack-button"
-                  style={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <span>📱</span>
-                  {`Scan QR Code - R${total.toFixed(2)}`}
-                </button>
-              </div>
-            ) : (
-              <button className="paystack-button disabled" disabled>
-                Please fill in all fields
-              </button>
-            )}
-            <p className="checkout-secure">🔒 Secure payment powered by Yoco</p>
-          </div>
-        ) : (
-          <QRCodePayment
-            store={store}
-            orderNumber={`${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(Math.random() * 900) + 100}`}
-            total={total}
-            customerName={customerName}
-            customerPhone={customerPhone}
-            items={items.map((item) => ({
-              item: item.name,
-              qty: item.qty,
-              price: item.price,
-              instructions: item.instructions || "",
-              preferences: item.selectedPreferences || [],
-            }))}
-            onSuccess={handleQRSuccess}
-            onCancel={handleQRCancel}
-          />
-        )}
+        {/* Payment Button */}
+        <div className="checkout-payment">
+          {isValid ? (
+            <button
+              onClick={handleYocoPayment}
+              className="paystack-button"
+              disabled={loading || processingPayment}
+            >
+              {processingPayment ? "Processing..." : `Pay R${total.toFixed(2)}`}
+            </button>
+          ) : (
+            <button className="paystack-button disabled" disabled>
+              Please fill in all fields
+            </button>
+          )}
+          <p className="checkout-secure">🔒 Secure payment powered by Yoco</p>
+        </div>
         </div>
       </div>
 
