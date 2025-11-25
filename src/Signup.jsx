@@ -193,6 +193,8 @@ export default function Signup({ onBack, onSuccess }) {
       is_open: true,
       banner_text: `Welcome to ${storeName}!`,
       about_text: `Proudly serving authentic food.`,
+      instructions: `#1. Ask before you order\n#2. Order\n#3. Wait for WhatsApp message.\n#4. Fetch Your Order.\nThank You!`,
+      show_instructions: true,
       payment_reference: paymentRef,
       // Note: Vendors must add their Yoco keys in Settings after signup
     }]).select().single();
