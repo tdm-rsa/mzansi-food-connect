@@ -6,8 +6,10 @@ import logo from "../images/logo.png";
 export default function StyledQRCode({ storeName }) {
   const ref = useRef(null);
   const whatsappQrRef = useRef(null);
+  const yocoQrRef = useRef(null);
   const [qr, setQr] = useState(null);
   const [whatsappQr, setWhatsappQr] = useState(null);
+  const [yocoQr, setYocoQr] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // 🎨 Customizable state
@@ -20,6 +22,7 @@ export default function StyledQRCode({ storeName }) {
   const [whatsappGroupLink, setWhatsappGroupLink] = useState("");
   const [storeId, setStoreId] = useState(null);
   const [storeSlug, setStoreSlug] = useState("");
+  const [yocoPublicKey, setYocoPublicKey] = useState("");
 
   // ✅ Load saved QR design from Supabase
   useEffect(() => {
@@ -36,6 +39,7 @@ export default function StyledQRCode({ storeName }) {
         setWhatsappGroupLink(data.whatsapp_group_link || "");
         setStoreId(data.id);
         setStoreSlug(data.slug || "");
+        setYocoPublicKey(data.yoco_public_key || "");
       }
       setLoading(false);
     }
@@ -129,6 +133,56 @@ export default function StyledQRCode({ storeName }) {
       });
     }
   }, [whatsappQr, whatsappGroupLink, frameStyle, bgColor]);
+
+  // Initialize Yoco Payment QR (generates payment link QR)
+  useEffect(() => {
+    if (!yocoPublicKey || loading) {
+      // Clear Yoco QR if no key
+      if (yocoQrRef.current) {
+        yocoQrRef.current.innerHTML = "";
+      }
+      setYocoQr(null);
+      return;
+    }
+
+    // Create Yoco payment link
+    // Format: https://pay.yoco.com/storename (this is a simplified version)
+    // Customers will manually enter amount when they scan
+    const yocoPaymentUrl = `https://pay.yoco.com/${storeSlug || storeName.toLowerCase().replace(/\s+/g, '-')}`;
+
+    // Create Yoco Payment QR code
+    const yocoQrCode = new QRCodeStyling({
+      width: 250,
+      height: 250,
+      data: yocoPaymentUrl,
+      margin: 10,
+      dotsOptions: {
+        color: "#667eea", // Yoco brand color
+        type: frameStyle,
+      },
+      backgroundOptions: {
+        color: bgColor,
+      },
+    });
+
+    setYocoQr(yocoQrCode);
+    if (yocoQrRef.current) {
+      yocoQrRef.current.innerHTML = ""; // Clear previous
+      yocoQrCode.append(yocoQrRef.current);
+    }
+  }, [yocoPublicKey, loading, frameStyle, bgColor, storeSlug, storeName]);
+
+  // Update Yoco QR when settings change
+  useEffect(() => {
+    if (yocoQr && yocoPublicKey) {
+      const yocoPaymentUrl = `https://pay.yoco.com/${storeSlug || storeName.toLowerCase().replace(/\s+/g, '-')}`;
+      yocoQr.update({
+        data: yocoPaymentUrl,
+        dotsOptions: { color: "#667eea", type: frameStyle },
+        backgroundOptions: { color: bgColor },
+      });
+    }
+  }, [yocoQr, yocoPublicKey, frameStyle, bgColor, storeSlug, storeName]);
 
   const downloadQR = async () => {
     try {
@@ -257,6 +311,104 @@ export default function StyledQRCode({ storeName }) {
     } catch (error) {
       console.error("Error creating QR poster:", error);
       alert(`Failed to create QR poster: ${error.message}`);
+    }
+  };
+
+  const downloadYocoQR = async () => {
+    try {
+      if (!yocoQr) {
+        alert("Yoco QR code not ready. Please add your Yoco public key in Settings first.");
+        return;
+      }
+
+      // Create a canvas for the Yoco payment QR poster
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas size for print quality
+      const width = 1748;
+      const height = 2480;
+      canvas.width = width;
+      canvas.height = height;
+
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, "#667eea");
+      gradient.addColorStop(1, "#764ba2");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw "Scan to Pay" heading
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 140px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Scan to Pay", width / 2, 300);
+
+      // Get Yoco QR code as blob and draw it
+      const yocoBlob = await yocoQr.getRawData("png");
+      const yocoImage = new Image();
+
+      await new Promise((resolve, reject) => {
+        yocoImage.onload = resolve;
+        yocoImage.onerror = reject;
+        yocoImage.src = URL.createObjectURL(yocoBlob);
+      });
+
+      // Draw QR code (larger, centered)
+      const qrSize = 1000;
+      const qrX = (width - qrSize) / 2;
+      const qrY = 450;
+
+      // Add white background with shadow for QR
+      ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+      ctx.shadowBlur = 50;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 15;
+      ctx.fillStyle = "#ffffff";
+      const borderRadius = 50;
+      ctx.beginPath();
+      ctx.roundRect(qrX - 80, qrY - 80, qrSize + 160, qrSize + 160, borderRadius);
+      ctx.fill();
+
+      // Reset shadow
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+
+      // Draw QR code
+      ctx.drawImage(yocoImage, qrX, qrY, qrSize, qrSize);
+
+      // Draw store name below QR
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 100px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(storeName, width / 2, qrY + qrSize + 220);
+
+      // Draw instructions
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.font = "56px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.fillText("Scan with camera • Enter amount • Pay", width / 2, qrY + qrSize + 340);
+
+      // Add Yoco branding
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+      ctx.font = "48px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.fillText("Powered by Yoco", width / 2, height - 150);
+
+      // Download the canvas as PNG
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert("Failed to create payment QR. Please try again.");
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${storeName}-Payment-QR.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }, "image/png", 1.0);
+    } catch (error) {
+      console.error("Error creating Yoco payment QR:", error);
+      alert(`Failed to create payment QR: ${error.message}`);
     }
   };
 
@@ -514,6 +666,62 @@ export default function StyledQRCode({ storeName }) {
           >
             ⬇️ Download WhatsApp QR
           </button>
+        </div>
+      )}
+
+      {/* Yoco Payment QR Code */}
+      {yocoPublicKey && (
+        <div style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+          <h3 style={{ marginBottom: "1rem", color: "#667eea" }}>💳 Yoco Payment QR Code</h3>
+          <div
+            style={{
+              background: "#fff",
+              padding: "1.5rem",
+              display: "inline-block",
+              borderRadius: frameStyle === "rounded" ? "20px" : "0px",
+              boxShadow: "0 0 12px rgba(0,0,0,0.25)",
+            }}
+          >
+            <div ref={yocoQrRef}></div>
+
+            <div
+              style={{
+                marginTop: "1rem",
+                background: "#fff",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid #667eea",
+              }}
+            >
+              <h4 style={{ color: "#667eea", margin: 0, fontSize: "1.1rem" }}>Scan to Pay</h4>
+              <p style={{ margin: "0.25rem 0 0 0", color: "#333", fontSize: "0.9rem", fontWeight: "600" }}>
+                {storeName}
+              </p>
+              <p style={{ margin: "0.25rem 0 0 0", color: "#666", fontSize: "0.75rem" }}>
+                Customer enters amount • Pays instantly
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={downloadYocoQR}
+            style={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              border: "none",
+              padding: "0.7rem 1.4rem",
+              borderRadius: "8px",
+              cursor: "pointer",
+              color: "#fff",
+              fontWeight: "600",
+              marginTop: "1rem",
+            }}
+          >
+            ⬇️ Download Payment QR
+          </button>
+
+          <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
+            Print this QR and display at your store counter. Customers scan, enter amount, and pay directly to your Yoco account.
+          </p>
         </div>
       )}
     </div>
