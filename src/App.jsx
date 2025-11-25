@@ -2690,7 +2690,9 @@ export default function App({ user }) {
     <div className="app">
       <Header />
 
-      {/* Grace Period Banner - Shows warning during 3-day grace period */}
+      <main className="main">{renderView()}</main>
+
+      {/* Grace Period Banner - Shows warning during 3-day grace period (moved to bottom) */}
       {isInGracePeriod(storeInfo) && (
         <GracePeriodBanner
           storeInfo={storeInfo}
@@ -2708,8 +2710,6 @@ export default function App({ user }) {
           }}
         />
       )}
-
-      <main className="main">{renderView()}</main>
 
       {/* Plan Expired Modal - Blocks access until renewed */}
       {planExpired && (

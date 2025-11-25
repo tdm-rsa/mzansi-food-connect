@@ -5,6 +5,7 @@ import { supabase } from "./supabaseClient";
 import { useCart } from "./hooks/useCart";
 import { useToast } from "./hooks/useToast";
 import { getSubdomain } from "./utils/subdomain";
+import { isPlanActive } from "./utils/planFeatures";
 import Toast from "./components/Toast";
 import "./Checkout.css";
 
@@ -203,6 +204,26 @@ export default function Checkout() {
     return (
       <div className="checkout-loading">
         <h2>Loading checkout...</h2>
+      </div>
+    );
+  }
+
+  // Block checkout if store plan is expired
+  if (store && !isPlanActive(store)) {
+    return (
+      <div className="checkout-empty">
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🚫</div>
+          <h2>Store Temporarily Unavailable</h2>
+          <p style={{ color: '#666', marginTop: '1rem' }}>
+            This store is currently unable to accept new orders.
+            <br />
+            Please check back later or contact the store directly.
+          </p>
+          <button onClick={() => navigate(`/store/${slug}`)} className="btn-back" style={{ marginTop: '1.5rem' }}>
+            ← Back to Store
+          </button>
+        </div>
       </div>
     );
   }
