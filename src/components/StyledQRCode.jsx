@@ -722,119 +722,115 @@ export default function StyledQRCode({ storeName }) {
       </p>
 
       {/* 2️⃣ WHATSAPP GROUP QR CODE - GREEN THEME */}
-      {whatsappGroupLink && (
-        <div style={{ marginTop: "3rem", paddingTop: "2rem", paddingBottom: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)", borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
-          <h4 style={{ color: "#25D366", background: "#fff", display: "inline-block", padding: "0.5rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-            📱 WhatsApp Group QR Code (Green)
-          </h4>
+      <div style={{ marginTop: "3rem", paddingTop: "2rem", paddingBottom: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)", borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
+        <h4 style={{ color: "#25D366", background: "#fff", display: "inline-block", padding: "0.5rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
+          📱 WhatsApp Group QR Code (Green)
+        </h4>
+
+        <div
+          style={{
+            background: "#fff",
+            padding: "1.5rem",
+            display: "inline-block",
+            borderRadius: frameStyle === "rounded" ? "20px" : "0px",
+            boxShadow: "0 0 12px rgba(0,0,0,0.25)",
+          }}
+        >
+          <div ref={whatsappQrRef}></div>
 
           <div
             style={{
-              background: "#fff",
-              padding: "1.5rem",
-              display: "inline-block",
-              borderRadius: frameStyle === "rounded" ? "20px" : "0px",
-              boxShadow: "0 0 12px rgba(0,0,0,0.25)",
-            }}
-          >
-            <div ref={whatsappQrRef}></div>
-
-            <div
-              style={{
-                marginTop: "1rem",
-                background: "#fff",
-                padding: "0.75rem 1rem",
-                borderRadius: "8px",
-                border: "2px solid #25D366",
-              }}
-            >
-              <h4 style={{ color: "#25D366", margin: 0, fontSize: "1.1rem" }}>Join our WhatsApp Group</h4>
-              <p style={{ margin: "0.25rem 0 0 0", color: "#333", fontSize: "0.85rem" }}>
-                Get updates & special offers
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={downloadWhatsappQR}
-            style={{
-              background: "#25D366",
-              border: "none",
-              padding: "0.7rem 1.4rem",
-              borderRadius: "8px",
-              cursor: "pointer",
-              color: "#fff",
-              fontWeight: "600",
               marginTop: "1rem",
+              background: "#fff",
+              padding: "0.75rem 1rem",
+              borderRadius: "8px",
+              border: "2px solid #25D366",
             }}
           >
-            ⬇️ Download WhatsApp QR
-          </button>
-
-          <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
-            Print this QR and display at your store. Customers scan to join your WhatsApp group for updates and offers.
-          </p>
+            <h4 style={{ color: "#25D366", margin: 0, fontSize: "1.1rem" }}>Join our WhatsApp Group</h4>
+            <p style={{ margin: "0.25rem 0 0 0", color: "#333", fontSize: "0.85rem" }}>
+              Get updates & special offers
+            </p>
+          </div>
         </div>
-      )}
+
+        <button
+          onClick={downloadWhatsappQR}
+          style={{
+            background: "#25D366",
+            border: "none",
+            padding: "0.7rem 1.4rem",
+            borderRadius: "8px",
+            cursor: "pointer",
+            color: "#fff",
+            fontWeight: "600",
+            marginTop: "1rem",
+          }}
+        >
+          ⬇️ Download WhatsApp QR
+        </button>
+
+        <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
+          Print this QR and display at your store. Customers scan to join your WhatsApp group for updates and offers.
+        </p>
+      </div>
 
       {/* 3️⃣ YOCO PAYMENT QR CODE - PURPLE THEME */}
-      {yocoPaymentLink && (
-        <div style={{ marginTop: "3rem", paddingTop: "2rem", paddingBottom: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-          <h4 style={{ color: "#667eea", background: "#fff", display: "inline-block", padding: "0.5rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-            💳 Yoco Payment QR Code (Purple)
-          </h4>
+      <div style={{ marginTop: "3rem", paddingTop: "2rem", paddingBottom: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+        <h4 style={{ color: "#667eea", background: "#fff", display: "inline-block", padding: "0.5rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
+          💳 Yoco Payment QR Code (Purple)
+        </h4>
+
+        <div
+          style={{
+            background: "#fff",
+            padding: "1.5rem",
+            display: "inline-block",
+            borderRadius: frameStyle === "rounded" ? "20px" : "0px",
+            boxShadow: "0 0 12px rgba(0,0,0,0.25)",
+          }}
+        >
+          <div ref={yocoQrRef}></div>
 
           <div
             style={{
-              background: "#fff",
-              padding: "1.5rem",
-              display: "inline-block",
-              borderRadius: frameStyle === "rounded" ? "20px" : "0px",
-              boxShadow: "0 0 12px rgba(0,0,0,0.25)",
-            }}
-          >
-            <div ref={yocoQrRef}></div>
-
-            <div
-              style={{
-                marginTop: "1rem",
-                background: "#fff",
-                padding: "0.75rem 1rem",
-                borderRadius: "8px",
-                border: "2px solid #667eea",
-              }}
-            >
-              <h4 style={{ color: "#667eea", margin: 0, fontSize: "1.1rem" }}>Scan to Pay</h4>
-              <p style={{ margin: "0.25rem 0 0 0", color: "#333", fontSize: "0.9rem", fontWeight: "600" }}>
-                {storeName}
-              </p>
-              <p style={{ margin: "0.25rem 0 0 0", color: "#666", fontSize: "0.75rem" }}>
-                Customer enters amount • Pays instantly
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={downloadYocoQR}
-            style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              border: "none",
-              padding: "0.7rem 1.4rem",
-              borderRadius: "8px",
-              cursor: "pointer",
-              color: "#fff",
-              fontWeight: "600",
               marginTop: "1rem",
+              background: "#fff",
+              padding: "0.75rem 1rem",
+              borderRadius: "8px",
+              border: "2px solid #667eea",
             }}
           >
-            ⬇️ Download Payment QR
-          </button>
-
-          <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
-            Print this QR and display at your store counter. Customers scan, enter amount, and pay directly to your Yoco account.
-          </p>
+            <h4 style={{ color: "#667eea", margin: 0, fontSize: "1.1rem" }}>Scan to Pay</h4>
+            <p style={{ margin: "0.25rem 0 0 0", color: "#333", fontSize: "0.9rem", fontWeight: "600" }}>
+              {storeName}
+            </p>
+            <p style={{ margin: "0.25rem 0 0 0", color: "#666", fontSize: "0.75rem" }}>
+              Customer enters amount • Pays instantly
+            </p>
+          </div>
         </div>
-      )}
+
+        <button
+          onClick={downloadYocoQR}
+          style={{
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            border: "none",
+            padding: "0.7rem 1.4rem",
+            borderRadius: "8px",
+            cursor: "pointer",
+            color: "#fff",
+            fontWeight: "600",
+            marginTop: "1rem",
+          }}
+        >
+          ⬇️ Download Payment QR
+        </button>
+
+        <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
+          Print this QR and display at your store counter. Customers scan, enter amount, and pay directly to your Yoco account.
+        </p>
+      </div>
     </div>
   );
 }
