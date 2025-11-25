@@ -53,7 +53,7 @@ export default function StyledQRCode({ storeName }) {
       ? `https://${storeSlug}.mzansifoodconnect.app`
       : `${window.location.origin}/store/${encodeURIComponent(storeName)}`;
 
-  // Initialize QR
+  // Initialize Store URL QR (Black theme - fixed color)
   useEffect(() => {
     if (loading) return;
     const qrCode = new QRCodeStyling({
@@ -62,11 +62,11 @@ export default function StyledQRCode({ storeName }) {
       data: storeUrl,
       margin: 10,
       dotsOptions: {
-        color,
+        color: "#1a1a1a", // Fixed black color for store QR
         type: frameStyle,
       },
       backgroundOptions: {
-        color: bgColor,
+        color: "#ffffff", // White background
       },
       imageOptions: {
         crossOrigin: "anonymous",
@@ -78,19 +78,19 @@ export default function StyledQRCode({ storeName }) {
     qrCode.append(ref.current);
   }, [loading]);
 
-  // Update when settings change
+  // Update Store QR when settings change
   useEffect(() => {
     if (qr) {
       qr.update({
         data: storeUrl,
-        dotsOptions: { color, type: frameStyle },
-        backgroundOptions: { color: bgColor },
+        dotsOptions: { color: "#1a1a1a", type: frameStyle }, // Fixed black
+        backgroundOptions: { color: "#ffffff" }, // Fixed white
         image: logoFile ? URL.createObjectURL(logoFile) : null,
       });
     }
-  }, [qr, color, bgColor, frameStyle, logoFile, storeUrl]);
+  }, [qr, frameStyle, logoFile, storeUrl]);
 
-  // Initialize WhatsApp Group QR
+  // Initialize WhatsApp Group QR (Green theme - fixed color)
   useEffect(() => {
     if (!whatsappGroupLink || loading) {
       // Clear WhatsApp QR if no link
@@ -101,18 +101,18 @@ export default function StyledQRCode({ storeName }) {
       return;
     }
 
-    // Create WhatsApp QR code
+    // Create WhatsApp QR code with fixed green color
     const whatsappQrCode = new QRCodeStyling({
-      width: 200,
-      height: 200,
+      width: 250,
+      height: 250,
       data: whatsappGroupLink,
-      margin: 8,
+      margin: 10,
       dotsOptions: {
-        color: "#25D366", // WhatsApp green
+        color: "#25D366", // Fixed WhatsApp green
         type: frameStyle,
       },
       backgroundOptions: {
-        color: bgColor,
+        color: "#ffffff", // Fixed white background
       },
     });
 
@@ -121,20 +121,20 @@ export default function StyledQRCode({ storeName }) {
       whatsappQrRef.current.innerHTML = ""; // Clear previous
       whatsappQrCode.append(whatsappQrRef.current);
     }
-  }, [whatsappGroupLink, loading, frameStyle, bgColor]);
+  }, [whatsappGroupLink, loading, frameStyle]);
 
   // Update WhatsApp QR when settings change
   useEffect(() => {
     if (whatsappQr && whatsappGroupLink) {
       whatsappQr.update({
         data: whatsappGroupLink,
-        dotsOptions: { color: "#25D366", type: frameStyle },
-        backgroundOptions: { color: bgColor },
+        dotsOptions: { color: "#25D366", type: frameStyle }, // Fixed green
+        backgroundOptions: { color: "#ffffff" }, // Fixed white
       });
     }
-  }, [whatsappQr, whatsappGroupLink, frameStyle, bgColor]);
+  }, [whatsappQr, whatsappGroupLink, frameStyle]);
 
-  // Initialize Yoco Payment QR (generates payment link QR)
+  // Initialize Yoco Payment QR (Purple theme - fixed color)
   useEffect(() => {
     if (!yocoPaymentLink || loading) {
       // Clear Yoco QR if no link
@@ -150,18 +150,18 @@ export default function StyledQRCode({ storeName }) {
     // Supports open amount - customer can enter any amount
     const yocoPaymentUrl = yocoPaymentLink.trim();
 
-    // Create Yoco Payment QR code
+    // Create Yoco Payment QR code with fixed purple color
     const yocoQrCode = new QRCodeStyling({
       width: 250,
       height: 250,
       data: yocoPaymentUrl,
       margin: 10,
       dotsOptions: {
-        color: "#667eea", // Yoco brand color
+        color: "#667eea", // Fixed purple/Yoco brand color
         type: frameStyle,
       },
       backgroundOptions: {
-        color: bgColor,
+        color: "#ffffff", // Fixed white background
       },
     });
 
@@ -170,7 +170,7 @@ export default function StyledQRCode({ storeName }) {
       yocoQrRef.current.innerHTML = ""; // Clear previous
       yocoQrCode.append(yocoQrRef.current);
     }
-  }, [yocoPaymentLink, loading, frameStyle, bgColor]);
+  }, [yocoPaymentLink, loading, frameStyle]);
 
   // Update Yoco QR when settings change
   useEffect(() => {
@@ -178,11 +178,11 @@ export default function StyledQRCode({ storeName }) {
       const yocoPaymentUrl = yocoPaymentLink.trim();
       yocoQr.update({
         data: yocoPaymentUrl,
-        dotsOptions: { color: "#667eea", type: frameStyle },
-        backgroundOptions: { color: bgColor },
+        dotsOptions: { color: "#667eea", type: frameStyle }, // Fixed purple
+        backgroundOptions: { color: "#ffffff" }, // Fixed white
       });
     }
-  }, [yocoQr, yocoPaymentLink, frameStyle, bgColor]);
+  }, [yocoQr, yocoPaymentLink, frameStyle]);
 
   const downloadQR = async () => {
     try {
@@ -538,77 +538,65 @@ export default function StyledQRCode({ storeName }) {
   return (
     <div className="qr-designer-card">
       <h3 style={{ marginBottom: "1rem" }}>📱 QR Code Designer</h3>
+      <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9rem", marginBottom: "2rem" }}>
+        Configure and download three separate QR codes for your store
+      </p>
 
-      {/* QR Preview Card */}
-      <div
-        style={{
-          background: "#fff",
-          padding: "1rem",
-          display: "inline-block",
-          borderRadius: frameStyle === "rounded" ? "20px" : "0px",
-          boxShadow: "0 0 12px rgba(0,0,0,0.25)",
-        }}
-      >
-        <div ref={ref}></div>
+      {/* 1️⃣ STORE URL QR CODE - BLACK THEME */}
+      <div style={{ marginBottom: "3rem", paddingBottom: "2rem", borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
+        <h4 style={{ color: "#1a1a1a", background: "#fff", display: "inline-block", padding: "0.5rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
+          🏪 Store URL QR Code (Black)
+        </h4>
 
-        {/* Store branding below QR */}
+        {/* QR Preview Card */}
         <div
           style={{
-            marginTop: "1rem",
             background: "#fff",
-            padding: "0.5rem 0.8rem",
-            borderRadius: "8px",
-            border: `1px solid ${color}`,
+            padding: "1.5rem",
+            display: "inline-block",
+            borderRadius: frameStyle === "rounded" ? "20px" : "0px",
+            boxShadow: "0 0 12px rgba(0,0,0,0.25)",
           }}
         >
-          <h4 style={{ color, margin: 0, fontSize: "1.1rem" }}>{storeName}</h4>
-          <p style={{ margin: 0, color: "#333", fontSize: "0.85rem" }}>
-            {storeUrl.replace(/^https?:\/\//, "")}
-          </p>
-        </div>
-      </div>
+          <div ref={ref}></div>
 
-      {/* Tagline */}
-      {tagline && (
-        <p
-          style={{
-            marginTop: "1rem",
-            fontStyle: "italic",
-            color,
-            fontWeight: "500",
-          }}
-        >
-          {tagline}
-        </p>
-      )}
+          {/* Store branding below QR */}
+          <div
+            style={{
+              marginTop: "1rem",
+              background: "#fff",
+              padding: "0.5rem 0.8rem",
+              borderRadius: "8px",
+              border: "2px solid #1a1a1a",
+            }}
+          >
+            <h4 style={{ color: "#1a1a1a", margin: 0, fontSize: "1.1rem" }}>{storeName}</h4>
+            <p style={{ margin: 0, color: "#333", fontSize: "0.85rem" }}>
+              {storeUrl.replace(/^https?:\/\//, "")}
+            </p>
+          </div>
+        </div>
+
+        {/* Tagline */}
+        {tagline && (
+          <p
+            style={{
+              marginTop: "1rem",
+              fontStyle: "italic",
+              color: "rgba(255,255,255,0.9)",
+              fontWeight: "500",
+            }}
+          >
+            {tagline}
+          </p>
+        )}
+      </div>
 
       {/* Controls */}
       <div style={{ marginTop: "1.5rem", display: "grid", gap: "1rem" }}>
-        {/* Accent Color */}
-        <div>
-          <label>Accent Color</label>
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            style={{ marginLeft: "0.5rem", border: "none" }}
-          />
-        </div>
-
-        {/* Background Color */}
-        <div>
-          <label>Background Color</label>
-          <input
-            type="color"
-            value={bgColor}
-            onChange={(e) => setBgColor(e.target.value)}
-            style={{ marginLeft: "0.5rem", border: "none" }}
-          />
-        </div>
-
         {/* Frame Style */}
         <div>
-          <label>Frame Style</label>
+          <label>QR Code Frame Style (applies to all QR codes)</label>
           <select
             className="design-select"
             value={frameStyle}
@@ -702,39 +690,48 @@ export default function StyledQRCode({ storeName }) {
               fontWeight: "600",
             }}
           >
-            💾 Save Design
-          </button>
-
-          <button
-            onClick={downloadQR}
-            style={{
-              background: color,
-              border: "none",
-              padding: "0.7rem 1.4rem",
-              borderRadius: "8px",
-              cursor: "pointer",
-              color: "#fff",
-              fontWeight: "600",
-            }}
-          >
-            ⬇️ Download QR
+            💾 Save Settings
           </button>
         </div>
       </div>
 
-      <p style={{ marginTop: "1rem", opacity: 0.7, fontSize: "0.9rem" }}>
-        Scans to: <br />
-        <strong style={{ color }}>{storeUrl}</strong>
+      {/* Store QR Download Button */}
+      <button
+        onClick={downloadQR}
+        style={{
+          background: "#1a1a1a",
+          border: "none",
+          padding: "0.7rem 1.4rem",
+          borderRadius: "8px",
+          cursor: "pointer",
+          color: "#fff",
+          fontWeight: "600",
+          marginTop: "1rem",
+          display: "block",
+        }}
+      >
+        ⬇️ Download Store QR
+      </button>
+
+      <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontStyle: "italic" }}>
+        Print this QR and display at your store. Customers scan to visit your online store.
       </p>
 
-      {/* WhatsApp Group QR Code */}
+      <p style={{ marginTop: "0.5rem", opacity: 0.7, fontSize: "0.85rem" }}>
+        Scans to: <strong style={{ color: "rgba(255,255,255,0.9)" }}>{storeUrl}</strong>
+      </p>
+
+      {/* 2️⃣ WHATSAPP GROUP QR CODE - GREEN THEME */}
       {whatsappGroupLink && (
-        <div style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-          <h3 style={{ marginBottom: "1rem", color: "#25D366" }}>📱 WhatsApp Group QR</h3>
+        <div style={{ marginTop: "3rem", paddingTop: "2rem", paddingBottom: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)", borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
+          <h4 style={{ color: "#25D366", background: "#fff", display: "inline-block", padding: "0.5rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
+            📱 WhatsApp Group QR Code (Green)
+          </h4>
+
           <div
             style={{
               background: "#fff",
-              padding: "1rem",
+              padding: "1.5rem",
               display: "inline-block",
               borderRadius: frameStyle === "rounded" ? "20px" : "0px",
               boxShadow: "0 0 12px rgba(0,0,0,0.25)",
@@ -746,13 +743,13 @@ export default function StyledQRCode({ storeName }) {
               style={{
                 marginTop: "1rem",
                 background: "#fff",
-                padding: "0.5rem 0.8rem",
+                padding: "0.75rem 1rem",
                 borderRadius: "8px",
-                border: "1px solid #25D366",
+                border: "2px solid #25D366",
               }}
             >
-              <h4 style={{ color: "#25D366", margin: 0, fontSize: "1rem" }}>Join our WhatsApp Group</h4>
-              <p style={{ margin: 0, color: "#333", fontSize: "0.8rem" }}>
+              <h4 style={{ color: "#25D366", margin: 0, fontSize: "1.1rem" }}>Join our WhatsApp Group</h4>
+              <p style={{ margin: "0.25rem 0 0 0", color: "#333", fontSize: "0.85rem" }}>
                 Get updates & special offers
               </p>
             </div>
@@ -780,10 +777,13 @@ export default function StyledQRCode({ storeName }) {
         </div>
       )}
 
-      {/* Yoco Payment QR Code */}
+      {/* 3️⃣ YOCO PAYMENT QR CODE - PURPLE THEME */}
       {yocoPaymentLink && (
-        <div style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-          <h3 style={{ marginBottom: "1rem", color: "#667eea" }}>💳 Yoco Payment QR Code</h3>
+        <div style={{ marginTop: "3rem", paddingTop: "2rem", paddingBottom: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+          <h4 style={{ color: "#667eea", background: "#fff", display: "inline-block", padding: "0.5rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
+            💳 Yoco Payment QR Code (Purple)
+          </h4>
+
           <div
             style={{
               background: "#fff",
