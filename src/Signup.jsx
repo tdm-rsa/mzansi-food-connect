@@ -214,7 +214,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      const amountInCents = selectedPlan === "pro" ? 250 : 300; // R2.50 Pro, R3.00 Premium
+      const amountInCents = selectedPlan === "pro" ? 14900 : 21500; // R149 Pro, R215 Premium
 
       console.log('💳 Creating Yoco Checkout session for subscription signup...');
 
@@ -301,7 +301,7 @@ export default function Signup({ onBack, onSuccess }) {
           store_name: storeName,
           plan: selectedPlan,
           payment_reference: paymentId,
-          amount_in_cents: selectedPlan === 'pro' ? 400 : 600, // R4 Pro, R6 Premium
+          amount_in_cents: selectedPlan === 'pro' ? 14900 : 21500, // R149 Pro, R215 Premium
           payment_status: 'completed',
           created_at: new Date().toISOString()
         }]);
