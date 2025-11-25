@@ -22,7 +22,7 @@ export default function StyledQRCode({ storeName }) {
   const [whatsappGroupLink, setWhatsappGroupLink] = useState("");
   const [storeId, setStoreId] = useState(null);
   const [storeSlug, setStoreSlug] = useState("");
-  const [yocoPublicKey, setYocoPublicKey] = useState("");
+  const [yocoPaymentLink, setYocoPaymentLink] = useState("");
 
   // ✅ Load saved QR design from Supabase
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function StyledQRCode({ storeName }) {
         setWhatsappGroupLink(data.whatsapp_group_link || "");
         setStoreId(data.id);
         setStoreSlug(data.slug || "");
-        setYocoPublicKey(data.yoco_public_key || "");
+        setYocoPaymentLink(data.yoco_payment_link || "");
       }
       setLoading(false);
     }
@@ -136,8 +136,8 @@ export default function StyledQRCode({ storeName }) {
 
   // Initialize Yoco Payment QR (generates payment link QR)
   useEffect(() => {
-    if (!yocoPublicKey || loading) {
-      // Clear Yoco QR if no key
+    if (!yocoPaymentLink || loading) {
+      // Clear Yoco QR if no link
       if (yocoQrRef.current) {
         yocoQrRef.current.innerHTML = "";
       }
@@ -145,10 +145,10 @@ export default function StyledQRCode({ storeName }) {
       return;
     }
 
-    // Create Yoco payment link
-    // Format: https://pay.yoco.com/storename (this is a simplified version)
-    // Customers will manually enter amount when they scan
-    const yocoPaymentUrl = `https://pay.yoco.com/${storeSlug || storeName.toLowerCase().replace(/\s+/g, '-')}`;
+    // Use the vendor's actual Yoco payment link
+    // This is the link they get from their Yoco Business Portal
+    // Supports open amount - customer can enter any amount
+    const yocoPaymentUrl = yocoPaymentLink.trim();
 
     // Create Yoco Payment QR code
     const yocoQrCode = new QRCodeStyling({
@@ -170,19 +170,19 @@ export default function StyledQRCode({ storeName }) {
       yocoQrRef.current.innerHTML = ""; // Clear previous
       yocoQrCode.append(yocoQrRef.current);
     }
-  }, [yocoPublicKey, loading, frameStyle, bgColor, storeSlug, storeName]);
+  }, [yocoPaymentLink, loading, frameStyle, bgColor]);
 
   // Update Yoco QR when settings change
   useEffect(() => {
-    if (yocoQr && yocoPublicKey) {
-      const yocoPaymentUrl = `https://pay.yoco.com/${storeSlug || storeName.toLowerCase().replace(/\s+/g, '-')}`;
+    if (yocoQr && yocoPaymentLink) {
+      const yocoPaymentUrl = yocoPaymentLink.trim();
       yocoQr.update({
         data: yocoPaymentUrl,
         dotsOptions: { color: "#667eea", type: frameStyle },
         backgroundOptions: { color: bgColor },
       });
     }
-  }, [yocoQr, yocoPublicKey, frameStyle, bgColor, storeSlug, storeName]);
+  }, [yocoQr, yocoPaymentLink, frameStyle, bgColor]);
 
   const downloadQR = async () => {
     try {
@@ -317,7 +317,7 @@ export default function StyledQRCode({ storeName }) {
   const downloadYocoQR = async () => {
     try {
       if (!yocoQr) {
-        alert("Yoco QR code not ready. Please add your Yoco public key in Settings first.");
+        alert("Yoco QR code not ready. Please add your Yoco payment link first.");
         return;
       }
 
@@ -423,6 +423,7 @@ export default function StyledQRCode({ storeName }) {
         qr_tagline: tagline,
         qr_custom_url: ownerWebsite,
         whatsapp_group_link: whatsappGroupLink,
+        yoco_payment_link: yocoPaymentLink,
       })
       .eq("id", storeId);
     if (error) alert("⚠️ Could not save design.");
@@ -564,6 +565,21 @@ export default function StyledQRCode({ storeName }) {
           </small>
         </div>
 
+        {/* Yoco Payment Link */}
+        <div>
+          <label>Yoco Payment Link (for QR code payments)</label>
+          <input
+            type="text"
+            className="design-select"
+            placeholder="https://pay.yoco.com/..."
+            value={yocoPaymentLink}
+            onChange={(e) => setYocoPaymentLink(e.target.value)}
+          />
+          <small style={{ color: "#999", fontSize: "0.75rem", display: "block", marginTop: "0.25rem" }}>
+            Get this from your Yoco Business Portal → Payment Links. Must support open amounts.
+          </small>
+        </div>
+
         {/* Logo Upload */}
         <div>
           <label>Upload Logo</label>
@@ -670,7 +686,7 @@ export default function StyledQRCode({ storeName }) {
       )}
 
       {/* Yoco Payment QR Code */}
-      {yocoPublicKey && (
+      {yocoPaymentLink && (
         <div style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.2)" }}>
           <h3 style={{ marginBottom: "1rem", color: "#667eea" }}>💳 Yoco Payment QR Code</h3>
           <div
