@@ -8,7 +8,7 @@ import "./ModernFoodTemplate.css"; // ✅ NEW: use the Jersey-like CSS
 
 export default function ModernFoodTemplate(props) {
   const { state, storeId, cart: extCart } = props;
-  const { header, banner, menuItems, about, liveQueue, yoco_public_key, yoco_secret_key } = state;
+  const { header, banner, menuItems, about, liveQueue, yoco_public_key } = state;
 
 
   // ✅ Cart state with localStorage persistence
@@ -172,18 +172,7 @@ export default function ModernFoodTemplate(props) {
 
   // Yoco configuration - Use store key from database, fallback to env variable
   const yocoPublicKey = yoco_public_key || import.meta.env.VITE_YOCO_PUBLIC_KEY;
-  const totalInCents = Math.round(total * 100); // Yoco uses cents
-
-  // Load Yoco SDK
-  useEffect(() => {
-    if (!document.getElementById('yoco-sdk')) {
-      const script = document.createElement('script');
-      script.id = 'yoco-sdk';
-      script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
+  const totalInCents = Math.round(total * 100); // For display purposes
 
   // Debug: Log Yoco setup
   useEffect(() => {
@@ -193,21 +182,19 @@ export default function ModernFoodTemplate(props) {
       console.log('✅ Yoco public key loaded:', yocoPublicKey.substring(0, 20) + '...');
       console.log('   Source:', yoco_public_key ? 'Database (store settings)' : 'Environment variable');
     }
+  }, [yocoPublicKey, yoco_public_key]);
 
-    const secretKey = yoco_secret_key || import.meta.env.VITE_YOCO_SECRET_KEY;
-    if (!secretKey) {
-      console.warn('⚠️ Yoco secret key not configured (needed for payment verification)');
-    } else {
-      console.log('✅ Yoco secret key loaded:', secretKey.substring(0, 20) + '...');
-      console.log('   Source:', yoco_secret_key ? 'Database (store settings)' : 'Environment variable');
+  // ✅ Handle Yoco Payment - Create checkout session via edge function
+  const handleYocoPayment = async () => {
+    if (!yocoPublicKey) {
+      alert('⚠️ Payment is not configured. Please contact the store.');
+      return;
     }
-  }, [yocoPublicKey, yoco_public_key, yoco_secret_key]);
 
-  // ✅ Create Order after Payment Success
-  const createOrder = async (paymentId) => {
+    setProcessing(true);
+
     try {
-      setProcessing(true);
-
+      // Prepare cart items for backend
       const orderItems = cart.map((c) => ({
         item: c.name,
         qty: c.qty || 1,
@@ -217,78 +204,38 @@ export default function ModernFoodTemplate(props) {
 
       const orderNumber = generateOrderNumber();
 
-      const { error } = await supabase.from("orders").insert([
+      // Call edge function to create secure checkout session
+      const { data, error } = await supabase.functions.invoke(
+        'create-customer-order-checkout',
         {
-          store_id: storeId,
-          customer_name: customerName,
-          phone: customerPhone,
-          items: orderItems,
-          total,
-          payment_status: "paid",
-          payment_reference: paymentId,
-          order_number: orderNumber,
-        },
-      ]);
-
-      if (error) throw error;
-      alert(`✅ Payment successful! Order placed.\n\nOrder #${orderNumber}\nPayment Ref: ${paymentId}\n\nThank you! 🎉`);
-      clearCart();
-      setCustomerName("");
-      setCustomerPhone("");
-      setIsCartOpen(false);
-    } catch (err) {
-      console.error(err.message);
-      alert("⚠️ Order failed after payment: " + err.message);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  // ✅ Handle Yoco Payment
-  const handleYocoPayment = async () => {
-    if (!yocoPublicKey) {
-      alert('⚠️ Payment is not configured. Please contact the store.');
-      return;
-    }
-
-    if (!window.YocoSDK) {
-      alert('⚠️ Payment system is loading. Please try again in a moment.');
-      return;
-    }
-
-    setProcessing(true);
-
-    try {
-      const sdk = new window.YocoSDK({
-        publicKey: yocoPublicKey,
-      });
-
-      sdk.showPopup({
-        amountInCents: totalInCents,
-        currency: 'ZAR',
-        name: header.storeName || 'Mzansi Food Connect',
-        description: `Order from ${header.storeName}`,
-        metadata: {
-          customerName: customerName,
-          customerPhone: customerPhone,
-          storeId: storeId,
-        },
-        callback: async function (result) {
-          if (result.error) {
-            console.error('Yoco payment error:', result.error);
-            alert('❌ Payment failed: ' + result.error.message);
-            setProcessing(false);
-            return;
+          body: {
+            storeId: storeId,
+            storeName: header.storeName || 'Mzansi Food Connect',
+            customerName: customerName,
+            customerPhone: customerPhone,
+            cart: orderItems,
+            total: total,
+            orderNumber: orderNumber
           }
+        }
+      );
 
-          // Payment successful
-          console.log('💳 Yoco payment successful:', result);
-          await createOrder(result.id);
-        },
-      });
+      if (error) {
+        console.error('Checkout creation error:', error);
+        throw new Error(error.message || 'Failed to create checkout session');
+      }
+
+      if (!data.success || !data.redirectUrl) {
+        throw new Error('Invalid checkout response');
+      }
+
+      // Redirect to Yoco checkout page
+      console.log('✅ Redirecting to Yoco checkout:', data.checkoutId);
+      window.location.href = data.redirectUrl;
+
     } catch (err) {
-      console.error('Yoco SDK error:', err);
-      alert('⚠️ Payment initialization failed. Please try again.');
+      console.error('Payment initialization error:', err);
+      alert('⚠️ Payment initialization failed: ' + err.message);
       setProcessing(false);
     }
   };

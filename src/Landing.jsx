@@ -45,7 +45,7 @@ function Landing() {
     {
       icon: "💳",
       title: "Secure Online Payments",
-      description: "Accept payments instantly with Paystack integration. Get paid faster."
+      description: "Accept payments instantly with simple and Easy Yoco integration. Get paid faster."
     },
     {
       icon: "📊",

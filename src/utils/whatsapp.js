@@ -1,63 +1,37 @@
 // WhatsApp Messaging via Ultramsg (Platform-level)
 // All messages sent from YOUR platform WhatsApp Business number
+// Now using secure edge function instead of exposing credentials
 
-// SETUP: Add these to your .env.local file:
-// VITE_ULTRAMSG_INSTANCE_ID=your_instance_id
-// VITE_ULTRAMSG_TOKEN=your_token
-
-const ULTRAMSG_INSTANCE_ID = import.meta.env.VITE_ULTRAMSG_INSTANCE_ID;
-const ULTRAMSG_TOKEN = import.meta.env.VITE_ULTRAMSG_TOKEN;
+import { supabase } from "../supabaseClient";
 
 /**
- * Send WhatsApp message via Ultramsg API
+ * Send WhatsApp message via edge function
  * @param {string} phoneNumber - Customer phone number (format: 27XXXXXXXXX)
  * @param {string} message - Message to send
  * @returns {Promise<object>} Response from API
  */
 export async function sendWhatsAppMessage(phoneNumber, message) {
-  // Check if credentials are configured
-  if (!ULTRAMSG_INSTANCE_ID || !ULTRAMSG_TOKEN) {
-    console.warn('⚠️ Ultramsg credentials not configured. Message not sent.');
-    console.log('Message would have been:', message);
-    return { success: false, error: 'Credentials not configured' };
-  }
-
-  // Format phone number (remove spaces, dashes, + sign)
-  const formattedPhone = phoneNumber.replace(/[\s\-+]/g, '');
-
-  // Ensure it starts with country code (27 for South Africa)
-  const finalPhone = formattedPhone.startsWith('27')
-    ? formattedPhone
-    : `27${formattedPhone.startsWith('0') ? formattedPhone.slice(1) : formattedPhone}`;
-
-  // Ultramsg API endpoint
-  const apiUrl = `https://api.ultramsg.com/${ULTRAMSG_INSTANCE_ID}/messages/chat`;
-
   try {
-    // Ultramsg expects x-www-form-urlencoded, not JSON
-    const payload = new URLSearchParams({
-      token: ULTRAMSG_TOKEN,
-      to: finalPhone,
-      body: message,
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber: phoneNumber,
+        message: message
+      }
     });
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: payload,
-    });
-
-    const data = await response.json();
-
-    if (response.ok && (data.sent === 'true' || data.status === 'success')) {
-      console.log('✅ WhatsApp message sent successfully to', finalPhone);
-      return { success: true, data };
-    } else {
-      console.error('❌ Failed to send WhatsApp message:', { status: response.status, data });
-      return { success: false, error: data.error || data.message || `HTTP ${response.status}` };
+    if (error) {
+      console.error('❌ Failed to send WhatsApp message:', error);
+      return { success: false, error: error.message };
     }
+
+    if (!data.success) {
+      console.error('❌ WhatsApp send failed:', data.error);
+      return { success: false, error: data.error };
+    }
+
+    console.log('✅ WhatsApp message sent successfully to', phoneNumber);
+    return { success: true, data };
+
   } catch (error) {
     console.error('❌ Error sending WhatsApp message:', error);
     return { success: false, error: error.message };
@@ -68,75 +42,112 @@ export async function sendWhatsAppMessage(phoneNumber, message) {
  * Send Order Confirmation message
  */
 export async function sendOrderConfirmation(customerPhone, customerName, orderNumber, storeName, estimatedTime, totalAmount, storeSlug) {
-  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+  try {
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber: customerPhone,
+        messageType: 'confirmation',
+        customerName,
+        orderNumber,
+        storeName,
+        estimatedTime,
+        totalAmount,
+        storeSlug
+      }
+    });
 
-  const message = `Hi ${customerName}! 👋
+    if (error) {
+      console.error('❌ Failed to send order confirmation:', error);
+      return { success: false, error: error.message };
+    }
 
-Your order from *${storeName}* has been confirmed! ✅
-
-📦 Order #${orderNumber}
-⏱️ Ready in: ${estimatedTime} minutes
-💰 Total: R${totalAmount}
-
-Thank you for your order! We'll notify you when it's ready for pickup.
-
-${storeUrl ? `\n🛒 Order again: ${storeUrl}` : ''}`;
-
-  return await sendWhatsAppMessage(customerPhone, message);
+    return data;
+  } catch (error) {
+    console.error('❌ Error sending order confirmation:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
  * Send Order Ready message
  */
 export async function sendOrderReady(customerPhone, customerName, orderNumber, storeName, storeSlug) {
-  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+  try {
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber: customerPhone,
+        messageType: 'ready',
+        customerName,
+        orderNumber,
+        storeName,
+        storeSlug
+      }
+    });
 
-  const message = `Hi ${customerName}! 🎉
+    if (error) {
+      console.error('❌ Failed to send order ready message:', error);
+      return { success: false, error: error.message };
+    }
 
-Great news! Your order from *${storeName}* is ready for pickup! ✅
-
-📦 Order #${orderNumber}
-📍 Come collect at ${storeName}
-
-See you soon! 😊
-
-${storeUrl ? `\n🛒 Order again: ${storeUrl}` : ''}`;
-
-  return await sendWhatsAppMessage(customerPhone, message);
+    return data;
+  } catch (error) {
+    console.error('❌ Error sending order ready message:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
  * Send Order Fetched (Thank you) message
  */
 export async function sendOrderFetched(customerPhone, customerName, orderNumber, storeName, storeSlug) {
-  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+  try {
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber: customerPhone,
+        messageType: 'fetched',
+        customerName,
+        orderNumber,
+        storeName,
+        storeSlug
+      }
+    });
 
-  const message = `Thank you for collecting your order, ${customerName}! 🙏
+    if (error) {
+      console.error('❌ Failed to send order fetched message:', error);
+      return { success: false, error: error.message };
+    }
 
-We hope you enjoy your meal from *${storeName}*! 🍽️
-
-📦 Order #${orderNumber}
-
-We'd love to see you again soon! ❤️
-
-${storeUrl ? `\n🛒 Order again: ${storeUrl}` : ''}`;
-
-  return await sendWhatsAppMessage(customerPhone, message);
+    return data;
+  } catch (error) {
+    console.error('❌ Error sending order fetched message:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
  * Send Custom message (for future use)
  */
 export async function sendCustomMessage(customerPhone, customerName, storeName, customText, storeSlug) {
-  const storeUrl = storeSlug ? `https://${storeSlug}.mzansifoodconnect.app` : '';
+  try {
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber: customerPhone,
+        messageType: 'custom',
+        customerName,
+        storeName,
+        customText,
+        storeSlug
+      }
+    });
 
-  const message = `Hi ${customerName}! 👋
+    if (error) {
+      console.error('❌ Failed to send custom message:', error);
+      return { success: false, error: error.message };
+    }
 
-${customText}
-
-- ${storeName}
-
-${storeUrl ? `\n🛒 Visit us: ${storeUrl}` : ''}`;
-
-  return await sendWhatsAppMessage(customerPhone, message);
+    return data;
+  } catch (error) {
+    console.error('❌ Error sending custom message:', error);
+    return { success: false, error: error.message };
+  }
 }
