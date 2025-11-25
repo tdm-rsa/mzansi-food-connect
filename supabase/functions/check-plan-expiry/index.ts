@@ -46,7 +46,7 @@ serve(async (req) => {
       if (!userData?.user?.email) continue;
 
       const userEmail = userData.user.email;
-      const planPrice = store.plan === "pro" ? 2.50 : 3.00;
+      const planPrice = store.plan === "pro" ? 149 : 215;
       const planName = store.plan.charAt(0).toUpperCase() + store.plan.slice(1);
       const renewalUrl = `https://app.mzansifoodconnect.app`;
 

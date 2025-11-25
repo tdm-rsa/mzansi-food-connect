@@ -42,7 +42,7 @@ export default function GracePeriodBanner({ storeInfo, user, onRenewed }) {
             className="btn-renew-now"
             onClick={() => setShowPayment(true)}
           >
-            Renew Now (R{plan === 'pro' ? '2.50' : '3.00'}/month)
+            Renew Now (R{plan === 'pro' ? '149' : '215'}/month)
           </button>
         </div>
       </div>

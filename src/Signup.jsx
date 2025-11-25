@@ -51,7 +51,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "pro",
       name: "Pro",
       subtitle: "For Growing Businesses",
-      price: "R4",
+      price: "R149",
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
@@ -68,7 +68,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "premium",
       name: "Premium",
       subtitle: "Custom Domain Included",
-      price: "R6",
+      price: "R215",
       period: "per month",
       description: "Professional solution with your own domain",
       features: [

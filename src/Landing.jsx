@@ -94,7 +94,7 @@ function Landing() {
     {
       name: "Pro",
       subtitle: "For Growing Businesses",
-      price: "R2.50",
+      price: "R149",
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
@@ -115,7 +115,7 @@ function Landing() {
     {
       name: "Premium",
       subtitle: "Custom Domain Included",
-      price: "R3.00",
+      price: "R215",
       period: "per month",
       description: "Professional solution with your own domain (e.g., www.yourstore.co.za)",
       features: [
