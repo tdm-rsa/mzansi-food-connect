@@ -103,10 +103,10 @@ function Landing() {
         "Unlimited products",
         "Basic analytics (revenue tracking)",
         "Live Queue View for Customers",
-        "Remove branding",
         "Real payments with your own Yoco keys",
         "WhatsApp notifications",
-        "Priority support"
+        "First Priority support",
+        "QR code payments"
 
       ],
       cta: "Get Started with Pro",
@@ -117,16 +117,18 @@ function Landing() {
       subtitle: "Custom Domain Included",
       price: "R215",
       period: "per month",
-      description: "Professional solution with your own domain (e.g., www.yourstore.co.za)",
+      description: "Enhanced Professional Features",
       features: [
         "Everything in Pro",
-        "Custom domain support",
+        "Custom domain support(COMING SOON)",
         "5 Professional templates",
         "Advanced Analytics, charts and reports",
-        "Automated WhatsApp messaging",
+        "Unlimited  Automated WhatsApp messaging",
         "Unlimited Menu Items",
         "Dedicated support (WhatsApp)",
-        "Full branding control"
+        "First Priority support",
+        "Full branding control",
+        "QR code payments"
       ],
       cta: "Get Started with Premium",
       highlight: false
