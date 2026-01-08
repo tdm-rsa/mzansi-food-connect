@@ -40,12 +40,29 @@ export default function AskAboutProduct({ product, store, onClose }) {
 
       if (insertError) throw insertError;
 
+      // Send WhatsApp notification to vendor if they have a number configured
+      if (store.vendor_whatsapp_number) {
+        try {
+          const vendorMessage = `📩 *New Customer Question*\n\nFrom: *${customerName}*\nPhone: ${customerPhone}\n\n❓ Question:\n${fullMessage}\n\n👉 Reply via WhatsApp or check your dashboard!`;
+
+          await supabase.functions.invoke('send-whatsapp', {
+            body: {
+              phoneNumber: store.vendor_whatsapp_number,
+              message: vendorMessage
+            }
+          });
+        } catch (whatsappError) {
+          console.error('Failed to send vendor notification:', whatsappError);
+          // Don't fail the whole operation if WhatsApp fails
+        }
+      }
+
       setSuccess(true);
       setTimeout(() => {
         onClose();
       }, 2000);
     } catch (err) {
-      console.error("Error sending message:", err);
+
       setError("Failed to send message. Please try again.");
     } finally {
       setSending(false);

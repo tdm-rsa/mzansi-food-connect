@@ -36,6 +36,30 @@ export default function GeneralAskModal({ isOpen, onClose, storeId, storeName })
 
       if (error) throw error;
 
+      // Send WhatsApp notification to vendor
+      try {
+        // Get vendor WhatsApp number
+        const { data: storeData } = await supabase
+          .from("tenants")
+          .select("vendor_whatsapp_number")
+          .eq("id", storeId)
+          .single();
+
+        if (storeData?.vendor_whatsapp_number) {
+          const vendorMessage = `📩 *New Customer Question*\n\nFrom: *${name.trim()}*\nPhone: ${phone.trim()}\n\n❓ Question:\n${question.trim()}\n\n👉 Reply via WhatsApp or check your dashboard!`;
+
+          await supabase.functions.invoke('send-whatsapp', {
+            body: {
+              phoneNumber: storeData.vendor_whatsapp_number,
+              message: vendorMessage
+            }
+          });
+        }
+      } catch (whatsappError) {
+        console.error('Failed to send vendor notification:', whatsappError);
+        // Don't fail the whole operation if WhatsApp fails
+      }
+
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -45,7 +69,7 @@ export default function GeneralAskModal({ isOpen, onClose, storeId, storeName })
         onClose();
       }, 2000);
     } catch (err) {
-      console.error("Error sending question:", err);
+
       alert("Failed to send question. Please try again.");
     } finally {
       setSending(false);
