@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { supabase } from "./supabaseClient";
 import { getPlanFeatures, canAccessFeature, isPlanActive, getDaysRemaining, isInGracePeriod } from "./utils/planFeatures";
-import { sendOrderConfirmation, sendOrderReady, sendOrderFetched, sendWhatsAppMessage } from "./utils/whatsapp";
+import { sendOrderConfirmation, sendOrderReady, sendOrderFetched, sendWhatsAppMessage, sendGroupInvite } from "./utils/whatsapp";
 import logo from "./images/logo.png";
 
 // Views / components you already have
@@ -113,9 +113,9 @@ export default function App({ user }) {
         audio.play().then(() => {
           audio.pause();
           setAudioEnabled(true);
-          console.log('✅ Audio enabled');
+          
         }).catch(() => {
-          console.log('⚠️ Audio still blocked');
+          
         });
       }
     };
@@ -157,18 +157,14 @@ export default function App({ user }) {
       try {
         setLoading(true);
 
-        console.log('🔍 LOGIN: Loading store for user:', user.id, user.email);
-
         // First check if there are multiple stores for this user
         const { data: allStores } = await supabase
           .from("tenants")
           .select("*")
           .eq("owner_id", user.id);
 
-        console.log('🔍 LOGIN: All stores for user:', allStores);
-
         if (allStores && allStores.length > 1) {
-          console.warn('⚠️ MULTIPLE STORES FOUND! Taking most recent one');
+          
         }
 
         // 1) Store for this owner - GET MOST RECENT ONE
@@ -180,23 +176,12 @@ export default function App({ user }) {
           .limit(1)
           .single();
 
-        console.log('📦 LOGIN: Store query result:', {
-          found: !!store,
-          error: e1,
-          storePlan: store?.plan,
-          storeId: store?.id,
-          storeName: store?.name
-        });
-
         if (e1 && e1.code !== "PGRST116") throw e1;
 
         let s = store;
         if (!s) {
-          console.warn('⚠️ LOGIN: No store found! Creating store from signup metadata');
 
           // 🚨 DEBUG: Log full user metadata
-          console.log('🚨 LOGIN: Full user object:', user);
-          console.log('🚨 LOGIN: user.user_metadata:', user.user_metadata);
 
           // 🔥 FIX: Check pending_payments table first (more reliable than user_metadata)
           const { data: pendingPayment, error: paymentCheckError } = await supabase
@@ -205,14 +190,11 @@ export default function App({ user }) {
             .eq('user_id', user.id)
             .single();
 
-          console.log('🔍 Checking pending_payments table for user:', user.id);
-          console.log('💳 Pending payment found:', pendingPayment);
-
           // Get signup metadata - prioritize pending_payments table over user_metadata
           let storeName, plan, paymentReference;
 
           if (pendingPayment) {
-            console.log('✅ Using data from pending_payments table');
+            
             storeName = pendingPayment.store_name;
             plan = pendingPayment.plan;
             paymentReference = pendingPayment.payment_reference;
@@ -223,7 +205,7 @@ export default function App({ user }) {
               .update({ processed_at: new Date().toISOString() })
               .eq('id', pendingPayment.id);
           } else {
-            console.log('⚠️ No pending payment found, using user_metadata');
+            
             storeName = user.user_metadata?.store_name || "My New Store";
             plan = user.user_metadata?.plan || "trial";
             paymentReference = user.user_metadata?.payment_reference || null;
@@ -231,9 +213,6 @@ export default function App({ user }) {
             // 🚨 CRITICAL FIX: Don't create store for Pro/Premium until payment is completed
             // If user selected Pro/Premium but has no payment reference, block store creation
             if ((plan === 'pro' || plan === 'premium') && !paymentReference) {
-              console.warn('⚠️ Pro/Premium signup detected but NO payment found!');
-              console.warn('⚠️ Plan:', plan, 'Payment Reference:', paymentReference);
-              console.warn('⚠️ Blocking store creation - user must complete payment');
 
               // Show message and redirect to signup to complete payment
               alert('⚠️ Payment Required\n\nPlease complete your ' + plan.toUpperCase() + ' payment to activate your account.\n\nYou will be redirected to complete the payment process.');
@@ -244,14 +223,6 @@ export default function App({ user }) {
               return;
             }
           }
-
-          console.log('🚨 LOGIN: Extracted values:', {
-            storeName,
-            plan,
-            planType: typeof plan,
-            paymentReference,
-            source: pendingPayment ? 'pending_payments table' : 'user_metadata'
-          });
 
           // 🔥 Generate clean slug from store name
           const baseSlug = storeName
@@ -278,8 +249,6 @@ export default function App({ user }) {
             counter++;
           }
 
-          console.log('🔗 Final slug:', finalSlug);
-
           // Calculate plan_expires_at for trial (7 days from now), NULL for paid plans
           const planExpiresAt = plan === 'trial'
             ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -300,9 +269,6 @@ export default function App({ user }) {
             active_template: "Modern Food",
           };
 
-          console.log('🚨 LOGIN: About to insert store with data:', storeInsertData);
-          console.log('🚨 LOGIN: Plan value being inserted:', plan, 'Type:', typeof plan);
-
           // create store with signup data
           const { data: created, error: e2 } = await supabase
             .from("tenants")
@@ -313,15 +279,9 @@ export default function App({ user }) {
           s = created;
 
           // 🚨 DEBUG: Verify what was actually created
-          console.log('🚨 LOGIN: Store created successfully!');
-          console.log('🚨 LOGIN: Created store object:', created);
-          console.log('🚨 LOGIN: Plan in created store:', created.plan, 'Type:', typeof created.plan);
-          console.log(`✅ LOGIN: Created ${plan} store: ${storeName} (${finalSlug})`);
+
         } else {
           // 🚨 DEBUG: Log existing store details
-          console.log('✅ LOGIN: Found existing store');
-          console.log('🚨 LOGIN: Existing store object:', s);
-          console.log('🚨 LOGIN: Existing store plan:', s.plan, 'Type:', typeof s.plan);
 
           // 🔥 FIX: Check if there's a pending payment for this user that should upgrade their plan
           const { data: pendingPayment } = await supabase
@@ -332,7 +292,6 @@ export default function App({ user }) {
             .single();
 
           if (pendingPayment && s.plan === 'trial' && (pendingPayment.plan === 'pro' || pendingPayment.plan === 'premium')) {
-            console.log('🚨 UPGRADE: Found pending payment! Upgrading store from trial to', pendingPayment.plan);
 
             // Upgrade the existing store to the paid plan
             const { data: upgradedStore, error: upgradeError } = await supabase
@@ -349,7 +308,6 @@ export default function App({ user }) {
 
             if (!upgradeError && upgradedStore) {
               s = upgradedStore;
-              console.log('✅ UPGRADE: Store upgraded to', pendingPayment.plan);
 
               // Mark payment as processed
               await supabase
@@ -357,13 +315,13 @@ export default function App({ user }) {
                 .update({ processed_at: new Date().toISOString() })
                 .eq('id', pendingPayment.id);
             } else {
-              console.error('❌ UPGRADE: Failed to upgrade store:', upgradeError);
+              
             }
           }
 
           // 🔥 FIX: If existing store has no slug, generate one now
           if (!s.slug) {
-            console.warn('⚠️ Store has no slug! Generating one now...');
+            
             const baseSlug = s.name
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, '-')
@@ -376,10 +334,10 @@ export default function App({ user }) {
               .eq("id", s.id);
 
             if (slugError) {
-              console.error('❌ Failed to add slug:', slugError);
+              
             } else {
               s.slug = uniqueSlug;
-              console.log('✅ Added slug to existing store:', uniqueSlug);
+              
             }
           }
         }
@@ -391,13 +349,6 @@ export default function App({ user }) {
           s.plan = s.plan.trim();
         }
 
-        console.log('🔍 Store loaded:', s);
-        console.log('📋 Store plan:', s?.plan);
-        console.log('📋 Store plan TYPE:', typeof s?.plan);
-        console.log('📋 Store plan LENGTH:', s?.plan?.length);
-        console.log('📋 Store plan === "trial":', s?.plan === 'trial');
-        console.log('📋 Store plan === "pro":', s?.plan === 'pro');
-        console.log('📋 Store plan === "premium":', s?.plan === 'premium');
         setStoreInfo(s);
         setActiveTemplate(s.active_template || "Modern Food");
 
@@ -449,7 +400,7 @@ export default function App({ user }) {
         if (!mounted) return;
         setGeneralQuestions(genQuestions || []);
       } catch (err) {
-        console.error("Load failed:", err.message);
+        
         showToast("⚠️ Failed to load data", "#f44336");
       } finally {
         if (mounted) setLoading(false);
@@ -475,31 +426,28 @@ export default function App({ user }) {
         { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
           const o = payload.new;
-          console.log('🔔 NEW ORDER RECEIVED:', o);
+          
           if (storeInfo && o.store_id !== storeInfo.id) {
-            console.log('❌ Order not for this store');
+            
             return;
           }
           setOrders((prev) => [o, ...prev]);
           setNewOrders((n) => {
-            console.log(`📊 Badge count: ${n} → ${n + 1}`);
+            
             return n + 1;
           });
 
           // Play sound for all paid orders
           if (o.payment_status === "paid") {
-            console.log('🔊 Playing order notification sound...');
+            
             try {
               const a = new Audio(audioReadyUrl);
               a.volume = 0.7;
-              a.play()
-                .then(() => console.log('✅ Sound played successfully'))
-                .catch((error) => {
-                  console.warn('⚠️ Order sound blocked by browser:', error);
-                  console.log('💡 Click anywhere on the page to enable sound');
-                });
+              a.play().catch(() => {
+                // Audio play failed (user hasn't interacted with page yet)
+              });
             } catch (err) {
-              console.error('❌ Order sound error:', err);
+              // Audio initialization failed
             }
             showToast(
               `💰 New Order #${o.order_number || o.id?.slice(0, 6) || ""} — R${o.total}`,
@@ -540,30 +488,27 @@ export default function App({ user }) {
         { event: "INSERT", schema: "public", table: "notifications" },
         (payload) => {
           const n = payload.new;
-          console.log('💬 NEW CUSTOMER MESSAGE RECEIVED:', n);
+          
           if (storeInfo && n.store_id !== storeInfo.id) {
-            console.log('❌ Message not for this store');
+            
             return;
           }
           setNotifications((prev) => [n, ...prev]);
           setNewMsgs((m) => {
-            console.log(`📊 Messages badge count: ${m} → ${m + 1}`);
+            
             return m + 1;
           });
 
           // Play notification sound
-          console.log('🔊 Playing customer message notification sound...');
+          
           try {
             const a = new Audio(audioReadyUrl);
             a.volume = 0.7;
-            a.play()
-              .then(() => console.log('✅ Message sound played successfully'))
-              .catch((error) => {
-                console.warn('⚠️ Message sound blocked by browser:', error);
-                console.log('💡 Click anywhere on the page to enable sound');
-              });
+            a.play().catch(() => {
+              // Audio play failed
+            });
           } catch (err) {
-            console.error('❌ Message sound error:', err);
+            // Audio initialization failed
           }
 
           showToast(
@@ -589,30 +534,27 @@ export default function App({ user }) {
         { event: "INSERT", schema: "public", table: "general_questions" },
         (payload) => {
           const q = payload.new;
-          console.log('💬 NEW GENERAL QUESTION RECEIVED:', q);
+          
           if (storeInfo && q.store_id !== storeInfo.id) {
-            console.log('❌ Question not for this store');
+            
             return;
           }
           setGeneralQuestions((prev) => [q, ...prev]);
           setNewMsgs((m) => {
-            console.log(`📊 Messages badge count: ${m} → ${m + 1}`);
+            
             return m + 1;
           });
 
           // Play notification sound
-          console.log('🔊 Playing general question notification sound...');
+          
           try {
             const a = new Audio(audioReadyUrl);
             a.volume = 0.7;
-            a.play()
-              .then(() => console.log('✅ Question sound played successfully'))
-              .catch((error) => {
-                console.warn('⚠️ Question sound blocked by browser:', error);
-                console.log('💡 Click anywhere on the page to enable sound');
-              });
+            a.play().catch(() => {
+              // Audio play failed
+            });
           } catch (err) {
-            console.error('❌ Question sound error:', err);
+            // Audio initialization failed
           }
 
           showToast(
@@ -666,7 +608,7 @@ export default function App({ user }) {
         .eq("id", id);
 
       if (error && !error.message?.includes('updated_at') && error.code !== '42703') {
-        console.error("Mark Ready Error:", error);
+        
         throw error;
       }
 
@@ -698,7 +640,7 @@ export default function App({ user }) {
         showToast(`✅ Order marked ready (WhatsApp: ${result.error || 'not configured'})`, "#10b981");
       }
     } catch (err) {
-      console.error("Mark Ready Failed:", err.message);
+      
       showToast("⚠️ Could not update order: " + err.message, "#f44336");
     }
   };
@@ -767,7 +709,7 @@ export default function App({ user }) {
       setEstimatingOrder(null);
       setSelectedDuration(null);
     } catch (err) {
-      console.error('Send estimated duration failed:', err);
+      
       showToast("⚠️ Failed: " + err.message, "#f44336");
     }
   };
@@ -801,7 +743,7 @@ export default function App({ user }) {
         const result = await sendOrderFetched(phone, customerName, orderNum, storeName, storeInfo?.slug);
 
         if (!result.success) {
-          console.warn('WhatsApp thank you message failed:', result.error);
+          
         }
       }
 
@@ -813,8 +755,44 @@ export default function App({ user }) {
 
       showToast("✅ Order marked as fetched! Thank you message sent", "#10b981");
     } catch (err) {
-      console.error('Mark done failed:', err);
+      
       showToast("⚠️ Failed to mark as done: " + err.message, "#f44336");
+    }
+  };
+
+  const handleSendGroupInvite = async (order) => {
+    try {
+      // Check if WhatsApp group URL is configured
+      if (!storeInfo?.whatsapp_group_url) {
+        showToast("⚠️ WhatsApp group URL not configured. Add it in Settings.", "#f59e0b");
+        return;
+      }
+
+      // Format phone number
+      let phone = order.phone || "";
+      phone = phone.replace(/\s+/g, "").replace(/[^0-9+]/g, "");
+      if (phone.startsWith("0")) phone = "27" + phone.substring(1);
+      else if (phone.startsWith("+27")) phone = phone.substring(1);
+      else if (!phone.startsWith("27")) phone = "27" + phone;
+
+      const customerName = order.customer_name || order.customer || "there";
+      const storeName = storeInfo?.name || "Mzansi Food Connect";
+
+      // Send group invite
+      const result = await sendGroupInvite(
+        phone,
+        customerName,
+        storeInfo.whatsapp_group_url,
+        storeName
+      );
+
+      if (result.success) {
+        showToast(`✅ Group invite sent to ${customerName}!`, "#10b981");
+      } else {
+        showToast(`⚠️ Failed to send invite: ${result.error || 'Unknown error'}`, "#f59e0b");
+      }
+    } catch (err) {
+      showToast("⚠️ Failed to send group invite: " + err.message, "#f44336");
     }
   };
 
@@ -833,8 +811,6 @@ export default function App({ user }) {
       } else if (!phone.startsWith("+")) {
         phone = "+27" + phone;
       }
-      
-      console.log('Formatted phone:', phone);
 
       // Build WhatsApp message
       const storeUrl = window.location.origin + "/store";
@@ -850,8 +826,6 @@ export default function App({ user }) {
       
       const msg = encodeURIComponent(messageText);
       const whatsappUrl = `https://wa.me/${phone}?text=${msg}`;
-      
-      console.log('WhatsApp URL:', whatsappUrl);
 
       // Open WhatsApp
       window.open(whatsappUrl, "_blank");
@@ -863,7 +837,7 @@ export default function App({ user }) {
         .eq("id", order.id);
       
       if (error && !error.message?.includes('updated_at')) {
-        console.error("Status update error:", error);
+        
       }
       
       // Update local state
@@ -874,7 +848,7 @@ export default function App({ user }) {
       
       showToast(`✅ Fetch message sent to ${phone}`, "#10b981");
     } catch (err) {
-      console.error('Send fetch order failed:', err);
+      
       showToast("⚠️ Failed to send message: " + err.message, "#f44336");
     }
   };
@@ -906,7 +880,7 @@ export default function App({ user }) {
         .eq("id", notif.id);
 
       if (error) {
-        console.error("Handle Response Error:", error);
+        
         throw error;
       }
 
@@ -940,14 +914,16 @@ export default function App({ user }) {
         // Play success sound
         if (audioRef.current && audioEnabled) {
           audioRef.current.currentTime = 0;
-          audioRef.current.play().catch(err => console.log('Audio play failed:', err));
+          audioRef.current.play().catch(() => {
+            // Audio play failed
+          });
         }
         showToast(`✅ Reply sent to ${notif.customer_name || phone}`, "#10b981");
       } else {
         showToast(`⚠️ Reply sent but WhatsApp failed: ${result.error}`, "#f59e0b");
       }
     } catch (err) {
-      console.error("Handle Response Failed:", err.message);
+      
       showToast("⚠️ Could not send response: " + err.message, "#f44336");
     }
   };
@@ -961,7 +937,7 @@ export default function App({ user }) {
         .eq("id", id);
       
       if (error) {
-        console.error("Delete error:", error);
+        
         throw error;
       }
       
@@ -969,7 +945,7 @@ export default function App({ user }) {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
       showToast("✅ Notification dismissed", "#10b981");
     } catch (err) {
-      console.error("Dismiss failed:", err.message);
+      
       showToast("⚠️ Could not dismiss: " + err.message, "#f44336");
     }
   };
@@ -988,7 +964,7 @@ export default function App({ user }) {
         .eq("id", question.id);
 
       if (error) {
-        console.error("Handle General Question Response Error:", error);
+        
         throw error;
       }
 
@@ -1021,14 +997,16 @@ export default function App({ user }) {
       if (result.success) {
         if (audioRef.current && audioEnabled) {
           audioRef.current.currentTime = 0;
-          audioRef.current.play().catch(err => console.log('Audio play failed:', err));
+          audioRef.current.play().catch(() => {
+            // Audio play failed
+          });
         }
         showToast(`✅ Reply sent to ${question.customer_name || phone}`, "#10b981");
       } else {
         showToast(`⚠️ Reply sent but WhatsApp failed: ${result.error}`, "#f59e0b");
       }
     } catch (err) {
-      console.error("Handle General Question Response Failed:", err.message);
+      
       showToast("⚠️ Could not send response: " + err.message, "#f44336");
     }
   };
@@ -1041,14 +1019,14 @@ export default function App({ user }) {
         .eq("id", id);
 
       if (error) {
-        console.error("Delete general question error:", error);
+        
         throw error;
       }
 
       setGeneralQuestions((prev) => prev.filter((q) => q.id !== id));
       showToast("✅ Question dismissed", "#10b981");
     } catch (err) {
-      console.error("Dismiss general question failed:", err.message);
+      
       showToast("⚠️ Could not dismiss: " + err.message, "#f44336");
     }
   };
@@ -1092,7 +1070,7 @@ export default function App({ user }) {
         yoco_secret_key: yocoSecretKey.trim(),
       });
     } catch (error) {
-      console.error("Save Yoco keys failed:", error);
+      
       showToast("❌ Failed to save Yoco keys", "#ef4444");
     } finally {
       setSavingYoco(false);
@@ -1103,8 +1081,6 @@ export default function App({ user }) {
      Plan features for analytics and other components
   ------------------------------------------------------- */
   const planFeatures = getPlanFeatures(storeInfo?.plan);
-  console.log('🎯 Current plan from storeInfo:', storeInfo?.plan);
-  console.log('✨ Plan features:', planFeatures);
 
   /* -------------------------------------------------------
      Header
@@ -1581,6 +1557,18 @@ export default function App({ user }) {
                           ✅ Done
                         </button>
                       )}
+                      {o.phone && storeInfo?.whatsapp_group_url && (
+                        <button
+                          className="btn-primary"
+                          onClick={() => handleSendGroupInvite(o)}
+                          style={{
+                            background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                            color: "white"
+                          }}
+                        >
+                          📱 Invite to Group
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1685,6 +1673,18 @@ export default function App({ user }) {
                           }}
                         >
                           ✅ Done
+                        </button>
+                      )}
+                      {o.phone && storeInfo?.whatsapp_group_url && (
+                        <button
+                          className="btn-primary"
+                          onClick={() => handleSendGroupInvite(o)}
+                          style={{
+                            background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                            color: "white"
+                          }}
+                        >
+                          📱 Invite to Group
                         </button>
                       )}
                     </div>
@@ -2070,7 +2070,7 @@ export default function App({ user }) {
                     }
 
                     try {
-                      console.log('Updating owner_name to:', newName, 'for store:', storeInfo.id);
+                      
                       const { data, error } = await supabase
                         .from("tenants")
                         .update({ owner_name: newName })
@@ -2078,16 +2078,15 @@ export default function App({ user }) {
                         .select();
 
                       if (error) {
-                        console.error('Update error:', error);
+                        
                         throw error;
                       }
 
-                      console.log('Update successful:', data);
                       setStoreInfo({ ...storeInfo, owner_name: newName });
                       showToast("✅ Your name updated successfully!", "#4caf50");
                     } catch (error) {
                       showToast(`❌ Failed to update name: ${error.message}`, "#f44336");
-                      console.error('Full error:', error);
+                      
                     }
                   }}
                   style={{ whiteSpace: "nowrap" }}
@@ -2167,7 +2166,7 @@ export default function App({ user }) {
                       showToast("✅ Profile picture updated successfully!", "#4caf50");
                     } catch (error) {
                       showToast(`❌ Failed to upload: ${error.message}`, "#f44336");
-                      console.error('Upload error:', error);
+                      
                     }
                   }}
                 />
@@ -2238,7 +2237,6 @@ export default function App({ user }) {
                     }
 
                     try {
-                      console.log('Updating store name to:', newName, 'for store:', storeInfo.id);
 
                       // Generate new slug from new name
                       const baseSlug = newName
@@ -2267,8 +2265,6 @@ export default function App({ user }) {
                         counter++;
                       }
 
-                      console.log('New slug will be:', finalSlug);
-
                       const { data, error } = await supabase
                         .from("tenants")
                         .update({
@@ -2279,21 +2275,134 @@ export default function App({ user }) {
                         .select();
 
                       if (error) {
-                        console.error('Update error:', error);
+                        
                         throw error;
                       }
 
-                      console.log('Update successful:', data);
                       setStoreInfo({ ...storeInfo, name: newName, slug: finalSlug });
                       showToast(`✅ Store updated! New URL: ${finalSlug}.mzansifoodconnect.app`, "#4caf50");
                     } catch (error) {
                       showToast(`❌ Failed to update store name: ${error.message}`, "#f44336");
-                      console.error('Full error:', error);
+                      
                     }
                   }}
                   style={{ whiteSpace: "nowrap" }}
                 >
                   Update Name
+                </button>
+              </div>
+            </div>
+
+            {/* Vendor WhatsApp Number */}
+            <div className="settings-section">
+              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>📱 Vendor WhatsApp Number</h3>
+              <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                Your WhatsApp number to receive order notifications (format: 27XXXXXXXXX)
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem", maxWidth: "500px" }}>
+                <input
+                  type="text"
+                  id="vendorWhatsAppNumber"
+                  defaultValue={storeInfo?.vendor_whatsapp_number || ""}
+                  placeholder="27XXXXXXXXX"
+                  style={{
+                    flex: 1,
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "2px solid #e5e7eb",
+                    fontSize: "1rem"
+                  }}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={async () => {
+                    if (!storeInfo?.id) {
+                      showToast("⚠️ Store not loaded yet. Please wait.", "#f44336");
+                      return;
+                    }
+
+                    const vendorPhone = document.getElementById("vendorWhatsAppNumber").value.trim();
+
+                    // Validate phone number format
+                    if (vendorPhone && !/^27\d{9}$/.test(vendorPhone)) {
+                      showToast("⚠️ Please use format: 27XXXXXXXXX", "#f44336");
+                      return;
+                    }
+
+                    try {
+                      const { error } = await supabase
+                        .from("tenants")
+                        .update({ vendor_whatsapp_number: vendorPhone || null })
+                        .eq("id", storeInfo.id);
+
+                      if (error) throw error;
+
+                      setStoreInfo({ ...storeInfo, vendor_whatsapp_number: vendorPhone });
+                      showToast("✅ Vendor WhatsApp number updated!", "#4caf50");
+                    } catch (error) {
+                      showToast(`❌ Failed to update: ${error.message}`, "#f44336");
+                    }
+                  }}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Update Number
+                </button>
+              </div>
+            </div>
+
+            {/* WhatsApp Group URL */}
+            <div className="settings-section">
+              <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>💬 WhatsApp Group URL</h3>
+              <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                Your WhatsApp group invite link for customers
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem", maxWidth: "500px" }}>
+                <input
+                  type="text"
+                  id="whatsappGroupUrl"
+                  defaultValue={storeInfo?.whatsapp_group_url || ""}
+                  placeholder="https://chat.whatsapp.com/..."
+                  style={{
+                    flex: 1,
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "2px solid #e5e7eb",
+                    fontSize: "1rem"
+                  }}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={async () => {
+                    if (!storeInfo?.id) {
+                      showToast("⚠️ Store not loaded yet. Please wait.", "#f44336");
+                      return;
+                    }
+
+                    const groupUrl = document.getElementById("whatsappGroupUrl").value.trim();
+
+                    // Validate URL format if provided
+                    if (groupUrl && !groupUrl.startsWith("https://chat.whatsapp.com/")) {
+                      showToast("⚠️ Please use a valid WhatsApp group invite link", "#f44336");
+                      return;
+                    }
+
+                    try {
+                      const { error } = await supabase
+                        .from("tenants")
+                        .update({ whatsapp_group_url: groupUrl || null })
+                        .eq("id", storeInfo.id);
+
+                      if (error) throw error;
+
+                      setStoreInfo({ ...storeInfo, whatsapp_group_url: groupUrl });
+                      showToast("✅ WhatsApp group URL updated!", "#4caf50");
+                    } catch (error) {
+                      showToast(`❌ Failed to update: ${error.message}`, "#f44336");
+                    }
+                  }}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Update URL
                 </button>
               </div>
             </div>
@@ -2392,7 +2501,7 @@ export default function App({ user }) {
                       document.getElementById("newPassword").value = "";
                       document.getElementById("confirmPassword").value = "";
                     } catch (err) {
-                      console.error("Password update error:", err);
+                      
                       showToast("⚠️ Failed to update password: " + err.message, "#f44336");
                     }
                   }}
@@ -2625,23 +2734,10 @@ export default function App({ user }) {
         const normalizedPlan = storeInfo?.plan?.trim().toLowerCase();
 
         // 🚨 DEBUG: Log which dashboard we're routing to
-        console.log('🚨 DASHBOARD ROUTING: Full storeInfo object:', storeInfo);
-        console.log('🚨 DASHBOARD ROUTING:', {
-          originalPlan: storeInfo?.plan,
-          normalizedPlan: normalizedPlan,
-          planType: typeof storeInfo?.plan,
-          planLength: storeInfo?.plan?.length,
-          storeId: storeInfo?.id,
-          storeName: storeInfo?.name
-        });
-        console.log('🚨 DASHBOARD ROUTING: Comparison checks:');
-        console.log('  - normalizedPlan === "premium":', normalizedPlan === 'premium');
-        console.log('  - normalizedPlan === "pro":', normalizedPlan === 'pro');
-        console.log('  - normalizedPlan === "trial":', normalizedPlan === 'trial');
 
         // ROBUST ROUTING - Normalize plan value before comparison
         if (normalizedPlan === 'premium') {
-          console.log('✅ Routing to PREMIUM dashboard');
+          
           return (
             <PremiumDashboardView
               storeInfo={storeInfo}
@@ -2655,7 +2751,7 @@ export default function App({ user }) {
         }
 
         if (normalizedPlan === 'pro') {
-          console.log('✅ Routing to PRO dashboard');
+          
           return (
             <ProDashboardView
               storeInfo={storeInfo}
@@ -2669,7 +2765,7 @@ export default function App({ user }) {
         }
 
         // Default to Starter dashboard for trial and fallback
-        console.log('✅ Routing to STARTER dashboard (plan:', normalizedPlan, ')');
+        
         return (
           <StarterDashboardView
             storeInfo={storeInfo}

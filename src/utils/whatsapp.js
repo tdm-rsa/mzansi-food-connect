@@ -20,20 +20,19 @@ export async function sendWhatsAppMessage(phoneNumber, message) {
     });
 
     if (error) {
-      console.error('❌ Failed to send WhatsApp message:', error);
+      
       return { success: false, error: error.message };
     }
 
     if (!data.success) {
-      console.error('❌ WhatsApp send failed:', data.error);
+      
       return { success: false, error: data.error };
     }
 
-    console.log('✅ WhatsApp message sent successfully to', phoneNumber);
     return { success: true, data };
 
   } catch (error) {
-    console.error('❌ Error sending WhatsApp message:', error);
+    
     return { success: false, error: error.message };
   }
 }
@@ -57,13 +56,13 @@ export async function sendOrderConfirmation(customerPhone, customerName, orderNu
     });
 
     if (error) {
-      console.error('❌ Failed to send order confirmation:', error);
+      
       return { success: false, error: error.message };
     }
 
     return data;
   } catch (error) {
-    console.error('❌ Error sending order confirmation:', error);
+    
     return { success: false, error: error.message };
   }
 }
@@ -85,13 +84,13 @@ export async function sendOrderReady(customerPhone, customerName, orderNumber, s
     });
 
     if (error) {
-      console.error('❌ Failed to send order ready message:', error);
+      
       return { success: false, error: error.message };
     }
 
     return data;
   } catch (error) {
-    console.error('❌ Error sending order ready message:', error);
+    
     return { success: false, error: error.message };
   }
 }
@@ -113,13 +112,13 @@ export async function sendOrderFetched(customerPhone, customerName, orderNumber,
     });
 
     if (error) {
-      console.error('❌ Failed to send order fetched message:', error);
+      
       return { success: false, error: error.message };
     }
 
     return data;
   } catch (error) {
-    console.error('❌ Error sending order fetched message:', error);
+    
     return { success: false, error: error.message };
   }
 }
@@ -141,13 +140,65 @@ export async function sendCustomMessage(customerPhone, customerName, storeName, 
     });
 
     if (error) {
-      console.error('❌ Failed to send custom message:', error);
+
       return { success: false, error: error.message };
     }
 
     return data;
   } catch (error) {
-    console.error('❌ Error sending custom message:', error);
+
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send Vendor Notification for new order
+ */
+export async function sendVendorNotification(vendorPhone, customerName, orderNumber, storeName, totalAmount) {
+  try {
+    const message = `🔔 *New Order Alert!*\n\nYou have a new order from *${customerName}*\n\n📦 Order: #${orderNumber}\n💰 Total: R${totalAmount}\n\n👉 Go check your dashboard to confirm and prepare the order!\n\n- ${storeName}`;
+
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber: vendorPhone,
+        message: message
+      }
+    });
+
+    if (error) {
+      console.error('Failed to send vendor notification:', error);
+      return { success: false, error: error.message };
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error sending vendor notification:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send WhatsApp Group Invite to customer
+ */
+export async function sendGroupInvite(customerPhone, customerName, groupUrl, storeName) {
+  try {
+    const message = `Hi ${customerName}! 👋\n\nThank you for ordering from *${storeName}*!\n\nJoin our WhatsApp group to get:\n✅ Exclusive deals\n✅ New menu updates\n✅ Special promotions\n\n👉 Click here to join: ${groupUrl}\n\nSee you there! 🎉`;
+
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber: customerPhone,
+        message: message
+      }
+    });
+
+    if (error) {
+      console.error('Failed to send group invite:', error);
+      return { success: false, error: error.message };
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error sending group invite:', error);
     return { success: false, error: error.message };
   }
 }

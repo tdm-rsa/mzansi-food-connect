@@ -90,11 +90,51 @@ serve(async (req) => {
         .eq("id", pendingOrder.id);
 
       console.log("✅ Marked pending order as completed");
-      
-      return new Response(JSON.stringify({ 
-        success: true, 
+
+      // Send vendor notification via WhatsApp
+      try {
+        // Get store info to get vendor WhatsApp number
+        const { data: storeData } = await supabase
+          .from("tenants")
+          .select("vendor_whatsapp_number, name")
+          .eq("id", pendingOrder.store_id)
+          .single();
+
+        if (storeData && storeData.vendor_whatsapp_number) {
+          console.log(`📱 Sending vendor notification to ${storeData.vendor_whatsapp_number}`);
+
+          // Send WhatsApp notification to vendor
+          const message = `🔔 *New Order Alert!*\n\nYou have a new order from *${pendingOrder.customer_name}*\n\n📦 Order: #${orderData.order_number}\n💰 Total: R${pendingOrder.total}\n\n👉 Go check your dashboard to confirm and prepare the order!\n\n- ${storeData.name}`;
+
+          const whatsappResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-whatsapp`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`
+            },
+            body: JSON.stringify({
+              phoneNumber: storeData.vendor_whatsapp_number,
+              message: message
+            })
+          });
+
+          if (whatsappResponse.ok) {
+            console.log("✅ Vendor notification sent successfully");
+          } else {
+            console.log("⚠️ Vendor notification may have failed");
+          }
+        } else {
+          console.log("⚠️ No vendor WhatsApp number configured for this store");
+        }
+      } catch (notificationError) {
+        console.error("⚠️ Failed to send vendor notification:", notificationError);
+        // Don't fail the webhook if notification fails
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
         message: "Order created successfully",
-        orderNumber: orderData.order_number 
+        orderNumber: orderData.order_number
       }), {
         status: 200,
         headers: { "Content-Type": "application/json" },

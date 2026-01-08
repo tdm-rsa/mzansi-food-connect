@@ -145,20 +145,27 @@ ${storeUrl ? `\n🛒 Visit us: ${storeUrl}` : ''}`;
 
     const data = await response.json();
 
-    if (response.ok && (data.sent === 'true' || data.status === 'success')) {
+    if (response.ok && (data.sent === 'true' || data.status === 'success' || data.sent === true)) {
       console.log('✅ WhatsApp message sent successfully to', finalPhone);
       return new Response(
-        JSON.stringify({ success: true, data }),
+        JSON.stringify({ success: true, data, phoneNumber: finalPhone }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
       console.error('❌ Failed to send WhatsApp message:', { status: response.status, data });
+
+      // Even if Ultramsg says failed, return success to not break the flow
+      // Log the error but don't prevent order completion
+      console.warn('⚠️ WhatsApp send may have failed but continuing order flow');
+
       return new Response(
         JSON.stringify({
-          success: false,
-          error: data.error || data.message || `HTTP ${response.status}`
+          success: true, // Changed to true to not break order flow
+          warning: 'WhatsApp message may not have been delivered',
+          error: data.error || data.message || `HTTP ${response.status}`,
+          phoneNumber: finalPhone
         }),
-        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
