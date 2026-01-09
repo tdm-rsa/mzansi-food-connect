@@ -427,25 +427,28 @@ export default function App({ user }) {
     console.log("🔔 Orders realtime: Subscribing for store:", storeInfo.id);
 
     const ch = supabase
-      .channel("orders-live")
+      .channel(`orders-live-${storeInfo.id}`, {
+        config: {
+          broadcast: { self: false }
+        }
+      })
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "orders" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "orders",
+          filter: `store_id=eq.${storeInfo.id}`
+        },
         (payload) => {
           const o = payload.new;
-          console.log("🆕 New order received:", o.id, "Store:", o.store_id, "My store:", storeInfo.id);
+          console.log("🆕 NEW ORDER CALLBACK FIRED!", o.id, "Store:", o.store_id);
 
-          // Only process orders for this store
-          if (o.store_id !== storeInfo.id) {
-            console.log("⏭️ Skipping order - different store");
-            return;
-          }
-
-          console.log("✅ Processing order for my store");
           setOrders((prev) => [o, ...prev]);
           setNewOrders((n) => {
-            console.log("🔢 Badge count increasing from", n, "to", n + 1);
-            return n + 1;
+            const newCount = n + 1;
+            console.log("🔢 BADGE COUNT:", n, "→", newCount);
+            return newCount;
           });
 
           // Play sound for all paid orders
@@ -484,7 +487,9 @@ export default function App({ user }) {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("📡 Orders subscription status:", status);
+      });
 
     return () => {
       console.log("🔕 Orders realtime: Unsubscribing");
@@ -505,25 +510,28 @@ export default function App({ user }) {
     console.log("🔔 Notifications realtime: Subscribing for store:", storeInfo.id);
 
     const ch = supabase
-      .channel("notifications-live")
+      .channel(`notifications-live-${storeInfo.id}`, {
+        config: {
+          broadcast: { self: false }
+        }
+      })
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `store_id=eq.${storeInfo.id}`
+        },
         (payload) => {
           const n = payload.new;
-          console.log("💬 New notification received:", n.id, "Store:", n.store_id, "My store:", storeInfo.id);
+          console.log("💬 NEW MESSAGE CALLBACK FIRED!", n.id, "Store:", n.store_id);
 
-          // Only process notifications for this store
-          if (n.store_id !== storeInfo.id) {
-            console.log("⏭️ Skipping notification - different store");
-            return;
-          }
-
-          console.log("✅ Processing notification for my store");
           setNotifications((prev) => [n, ...prev]);
           setNewMsgs((m) => {
-            console.log("🔢 Message badge count increasing from", m, "to", m + 1);
-            return m + 1;
+            const newCount = m + 1;
+            console.log("🔢 MESSAGE BADGE:", m, "→", newCount);
+            return newCount;
           });
 
           // Play notification sound
@@ -544,7 +552,9 @@ export default function App({ user }) {
           );
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("📡 Notifications subscription status:", status);
+      });
 
     return () => {
       console.log("🔕 Notifications realtime: Unsubscribing");
@@ -565,25 +575,28 @@ export default function App({ user }) {
     console.log("🔔 General questions realtime: Subscribing for store:", storeInfo.id);
 
     const ch = supabase
-      .channel("general-questions-live")
+      .channel(`general-questions-live-${storeInfo.id}`, {
+        config: {
+          broadcast: { self: false }
+        }
+      })
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "general_questions" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "general_questions",
+          filter: `store_id=eq.${storeInfo.id}`
+        },
         (payload) => {
           const q = payload.new;
-          console.log("❓ New general question received:", q.id, "Store:", q.store_id, "My store:", storeInfo.id);
+          console.log("❓ NEW QUESTION CALLBACK FIRED!", q.id, "Store:", q.store_id);
 
-          // Only process questions for this store
-          if (q.store_id !== storeInfo.id) {
-            console.log("⏭️ Skipping question - different store");
-            return;
-          }
-
-          console.log("✅ Processing question for my store");
           setGeneralQuestions((prev) => [q, ...prev]);
           setNewMsgs((m) => {
-            console.log("🔢 Message badge count increasing from", m, "to", m + 1);
-            return m + 1;
+            const newCount = m + 1;
+            console.log("🔢 MESSAGE BADGE:", m, "→", newCount);
+            return newCount;
           });
 
           // Play notification sound
@@ -604,7 +617,9 @@ export default function App({ user }) {
           );
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("📡 General questions subscription status:", status);
+      });
 
     return () => {
       console.log("🔕 General questions realtime: Unsubscribing");
