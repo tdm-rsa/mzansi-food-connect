@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
+import { validateEmail } from "./utils/validation";
+import rateLimiter, { RATE_LIMITS } from "./utils/rateLimiter";
+import { executeRecaptcha, initRecaptchaBadge } from "./utils/captcha";
 import "./App.css";
 import logo from "./images/logo.png";
 
@@ -16,29 +19,93 @@ export default function Login({ onLogin, onSwitchToSignup, signupsEnabled = true
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState("");
 
+  // Load reCAPTCHA
+  useEffect(() => {
+    initRecaptchaBadge();
+  }, []);
+
   async function handleLogin(e) {
     e.preventDefault();
     setError("");
+
+    // Execute reCAPTCHA
+    const recaptchaToken = await executeRecaptcha('login');
+    if (!recaptchaToken) {
+      setError("CAPTCHA verification failed. Please try again.");
+      return;
+    }
+
+    // Rate limiting check
+    const rateLimit = rateLimiter.checkLimit(
+      `login_${email}`,
+      RATE_LIMITS.LOGIN.maxAttempts,
+      RATE_LIMITS.LOGIN.windowMs
+    );
+
+    if (!rateLimit.allowed) {
+      setError(rateLimit.message);
+      return;
+    }
+
+    // Validate email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      setError(emailValidation.error);
+      return;
+    }
+
+    // Validate password is not empty
+    if (!password || password.length < 1) {
+      setError("Please enter your password");
+      return;
+    }
+
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: emailValidation.value, // Use validated/normalized email
       password,
     });
     setLoading(false);
-    if (error) setError(error.message);
-    else onLogin(data.user);
+
+    if (error) {
+      setError(error.message);
+    } else {
+      // Reset rate limit on successful login
+      rateLimiter.reset(`login_${email}`);
+      onLogin(data.user);
+    }
   }
 
   async function handleForgotPassword(e) {
     e.preventDefault();
     setResetError("");
+
+    // Rate limiting for password reset
+    const rateLimit = rateLimiter.checkLimit(
+      `password_reset_${resetEmail}`,
+      RATE_LIMITS.PASSWORD_RESET.maxAttempts,
+      RATE_LIMITS.PASSWORD_RESET.windowMs
+    );
+
+    if (!rateLimit.allowed) {
+      setResetError(rateLimit.message);
+      return;
+    }
+
+    // Validate email
+    const emailValidation = validateEmail(resetEmail);
+    if (!emailValidation.valid) {
+      setResetError(emailValidation.error);
+      return;
+    }
+
     setResetLoading(true);
 
     try {
       // Use production URL for password reset links (even when testing locally)
       const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
 
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.value, {
         redirectTo: `${productionUrl}/reset-password`,
       });
 
@@ -105,8 +172,8 @@ export default function Login({ onLogin, onSwitchToSignup, signupsEnabled = true
           <h4>🚀 Start Free, Upgrade Anytime</h4>
           <div className="price-tags">
             <span className="price-tag free">Free Forever Trial</span>
-            <span className="price-tag pro">Pro R2.50/mo</span>
-            <span className="price-tag premium">Premium R3.00/mo</span>
+            <span className="price-tag pro">Pro R25/mo</span>
+            <span className="price-tag premium">Premium R50/mo</span>
           </div>
         </div>
       </div>

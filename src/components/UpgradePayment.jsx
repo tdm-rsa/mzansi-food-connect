@@ -15,8 +15,8 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
   const planDetails = {
     pro: {
       name: "Pro",
-      price: 149,
-      priceInCents: 14900,
+      price: 25,
+      priceInCents: 2500,
       features: [
         "Subdomain (yourstore.mzansifoodconnect.app)",
         "Unlimited products",
@@ -28,8 +28,8 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
     },
     premium: {
       name: "Premium",
-      price: 215,
-      priceInCents: 21500,
+      price: 50,
+      priceInCents: 5000,
       features: [
         "Premium subdomain (yourbusiness.mzansifoodconnect.app)",
         "Everything in Pro",
@@ -53,7 +53,6 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
     setError("");
 
     try {
-      console.log('🔄 Creating subscription checkout session...');
 
       // Call Supabase Edge Function to create checkout session
       const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
@@ -68,7 +67,7 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
       });
 
       if (error) {
-        console.error('Checkout creation error:', error);
+        
         throw error;
       }
 
@@ -76,13 +75,11 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
         throw new Error('No redirect URL received from payment provider');
       }
 
-      console.log('✅ Checkout session created, redirecting to Yoco...');
-
       // Redirect to Yoco hosted checkout page
       window.location.href = data.redirectUrl;
 
     } catch (err) {
-      console.error('Payment initialization error:', err);
+      
       setError('⚠️ Failed to initialize payment. Please try again.');
       setProcessingPayment(false);
       setLoading(false);

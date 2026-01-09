@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
+import { validateEmail, validatePassword, validatePasswordMatch, validateStoreName } from "./utils/validation";
+import rateLimiter, { RATE_LIMITS } from "./utils/rateLimiter";
+import { executeRecaptcha, initRecaptchaBadge } from "./utils/captcha";
 import "./App.css";
 
 export default function Signup({ onBack, onSuccess }) {
@@ -29,6 +32,11 @@ export default function Signup({ onBack, onSuccess }) {
     }
   }, []);
 
+  // Load reCAPTCHA
+  useEffect(() => {
+    initRecaptchaBadge();
+  }, []);
+
   const plans = [
     {
       id: "trial",
@@ -51,7 +59,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "pro",
       name: "Pro",
       subtitle: "For Growing Businesses",
-      price: "R149",
+      price: "R25",
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
@@ -68,7 +76,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "premium",
       name: "Premium",
       subtitle: "Custom Domain Included",
-      price: "R215",
+      price: "R50",
       period: "per month",
       description: "Professional solution with your own domain",
       features: [
@@ -86,19 +94,50 @@ export default function Signup({ onBack, onSuccess }) {
     e.preventDefault();
     setError("");
 
-    // Validation
-    if (!storeName.trim()) {
-      setError("Please enter a store name");
+    // Execute reCAPTCHA
+    const recaptchaToken = await executeRecaptcha('signup');
+    if (!recaptchaToken) {
+      setError("CAPTCHA verification failed. Please try again.");
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    // Rate limiting check
+    const rateLimit = rateLimiter.checkLimit(
+      `signup_${email}`,
+      RATE_LIMITS.SIGNUP.maxAttempts,
+      RATE_LIMITS.SIGNUP.windowMs
+    );
+
+    if (!rateLimit.allowed) {
+      setError(rateLimit.message);
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    // Validate store name
+    const storeNameValidation = validateStoreName(storeName);
+    if (!storeNameValidation.valid) {
+      setError(storeNameValidation.error);
+      return;
+    }
+
+    // Validate email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      setError(emailValidation.error);
+      return;
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      setError(passwordValidation.error);
+      return;
+    }
+
+    // Validate password match
+    const passwordMatchValidation = validatePasswordMatch(password, confirmPassword);
+    if (!passwordMatchValidation.valid) {
+      setError(passwordMatchValidation.error);
       return;
     }
 
@@ -107,29 +146,25 @@ export default function Signup({ onBack, onSuccess }) {
     try {
       // For trial - create account immediately (no payment needed)
       if (selectedPlan === 'trial') {
-        const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
-
-        const { data: authData, error: authError} = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${productionUrl}/app`,
-            data: {
-              store_name: storeName,
-              plan: selectedPlan,
-              payment_reference: null,
-              payment_completed: false
-            }
+        // Use edge function to auto-confirm and send welcome email
+        const { data, error: signupError } = await supabase.functions.invoke('complete-signup', {
+          body: {
+            email: emailValidation.value,
+            password: password,
+            storeName: storeNameValidation.value,
+            plan: selectedPlan
           }
         });
 
-        if (authError) throw authError;
+        if (signupError || !data.success) {
+          throw new Error(signupError?.message || data?.error || 'Signup failed');
+        }
 
-        alert(`✅ Account created successfully!\n\n📧 Check your email (${email}) to confirm your account.\n\n🔐 After confirming, login to access your dashboard.\n\nYour Free Trial (training ground) will be created automatically when you login for the first time!`);
+        alert(`✅ Account created successfully!\n\n📧 We've sent a welcome email to ${email}\n\n🔐 You can now login to access your dashboard.\n\nYour Free Trial store is ready!`);
         onBack();
       } else {
         // For Pro/Premium - GO TO PAYMENT FIRST (don't create account yet!)
-        console.log('💳 Pro/Premium selected - proceeding to payment first');
+        
         setStep(3); // Go directly to payment step
       }
     } catch (err) {
@@ -173,15 +208,6 @@ export default function Signup({ onBack, onSuccess }) {
     }
 
     // DEBUG: Log what's being inserted
-    console.log('💾 DATABASE INSERT:', {
-      owner_id: userId,
-      name: storeName,
-      slug: finalSlug,
-      plan: plan,
-      plan_type: typeof plan,
-      plan_expires_at: planExpiresAt,
-      payment_reference: paymentRef
-    });
 
     const { data: storeData, error: storeError } = await supabase.from("tenants").insert([{
       owner_id: userId,
@@ -200,11 +226,10 @@ export default function Signup({ onBack, onSuccess }) {
     }]).select().single();
 
     if (storeError) {
-      console.error('❌ Store creation error:', storeError);
+      
       throw storeError;
     }
 
-    console.log('✅ Store created successfully with slug:', finalSlug);
     return storeData; // Return store data including slug
   }
 
@@ -214,9 +239,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      const amountInCents = selectedPlan === "pro" ? 14900 : 21500; // R149 Pro, R215 Premium
-
-      console.log('💳 Creating Yoco Checkout session for subscription signup...');
+      const amountInCents = selectedPlan === "pro" ? 2500 : 5000; // R25 Pro, R50 Premium
 
       // Use create-subscription-checkout Edge Function for REAL PAYMENTS
       const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
@@ -231,7 +254,7 @@ export default function Signup({ onBack, onSuccess }) {
       });
 
       if (error) {
-        console.error('Checkout creation error:', error);
+        
         throw error;
       }
 
@@ -239,22 +262,25 @@ export default function Signup({ onBack, onSuccess }) {
         throw new Error('No redirect URL received from payment provider');
       }
 
-      console.log('✅ Checkout session created, redirecting to Yoco...');
-
       // Store signup data in localStorage before redirect
-      localStorage.setItem('pendingSignup', JSON.stringify({
+      const signupData = {
         email,
         storeName,
         password,
         plan: selectedPlan,
         timestamp: Date.now()
-      }));
+      };
+
+      localStorage.setItem('pendingSignup', JSON.stringify(signupData));
+
+      // Verify it was stored
+      const stored = localStorage.getItem('pendingSignup');
 
       // Redirect to Yoco hosted checkout page (REAL PAYMENT with LIVE keys)
       window.location.href = data.redirectUrl;
 
     } catch (err) {
-      console.error('Payment initialization error:', err);
+      
       setError('⚠️ Payment initialization failed. Please try again.');
       setProcessingPayment(false);
     }
@@ -264,57 +290,23 @@ export default function Signup({ onBack, onSuccess }) {
     setLoading(true);
 
     try {
-      console.log('✅ Payment successful! ID:', paymentId);
-      console.log('📋 Plan selected:', selectedPlan);
-      console.log('🔐 NOW creating account after payment...');
-
-      // ✅ SECURITY FIX: Create account AFTER payment succeeds
-      const productionUrl = import.meta.env.VITE_PRODUCTION_URL || window.location.origin;
-
-      const { data: authData, error: authError} = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${productionUrl}/app`,
-          data: {
-            store_name: storeName,
-            plan: selectedPlan,
-            payment_reference: paymentId,
-            payment_completed: true
-          }
+      // ✅ Use edge function to auto-confirm and send welcome email
+      const { data, error: signupError } = await supabase.functions.invoke('complete-signup', {
+        body: {
+          email: email,
+          password: password,
+          storeName: storeName,
+          plan: selectedPlan,
+          paymentReference: paymentId
         }
       });
 
-      if (authError) {
-        console.error('❌ Account creation failed after payment:', authError);
-        throw new Error(`Payment succeeded but account creation failed: ${authError.message}. Please contact support with payment ID: ${paymentId}`);
-      }
-
-      console.log('✅ Account created with user ID:', authData.user.id);
-
-      // Store payment in pending_payments table for webhook processing
-      const { error: paymentError } = await supabase
-        .from('pending_payments')
-        .insert([{
-          user_id: authData.user.id,
-          email: email,
-          store_name: storeName,
-          plan: selectedPlan,
-          payment_reference: paymentId,
-          amount_in_cents: selectedPlan === 'pro' ? 14900 : 21500, // R149 Pro, R215 Premium
-          payment_status: 'completed',
-          created_at: new Date().toISOString()
-        }]);
-
-      if (paymentError) {
-        console.error('❌ Failed to save payment reference:', paymentError);
-        console.warn('⚠️ Payment and account created, but couldn\'t save to pending_payments');
-      } else {
-        console.log('✅ Payment reference saved to pending_payments table');
+      if (signupError || !data.success) {
+        throw new Error(`Payment succeeded but account creation failed: ${signupError?.message || data?.error}. Please contact support with payment ID: ${paymentId}`);
       }
 
       // Show success message
-      alert(`✅ Payment successful!\n\n💳 Payment ID: ${paymentId}\n\nYour ${selectedPlanData.name} subscription is confirmed!\n\n📧 Next steps:\n1. Check your email (${email}) and confirm your account\n2. Login to access your dashboard\n\nYour ${selectedPlanData.name} store will be created automatically when you login for the first time!`);
+      alert(`✅ Payment successful!\n\n💳 Payment ID: ${paymentId}\n\nYour ${selectedPlanData.name} subscription is confirmed!\n\n📧 We've sent a welcome email to ${email}\n\n🔐 You can now login to access your dashboard.\n\nYour ${selectedPlanData.name} store is ready!`);
       onBack();
     } catch (err) {
       setError("Error: " + err.message);
