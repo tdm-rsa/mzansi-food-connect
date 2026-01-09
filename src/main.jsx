@@ -13,7 +13,10 @@ import PaymentSuccess from "./PaymentSuccess.jsx";
 import PaymentFailed from "./PaymentFailed.jsx";
 import UpgradeSuccess from "./UpgradeSuccess.jsx";
 import UpgradeFailed from "./UpgradeFailed.jsx";
+import AdminLogin from "./AdminLogin.jsx";
+import AdminDashboardPage from "./AdminDashboardPage.jsx";
 import { getSubdomain } from "./utils/subdomain.js";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 import ModernFoodTemplate from "./templates/ModernFoodTemplate.jsx";
 import TraditionalSATemplate from "./templates/TraditionalSATemplate.jsx";
@@ -153,6 +156,12 @@ function AppRouter() {
       {/* Upgrade Failed Page */}
       <Route path="/upgrade-failed" element={<UpgradeFailed />} />
 
+      {/* Admin Login Page */}
+      <Route path="/admin" element={<AdminLogin />} />
+
+      {/* Admin Dashboard Page */}
+      <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+
       {/* Legacy landing route (redirect to home) */}
       <Route path="/landing" element={<Landing />} />
 
@@ -173,9 +182,11 @@ function AppRouter() {
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AppRouter />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppRouter />
+      </BrowserRouter>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

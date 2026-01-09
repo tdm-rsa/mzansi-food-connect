@@ -92,6 +92,26 @@
   color: #0b0b0b;
 }
 
+.btn-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #0b0b0b;
+  font-size: 1.25rem;
+  border: 2px solid rgba(251, 191, 36, 0.3);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.btn-admin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
 .btn-secondary {
   border-color: rgba(14, 165, 233, 0.6);
   background: linear-gradient(135deg, #0ea5e9, #2563eb);
