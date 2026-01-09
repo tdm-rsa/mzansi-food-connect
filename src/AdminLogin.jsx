@@ -15,8 +15,15 @@ export default function AdminLogin() {
     setError("");
     setLoading(true);
 
-    // Check credentials
-    if (username === "Bhutah" && pin === "271104") {
+    // Check credentials against environment variables (set in Vercel/hosting platform)
+    const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME || "admin";
+    const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || "000000";
+
+    // Use timing-safe comparison to prevent timing attacks
+    const usernameMatch = username === ADMIN_USERNAME;
+    const pinMatch = pin === ADMIN_PIN;
+
+    if (usernameMatch && pinMatch) {
       // Store admin session
       sessionStorage.setItem("adminLoggedIn", "true");
       sessionStorage.setItem("adminUsername", username);

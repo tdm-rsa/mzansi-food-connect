@@ -419,12 +419,7 @@ export default function App({ user }) {
      - UPDATE: keep order rows fresh; push into liveQueue if status ready
   ------------------------------------------------------- */
   useEffect(() => {
-    if (!storeInfo?.id) {
-      console.log("⏳ Orders realtime: Waiting for storeInfo to load...");
-      return;
-    }
-
-    console.log("🔔 Orders realtime: Subscribing for store:", storeInfo.id);
+    if (!storeInfo?.id) return;
 
     const ch = supabase
       .channel(`orders-live-${storeInfo.id}`, {
@@ -442,27 +437,17 @@ export default function App({ user }) {
         },
         (payload) => {
           const o = payload.new;
-          console.log("🆕 NEW ORDER CALLBACK FIRED!", o.id, "Store:", o.store_id);
 
           setOrders((prev) => [o, ...prev]);
-          setNewOrders((n) => {
-            const newCount = n + 1;
-            console.log("🔢 BADGE COUNT:", n, "→", newCount);
-            return newCount;
-          });
+          setNewOrders((n) => n + 1);
 
           // Play sound for all paid orders
           if (o.payment_status === "paid") {
-            console.log("🔊 Playing sound for paid order");
             try {
               const a = new Audio(audioReadyUrl);
               a.volume = 0.7;
-              a.play().catch((err) => {
-                console.warn("⚠️ Audio play failed:", err.message);
-              });
-            } catch (err) {
-              console.error("❌ Audio initialization failed:", err);
-            }
+              a.play().catch(() => {});
+            } catch (err) {}
             showToast(
               `💰 New Order #${o.order_number || o.id?.slice(0, 6) || ""} — R${o.total}`,
               "#ff6b35"
@@ -477,7 +462,6 @@ export default function App({ user }) {
           const u = payload.new;
           if (u.store_id !== storeInfo.id) return;
 
-          console.log("♻️ Order updated:", u.id, "Status:", u.status);
           setOrders((prev) => prev.map((x) => (x.id === u.id ? u : x)));
 
           if (u.status === "ready") {
@@ -487,12 +471,9 @@ export default function App({ user }) {
           }
         }
       )
-      .subscribe((status) => {
-        console.log("📡 Orders subscription status:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("🔕 Orders realtime: Unsubscribing");
       supabase.removeChannel(ch);
     };
   }, [storeInfo?.id, audioReadyUrl]);
@@ -502,12 +483,7 @@ export default function App({ user }) {
      - INSERT: increment newMsgs badge, play sound and toast
   ------------------------------------------------------- */
   useEffect(() => {
-    if (!storeInfo?.id) {
-      console.log("⏳ Notifications realtime: Waiting for storeInfo to load...");
-      return;
-    }
-
-    console.log("🔔 Notifications realtime: Subscribing for store:", storeInfo.id);
+    if (!storeInfo?.id) return;
 
     const ch = supabase
       .channel(`notifications-live-${storeInfo.id}`, {
@@ -525,26 +501,16 @@ export default function App({ user }) {
         },
         (payload) => {
           const n = payload.new;
-          console.log("💬 NEW MESSAGE CALLBACK FIRED!", n.id, "Store:", n.store_id);
 
           setNotifications((prev) => [n, ...prev]);
-          setNewMsgs((m) => {
-            const newCount = m + 1;
-            console.log("🔢 MESSAGE BADGE:", m, "→", newCount);
-            return newCount;
-          });
+          setNewMsgs((m) => m + 1);
 
           // Play notification sound
-          console.log("🔊 Playing sound for new message");
           try {
             const a = new Audio(audioReadyUrl);
             a.volume = 0.7;
-            a.play().catch((err) => {
-              console.warn("⚠️ Audio play failed:", err.message);
-            });
-          } catch (err) {
-            console.error("❌ Audio initialization failed:", err);
-          }
+            a.play().catch(() => {});
+          } catch (err) {}
 
           showToast(
             `📩 New customer message from ${n.customer_name || "customer"}`,
@@ -552,12 +518,9 @@ export default function App({ user }) {
           );
         }
       )
-      .subscribe((status) => {
-        console.log("📡 Notifications subscription status:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("🔕 Notifications realtime: Unsubscribing");
       supabase.removeChannel(ch);
     };
   }, [storeInfo?.id, audioReadyUrl]);
@@ -567,12 +530,7 @@ export default function App({ user }) {
      - INSERT: increment newMsgs badge, play sound and toast
   ------------------------------------------------------- */
   useEffect(() => {
-    if (!storeInfo?.id) {
-      console.log("⏳ General questions realtime: Waiting for storeInfo to load...");
-      return;
-    }
-
-    console.log("🔔 General questions realtime: Subscribing for store:", storeInfo.id);
+    if (!storeInfo?.id) return;
 
     const ch = supabase
       .channel(`general-questions-live-${storeInfo.id}`, {
@@ -590,26 +548,16 @@ export default function App({ user }) {
         },
         (payload) => {
           const q = payload.new;
-          console.log("❓ NEW QUESTION CALLBACK FIRED!", q.id, "Store:", q.store_id);
 
           setGeneralQuestions((prev) => [q, ...prev]);
-          setNewMsgs((m) => {
-            const newCount = m + 1;
-            console.log("🔢 MESSAGE BADGE:", m, "→", newCount);
-            return newCount;
-          });
+          setNewMsgs((m) => m + 1);
 
           // Play notification sound
-          console.log("🔊 Playing sound for new question");
           try {
             const a = new Audio(audioReadyUrl);
             a.volume = 0.7;
-            a.play().catch((err) => {
-              console.warn("⚠️ Audio play failed:", err.message);
-            });
-          } catch (err) {
-            console.error("❌ Audio initialization failed:", err);
-          }
+            a.play().catch(() => {});
+          } catch (err) {}
 
           showToast(
             `💬 New general question from ${q.customer_name || "customer"}`,
@@ -617,12 +565,9 @@ export default function App({ user }) {
           );
         }
       )
-      .subscribe((status) => {
-        console.log("📡 General questions subscription status:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("🔕 General questions realtime: Unsubscribing");
       supabase.removeChannel(ch);
     };
   }, [storeInfo?.id, audioReadyUrl]);
