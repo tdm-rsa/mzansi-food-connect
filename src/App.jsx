@@ -419,6 +419,13 @@ export default function App({ user }) {
      - UPDATE: keep order rows fresh; push into liveQueue if status ready
   ------------------------------------------------------- */
   useEffect(() => {
+    if (!storeInfo?.id) {
+      console.log("⏳ Orders realtime: Waiting for storeInfo to load...");
+      return;
+    }
+
+    console.log("🔔 Orders realtime: Subscribing for store:", storeInfo.id);
+
     const ch = supabase
       .channel("orders-live")
       .on(
@@ -426,28 +433,32 @@ export default function App({ user }) {
         { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
           const o = payload.new;
-          
-          if (storeInfo && o.store_id !== storeInfo.id) {
-            
+          console.log("🆕 New order received:", o.id, "Store:", o.store_id, "My store:", storeInfo.id);
+
+          // Only process orders for this store
+          if (o.store_id !== storeInfo.id) {
+            console.log("⏭️ Skipping order - different store");
             return;
           }
+
+          console.log("✅ Processing order for my store");
           setOrders((prev) => [o, ...prev]);
           setNewOrders((n) => {
-            
+            console.log("🔢 Badge count increasing from", n, "to", n + 1);
             return n + 1;
           });
 
           // Play sound for all paid orders
           if (o.payment_status === "paid") {
-            
+            console.log("🔊 Playing sound for paid order");
             try {
               const a = new Audio(audioReadyUrl);
               a.volume = 0.7;
-              a.play().catch(() => {
-                // Audio play failed (user hasn't interacted with page yet)
+              a.play().catch((err) => {
+                console.warn("⚠️ Audio play failed:", err.message);
               });
             } catch (err) {
-              // Audio initialization failed
+              console.error("❌ Audio initialization failed:", err);
             }
             showToast(
               `💰 New Order #${o.order_number || o.id?.slice(0, 6) || ""} — R${o.total}`,
@@ -461,7 +472,9 @@ export default function App({ user }) {
         { event: "UPDATE", schema: "public", table: "orders" },
         (payload) => {
           const u = payload.new;
-          if (storeInfo && u.store_id !== storeInfo.id) return;
+          if (u.store_id !== storeInfo.id) return;
+
+          console.log("♻️ Order updated:", u.id, "Status:", u.status);
           setOrders((prev) => prev.map((x) => (x.id === u.id ? u : x)));
 
           if (u.status === "ready") {
@@ -473,14 +486,24 @@ export default function App({ user }) {
       )
       .subscribe();
 
-    return () => supabase.removeChannel(ch);
-  }, [storeInfo, audioReadyUrl]);
+    return () => {
+      console.log("🔕 Orders realtime: Unsubscribing");
+      supabase.removeChannel(ch);
+    };
+  }, [storeInfo?.id, audioReadyUrl]);
 
   /* -------------------------------------------------------
      Realtime: notifications INSERT
      - INSERT: increment newMsgs badge, play sound and toast
   ------------------------------------------------------- */
   useEffect(() => {
+    if (!storeInfo?.id) {
+      console.log("⏳ Notifications realtime: Waiting for storeInfo to load...");
+      return;
+    }
+
+    console.log("🔔 Notifications realtime: Subscribing for store:", storeInfo.id);
+
     const ch = supabase
       .channel("notifications-live")
       .on(
@@ -488,27 +511,31 @@ export default function App({ user }) {
         { event: "INSERT", schema: "public", table: "notifications" },
         (payload) => {
           const n = payload.new;
-          
-          if (storeInfo && n.store_id !== storeInfo.id) {
-            
+          console.log("💬 New notification received:", n.id, "Store:", n.store_id, "My store:", storeInfo.id);
+
+          // Only process notifications for this store
+          if (n.store_id !== storeInfo.id) {
+            console.log("⏭️ Skipping notification - different store");
             return;
           }
+
+          console.log("✅ Processing notification for my store");
           setNotifications((prev) => [n, ...prev]);
           setNewMsgs((m) => {
-            
+            console.log("🔢 Message badge count increasing from", m, "to", m + 1);
             return m + 1;
           });
 
           // Play notification sound
-          
+          console.log("🔊 Playing sound for new message");
           try {
             const a = new Audio(audioReadyUrl);
             a.volume = 0.7;
-            a.play().catch(() => {
-              // Audio play failed
+            a.play().catch((err) => {
+              console.warn("⚠️ Audio play failed:", err.message);
             });
           } catch (err) {
-            // Audio initialization failed
+            console.error("❌ Audio initialization failed:", err);
           }
 
           showToast(
@@ -519,14 +546,24 @@ export default function App({ user }) {
       )
       .subscribe();
 
-    return () => supabase.removeChannel(ch);
-  }, [storeInfo, audioReadyUrl]);
+    return () => {
+      console.log("🔕 Notifications realtime: Unsubscribing");
+      supabase.removeChannel(ch);
+    };
+  }, [storeInfo?.id, audioReadyUrl]);
 
   /* -------------------------------------------------------
      Realtime: general_questions INSERT
      - INSERT: increment newMsgs badge, play sound and toast
   ------------------------------------------------------- */
   useEffect(() => {
+    if (!storeInfo?.id) {
+      console.log("⏳ General questions realtime: Waiting for storeInfo to load...");
+      return;
+    }
+
+    console.log("🔔 General questions realtime: Subscribing for store:", storeInfo.id);
+
     const ch = supabase
       .channel("general-questions-live")
       .on(
@@ -534,27 +571,31 @@ export default function App({ user }) {
         { event: "INSERT", schema: "public", table: "general_questions" },
         (payload) => {
           const q = payload.new;
-          
-          if (storeInfo && q.store_id !== storeInfo.id) {
-            
+          console.log("❓ New general question received:", q.id, "Store:", q.store_id, "My store:", storeInfo.id);
+
+          // Only process questions for this store
+          if (q.store_id !== storeInfo.id) {
+            console.log("⏭️ Skipping question - different store");
             return;
           }
+
+          console.log("✅ Processing question for my store");
           setGeneralQuestions((prev) => [q, ...prev]);
           setNewMsgs((m) => {
-            
+            console.log("🔢 Message badge count increasing from", m, "to", m + 1);
             return m + 1;
           });
 
           // Play notification sound
-          
+          console.log("🔊 Playing sound for new question");
           try {
             const a = new Audio(audioReadyUrl);
             a.volume = 0.7;
-            a.play().catch(() => {
-              // Audio play failed
+            a.play().catch((err) => {
+              console.warn("⚠️ Audio play failed:", err.message);
             });
           } catch (err) {
-            // Audio initialization failed
+            console.error("❌ Audio initialization failed:", err);
           }
 
           showToast(
@@ -565,8 +606,11 @@ export default function App({ user }) {
       )
       .subscribe();
 
-    return () => supabase.removeChannel(ch);
-  }, [storeInfo, audioReadyUrl]);
+    return () => {
+      console.log("🔕 General questions realtime: Unsubscribing");
+      supabase.removeChannel(ch);
+    };
+  }, [storeInfo?.id, audioReadyUrl]);
 
   /* -------------------------------------------------------
      Reset the order/message badge when the tab is opened
