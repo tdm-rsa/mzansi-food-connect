@@ -255,7 +255,7 @@
 }
 
 .pricing-grid {
-  grid-template-columns: repeat(auto-fit, minmax(clamp(14rem, 38vw, 24rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(clamp(14rem, 28vw, 24rem), 1fr));
 }
 
 .pricing-card {
