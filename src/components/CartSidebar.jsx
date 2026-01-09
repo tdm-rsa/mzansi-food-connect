@@ -128,7 +128,7 @@ export default function CartSidebar({ cart, store }) {
                       🧪 This is a Trial Store
                     </p>
                     <p style={{ margin: 0, fontSize: "0.85rem", opacity: 0.9 }}>
-                      Checkout is disabled in training mode. This store owner needs to upgrade to Pro (R25/mo) or Premium (R50/mo) to accept real payments.
+                      Checkout is disabled in training mode. This store owner needs to upgrade to Pro (R159/mo) or Premium (R215/mo) to accept real payments.
                     </p>
                   </div>
                 ) : (

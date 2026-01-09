@@ -56,7 +56,7 @@ export default function AdminDashboard({ onLogout }) {
       const inactiveClients = totalClients - activeClients;
 
       // Calculate revenue
-      // Pro = R25/month, Premium = R50/month
+      // Pro = R159/month, Premium = R215/month
       // Count only active paid clients
       const activePro = tenants.filter(t =>
         t.plan === "pro" &&
@@ -70,8 +70,8 @@ export default function AdminDashboard({ onLogout }) {
         new Date(t.plan_expires_at) > now
       ).length;
 
-      const proRevenue = activePro * 25; // R25 per pro client
-      const premiumRevenue = activePremium * 50; // R50 per premium client
+      const proRevenue = activePro * 159; // R159 per pro client
+      const premiumRevenue = activePremium * 215; // R215 per premium client
       const totalRevenue = proRevenue + premiumRevenue;
 
       // Monthly revenue (clients who signed up this month)
@@ -93,7 +93,7 @@ export default function AdminDashboard({ onLogout }) {
         new Date(t.plan_expires_at) > now
       ).length;
 
-      const monthlyRevenue = (monthlyPro * 25) + (monthlyPremium * 50);
+      const monthlyRevenue = (monthlyPro * 159) + (monthlyPremium * 215);
 
       // Get recent signups (last 30 days)
       const thirtyDaysAgo = new Date();
@@ -228,7 +228,7 @@ export default function AdminDashboard({ onLogout }) {
           <div className="plan-card pro-plan">
             <div className="plan-header">
               <h3>🚀 Pro Plan</h3>
-              <span className="plan-price">R25/mo</span>
+              <span className="plan-price">R159/mo</span>
             </div>
             <p className="plan-count">{stats.proClients} clients</p>
             <div className="plan-percentage">
@@ -242,7 +242,7 @@ export default function AdminDashboard({ onLogout }) {
           <div className="plan-card premium-plan">
             <div className="plan-header">
               <h3>👑 Premium Plan</h3>
-              <span className="plan-price">R50/mo</span>
+              <span className="plan-price">R215/mo</span>
             </div>
             <p className="plan-count">{stats.premiumClients} clients</p>
             <div className="plan-percentage">

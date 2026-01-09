@@ -15,8 +15,8 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
   const planDetails = {
     pro: {
       name: "Pro",
-      price: 25,
-      priceInCents: 2500,
+      price: 159,
+      priceInCents: 15900,
       features: [
         "Subdomain (yourstore.mzansifoodconnect.app)",
         "Unlimited products",
@@ -28,8 +28,8 @@ export default function UpgradePayment({ user, storeInfo, targetPlan, onSuccess,
     },
     premium: {
       name: "Premium",
-      price: 50,
-      priceInCents: 5000,
+      price: 215,
+      priceInCents: 21500,
       features: [
         "Premium subdomain (yourbusiness.mzansifoodconnect.app)",
         "Everything in Pro",

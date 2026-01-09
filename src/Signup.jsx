@@ -59,7 +59,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "pro",
       name: "Pro",
       subtitle: "For Growing Businesses",
-      price: "R25",
+      price: "R159",
       period: "per month",
       description: "Everything you need to run your food business",
       features: [
@@ -76,7 +76,7 @@ export default function Signup({ onBack, onSuccess }) {
       id: "premium",
       name: "Premium",
       subtitle: "Custom Domain Included",
-      price: "R50",
+      price: "R215",
       period: "per month",
       description: "Professional solution with your own domain",
       features: [
@@ -239,7 +239,7 @@ export default function Signup({ onBack, onSuccess }) {
 
     try {
       const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      const amountInCents = selectedPlan === "pro" ? 2500 : 5000; // R25 Pro, R50 Premium
+      const amountInCents = selectedPlan === "pro" ? 15900 : 21500; // R159 Pro, R215 Premium
 
       // Use create-subscription-checkout Edge Function for REAL PAYMENTS
       const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
