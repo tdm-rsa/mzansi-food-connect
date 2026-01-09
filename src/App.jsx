@@ -1561,7 +1561,7 @@ export default function App({ user }) {
                           ✅ Done
                         </button>
                       )}
-                      {o.phone && storeInfo?.whatsapp_group_url && (
+                      {o.phone && (
                         <button
                           className="btn-primary"
                           onClick={() => handleSendGroupInvite(o)}
@@ -1679,7 +1679,7 @@ export default function App({ user }) {
                           ✅ Done
                         </button>
                       )}
-                      {o.phone && storeInfo?.whatsapp_group_url && (
+                      {o.phone && (
                         <button
                           className="btn-primary"
                           onClick={() => handleSendGroupInvite(o)}

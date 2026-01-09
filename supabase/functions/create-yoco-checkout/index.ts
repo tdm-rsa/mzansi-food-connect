@@ -100,10 +100,14 @@ serve(async (req) => {
 
     console.log("💰 Amount in cents:", totalInCents);
 
+    // CRITICAL: Include webhook URL so Yoco knows where to send payment notifications
+    const webhookUrl = `${supabaseUrl}/functions/v1/yoco-webhook`;
+    console.log("🔗 Webhook URL:", webhookUrl);
+
     const checkoutPayload = {
       amount: totalInCents,
       currency: "ZAR",
-      successUrl: storeData?.subdomain 
+      successUrl: storeData?.subdomain
         ? `${baseUrl}/payment-success?orderNumber=${orderNumber}`
         : `${baseUrl}/payment-success?orderNumber=${orderNumber}&slug=${storeSlug}`,
       cancelUrl: storeData?.subdomain
@@ -112,6 +116,7 @@ serve(async (req) => {
       failureUrl: storeData?.subdomain
         ? `${baseUrl}/payment-failed?orderNumber=${orderNumber}`
         : `${baseUrl}/payment-failed?orderNumber=${orderNumber}&slug=${storeSlug}`,
+      webhookUrl: webhookUrl,
       metadata: {
         storeId: storeId,
         storeName: storeName,

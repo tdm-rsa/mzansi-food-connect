@@ -50,6 +50,13 @@ serve(async (req) => {
     const totalInCents = Math.round(amount * 100);
     const appUrl = Deno.env.get("APP_URL") || "https://app.mzansifoodconnect.app";
 
+    // Check if this is a new signup (storeId starts with "new-signup-")
+    const isNewSignup = storeId.startsWith("new-signup-");
+
+    // CRITICAL: Include webhook URL so Yoco knows where to send payment notifications
+    const webhookUrl = `${supabaseUrl}/functions/v1/yoco-webhook`;
+    console.log("🔗 Webhook URL:", webhookUrl);
+
     const checkoutResponse = await fetch("https://payments.yoco.com/api/checkouts", {
       method: "POST",
       headers: {
@@ -59,9 +66,14 @@ serve(async (req) => {
       body: JSON.stringify({
         amount: totalInCents,
         currency: "ZAR",
-        successUrl: `${appUrl}/upgrade-success?storeId=${storeId}&plan=${targetPlan}`,
+        successUrl: isNewSignup
+          ? `${appUrl}/upgrade-success?signup=true&plan=${targetPlan}&email=${encodeURIComponent(userEmail)}&store=${encodeURIComponent(storeName)}`
+          : `${appUrl}/upgrade-success?storeId=${storeId}&plan=${targetPlan}`,
         cancelUrl: `${appUrl}/app`,
-        failureUrl: `${appUrl}/upgrade-failed?storeId=${storeId}&plan=${targetPlan}`,
+        failureUrl: isNewSignup
+          ? `${appUrl}/upgrade-failed?signup=true`
+          : `${appUrl}/upgrade-failed?storeId=${storeId}&plan=${targetPlan}`,
+        webhookUrl: webhookUrl,
         metadata: {
           storeId: storeId,
           storeName: storeName,
