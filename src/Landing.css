@@ -261,6 +261,8 @@
 .pricing-card {
   position: relative;
   padding: clamp(var(--space-lg), 1vw + var(--space-lg), var(--space-2xl));
+  gap: var(--space-md);
+  min-height: 100%;
 }
 
 .pricing-card.highlight {
@@ -276,6 +278,63 @@
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.85);
   font-size: var(--fs-2xs);
+}
+
+.plan-header {
+  margin-bottom: var(--space-md);
+}
+
+.plan-subtitle {
+  opacity: 0.8;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.plan-price {
+  margin: var(--space-sm) 0;
+}
+
+.plan-price .price {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: #ff6b35;
+}
+
+.plan-price .period {
+  font-size: var(--fs-sm);
+  opacity: 0.7;
+}
+
+.plan-description {
+  opacity: 0.85;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-md) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.plan-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+  line-height: 1.6;
+  font-size: var(--fs-sm);
+  padding: var(--space-3xs) 0;
+}
+
+.plan-features .check-icon {
+  color: #10b981;
+  font-weight: 700;
+  font-size: var(--fs-base);
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .plan-cta {
