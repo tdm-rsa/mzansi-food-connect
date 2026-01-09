@@ -2725,6 +2725,193 @@ export default function App({ user }) {
                 </>
               )}
             </div>
+
+            {/* Danger Zone - Cancel Subscription & Delete Account */}
+            <div className="settings-section" style={{
+              borderTop: "2px solid #dc2626",
+              paddingTop: "2rem",
+              marginTop: "3rem"
+            }}>
+              <h3 style={{ color: "#dc2626", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                ⚠️ Danger Zone
+              </h3>
+              <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
+                Irreversible actions. Please be certain before proceeding.
+              </p>
+
+              {/* Cancel Subscription - Only show for Pro/Premium users */}
+              {(storeInfo?.plan === 'pro' || storeInfo?.plan === 'premium') && (
+                <div style={{
+                  background: darkMode ? "#1e1e1e" : "#fef2f2",
+                  border: "2px solid #fca5a5",
+                  borderRadius: "12px",
+                  padding: "1.5rem",
+                  marginBottom: "1.5rem"
+                }}>
+                  <h4 style={{ color: darkMode ? "#fca5a5" : "#dc2626", margin: "0 0 0.5rem 0" }}>
+                    💳 Cancel Subscription
+                  </h4>
+                  <p style={{ color: darkMode ? "#cbd5e1" : "#4b5563", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                    Downgrade to the free Trial plan. Your store will remain active but with limited features. You can upgrade again anytime.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        `Are you sure you want to cancel your ${storeInfo.plan.toUpperCase()} subscription?\n\n` +
+                        `You will be downgraded to the FREE Trial plan and lose access to:\n` +
+                        `• Real payment processing (test payments only)\n` +
+                        `• Advanced analytics\n` +
+                        `• Premium features\n\n` +
+                        `Your store data will be preserved and you can upgrade again anytime.\n\n` +
+                        `Click OK to cancel your subscription.`
+                      );
+
+                      if (!confirmed) return;
+
+                      try {
+                        // Update tenant plan to trial
+                        const { error } = await supabase
+                          .from('tenants')
+                          .update({
+                            plan: 'trial',
+                            plan_expires_at: null,
+                            updated_at: new Date().toISOString()
+                          })
+                          .eq('id', storeInfo.id);
+
+                        if (error) throw error;
+
+                        showToast("✅ Subscription cancelled. You're now on the Trial plan.", "#10b981");
+
+                        // Reload to reflect changes
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 1500);
+                      } catch (err) {
+                        console.error('Cancel subscription error:', err);
+                        showToast(`❌ Failed to cancel subscription: ${err.message}`, "#dc2626");
+                      }
+                    }}
+                    style={{
+                      background: "#fbbf24",
+                      color: "#0b0b0b",
+                      padding: "0.75rem 1.5rem",
+                      borderRadius: "8px",
+                      border: "none",
+                      fontSize: "1rem",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = "#f59e0b";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = "#fbbf24";
+                    }}
+                  >
+                    Cancel My Subscription
+                  </button>
+                </div>
+              )}
+
+              {/* Delete Account */}
+              <div style={{
+                background: darkMode ? "#1e1e1e" : "#fef2f2",
+                border: "2px solid #dc2626",
+                borderRadius: "12px",
+                padding: "1.5rem"
+              }}>
+                <h4 style={{ color: "#dc2626", margin: "0 0 0.5rem 0" }}>
+                  🗑️ Delete Account Permanently
+                </h4>
+                <p style={{ color: darkMode ? "#cbd5e1" : "#4b5563", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                  Permanently delete your store and all associated data. This action <strong>cannot be undone</strong>.
+                </p>
+                <ul style={{
+                  color: darkMode ? "#fca5a5" : "#dc2626",
+                  fontSize: "0.85rem",
+                  marginBottom: "1rem",
+                  paddingLeft: "1.5rem"
+                }}>
+                  <li>All your products will be deleted</li>
+                  <li>All order history will be lost</li>
+                  <li>All customer messages will be deleted</li>
+                  <li>Your subdomain will become available to others</li>
+                  <li>This action is irreversible</li>
+                </ul>
+                <button
+                  onClick={async () => {
+                    const storeName = storeInfo?.name || 'your store';
+
+                    const firstConfirm = window.confirm(
+                      `⚠️ WARNING: You are about to PERMANENTLY DELETE "${storeName}"!\n\n` +
+                      `This will delete:\n` +
+                      `• All products and menu items\n` +
+                      `• All order history\n` +
+                      `• All customer messages\n` +
+                      `• All analytics data\n` +
+                      `• Your account and login access\n\n` +
+                      `THIS CANNOT BE UNDONE!\n\n` +
+                      `Are you absolutely sure you want to continue?`
+                    );
+
+                    if (!firstConfirm) return;
+
+                    // Second confirmation
+                    const finalConfirm = window.confirm(
+                      `⚠️ FINAL WARNING!\n\n` +
+                      `Type your store name to confirm: "${storeName}"\n\n` +
+                      `Click OK to PERMANENTLY DELETE your account.\n` +
+                      `Click Cancel to keep your account.`
+                    );
+
+                    if (!finalConfirm) return;
+
+                    try {
+                      // Delete all related data first (orders, products, messages)
+                      // Then delete the tenant
+                      const { error: deleteError } = await supabase
+                        .from('tenants')
+                        .delete()
+                        .eq('id', storeInfo.id);
+
+                      if (deleteError) throw deleteError;
+
+                      showToast("✅ Account deleted successfully", "#10b981");
+
+                      // Sign out and redirect to home
+                      await supabase.auth.signOut();
+                      setTimeout(() => {
+                        window.location.href = '/';
+                      }, 1500);
+                    } catch (err) {
+                      console.error('Delete account error:', err);
+                      showToast(`❌ Failed to delete account: ${err.message}`, "#dc2626");
+                    }
+                  }}
+                  style={{
+                    background: "#dc2626",
+                    color: "white",
+                    padding: "0.75rem 1.5rem",
+                    borderRadius: "8px",
+                    border: "none",
+                    fontSize: "1rem",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = "#b91c1c";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = "#dc2626";
+                  }}
+                >
+                  Delete My Account Forever
+                </button>
+              </div>
+            </div>
           </div>
         );
 
