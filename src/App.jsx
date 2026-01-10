@@ -518,7 +518,13 @@ export default function App({ user }) {
           );
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Subscribed to notifications realtime');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Notifications channel error');
+        }
+      });
 
     return () => {
       supabase.removeChannel(ch);
@@ -565,7 +571,13 @@ export default function App({ user }) {
           );
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Subscribed to general_questions realtime');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ General questions channel error');
+        }
+      });
 
     return () => {
       supabase.removeChannel(ch);
