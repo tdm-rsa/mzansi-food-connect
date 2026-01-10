@@ -1536,6 +1536,23 @@ export default function App({ user }) {
                     )}
 
                     <div style={{ marginTop: ".75rem", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
+                      {o.phone && o.phone !== "N/A" && (
+                        <a
+                          href={`tel:${o.phone}`}
+                          className="btn-primary"
+                          style={{
+                            background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                            color: "white",
+                            border: "none",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.5rem"
+                          }}
+                        >
+                          📞 Call Customer
+                        </a>
+                      )}
                       {o.status === "pending" && o.phone && (
                         <button
                           className="btn-primary"
@@ -1654,6 +1671,23 @@ export default function App({ user }) {
                     )}
 
                     <div style={{ marginTop: ".75rem", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
+                      {o.phone && o.phone !== "N/A" && (
+                        <a
+                          href={`tel:${o.phone}`}
+                          className="btn-primary"
+                          style={{
+                            background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                            color: "white",
+                            border: "none",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.5rem"
+                          }}
+                        >
+                          📞 Call Customer
+                        </a>
+                      )}
                       {o.status === "pending" && o.phone && (
                         <button
                           className="btn-primary"
@@ -1822,6 +1856,26 @@ export default function App({ user }) {
                           </li>
                         ))}
                       </ul>
+                    )}
+
+                    {o.phone && o.phone !== "N/A" && (
+                      <div style={{ marginTop: ".75rem" }}>
+                        <a
+                          href={`tel:${o.phone}`}
+                          className="btn-primary"
+                          style={{
+                            background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                            color: "white",
+                            border: "none",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.5rem"
+                          }}
+                        >
+                          📞 Call Customer
+                        </a>
+                      </div>
                     )}
 
                     <div style={{
