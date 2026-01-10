@@ -2328,14 +2328,14 @@ export default function App({ user }) {
             <div className="settings-section">
               <h3 style={{ color: darkMode ? "#ffffff" : "#333" }}>📱 Vendor WhatsApp Number</h3>
               <p style={{ color: darkMode ? "#cbd5e1" : "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
-                Your WhatsApp number to receive order notifications (format: 27XXXXXXXXX)
+                Your WhatsApp number to receive order notifications (format: +27XXXXXXXXX)
               </p>
               <div style={{ display: "flex", gap: "0.75rem", maxWidth: "500px" }}>
                 <input
                   type="text"
                   id="vendorWhatsAppNumber"
                   defaultValue={storeInfo?.vendor_whatsapp_number || ""}
-                  placeholder="27XXXXXXXXX"
+                  placeholder="+27XXXXXXXXX"
                   style={{
                     flex: 1,
                     padding: "0.75rem",
@@ -2352,12 +2352,29 @@ export default function App({ user }) {
                       return;
                     }
 
-                    const vendorPhone = document.getElementById("vendorWhatsAppNumber").value.trim();
+                    let vendorPhone = document.getElementById("vendorWhatsAppNumber").value.trim();
 
-                    // Validate phone number format
-                    if (vendorPhone && !/^27\d{9}$/.test(vendorPhone)) {
-                      showToast("⚠️ Please use format: 27XXXXXXXXX", "#f44336");
-                      return;
+                    // Auto-format: add +27 if needed
+                    if (vendorPhone) {
+                      // Remove spaces and dashes
+                      vendorPhone = vendorPhone.replace(/[\s\-]/g, '');
+
+                      // Ensure it starts with +27
+                      if (vendorPhone.startsWith('+27')) {
+                        // Already correct
+                      } else if (vendorPhone.startsWith('27')) {
+                        vendorPhone = '+' + vendorPhone;
+                      } else if (vendorPhone.startsWith('0')) {
+                        vendorPhone = '+27' + vendorPhone.slice(1);
+                      } else {
+                        vendorPhone = '+27' + vendorPhone;
+                      }
+
+                      // Validate final format: +27XXXXXXXXX
+                      if (!/^\+27\d{9}$/.test(vendorPhone)) {
+                        showToast("⚠️ Please use format: +27XXXXXXXXX (must be 9 digits after +27)", "#f44336");
+                        return;
+                      }
                     }
 
                     try {

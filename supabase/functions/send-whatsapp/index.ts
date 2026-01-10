@@ -53,13 +53,26 @@ serve(async (req) => {
       );
     }
 
-    // Format phone number (remove spaces, dashes, + sign)
-    const formattedPhone = phoneNumber.replace(/[\s\-+]/g, '');
+    // Format phone number (remove spaces, dashes)
+    const formattedPhone = phoneNumber.replace(/[\s\-]/g, '');
 
-    // Ensure it starts with country code (27 for South Africa)
-    const finalPhone = formattedPhone.startsWith('27')
-      ? formattedPhone
-      : `27${formattedPhone.startsWith('0') ? formattedPhone.slice(1) : formattedPhone}`;
+    // Ensure it starts with +27 (Ultramsg requires + prefix)
+    let finalPhone = formattedPhone;
+
+    // If it already has +, keep it
+    if (finalPhone.startsWith('+27')) {
+      // Already correct format
+      finalPhone = finalPhone;
+    } else if (finalPhone.startsWith('27')) {
+      // Add + prefix
+      finalPhone = `+${finalPhone}`;
+    } else if (finalPhone.startsWith('0')) {
+      // Replace 0 with +27
+      finalPhone = `+27${finalPhone.slice(1)}`;
+    } else {
+      // Just add +27
+      finalPhone = `+27${finalPhone}`;
+    }
 
     // Build message based on type
     let finalMessage = message;
