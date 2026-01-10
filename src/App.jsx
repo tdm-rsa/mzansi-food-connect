@@ -1052,9 +1052,16 @@ export default function App({ user }) {
       return;
     }
 
+    // Validate it's a LIVE key
+    if (!yocoSecretKey.trim().startsWith('sk_live_')) {
+      showToast("⚠️ Only LIVE Yoco keys are supported (must start with sk_live_)", "#f59e0b");
+      return;
+    }
+
     setSavingYoco(true);
 
     try {
+      // 1. Save keys to database
       const { error } = await supabase
         .from("tenants")
         .update({
@@ -1065,7 +1072,27 @@ export default function App({ user }) {
 
       if (error) throw error;
 
-      showToast("✅ Yoco keys saved successfully!", "#10b981");
+      showToast("✅ Yoco keys saved! Registering webhook...", "#10b981");
+
+      // 2. Auto-register webhook with Yoco
+      try {
+        const webhookResponse = await supabase.functions.invoke('register-vendor-webhook', {
+          body: {
+            storeId: storeInfo.id,
+            yocoSecretKey: yocoSecretKey.trim()
+          }
+        });
+
+        if (webhookResponse.error) {
+          console.error("Webhook registration error:", webhookResponse.error);
+          showToast("⚠️ Keys saved but webhook registration failed. Contact support.", "#f59e0b");
+        } else {
+          showToast("✅ Yoco keys and webhook registered successfully!", "#10b981");
+        }
+      } catch (webhookError) {
+        console.error("Webhook registration failed:", webhookError);
+        showToast("⚠️ Keys saved but webhook registration failed. Contact support.", "#f59e0b");
+      }
 
       // Update local store info
       setStoreInfo({
@@ -1074,7 +1101,7 @@ export default function App({ user }) {
         yoco_secret_key: yocoSecretKey.trim(),
       });
     } catch (error) {
-      
+
       showToast("❌ Failed to save Yoco keys", "#ef4444");
     } finally {
       setSavingYoco(false);

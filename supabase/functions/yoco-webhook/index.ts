@@ -5,28 +5,146 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req) => {
+  // IMPORTANT: Allow all requests - we verify via webhook signature instead
+  // Yoco webhooks don't include Authorization header
+
   try {
     const body = await req.text();
+
+    // Verify webhook signature (security check)
+    const webhookId = req.headers.get("webhook-id");
+    const webhookTimestamp = req.headers.get("webhook-timestamp");
+    const webhookSignature = req.headers.get("webhook-signature");
+
+    if (webhookId && webhookTimestamp && webhookSignature) {
+      console.log("🔒 Verifying webhook signature...");
+
+      // Get webhook secret from environment
+      const webhookSecret = Deno.env.get("YOCO_WEBHOOK_SECRET");
+
+      if (webhookSecret) {
+        // Construct signed content: id.timestamp.body
+        const signedContent = `${webhookId}.${webhookTimestamp}.${body}`;
+
+        // Remove whsec_ prefix and decode secret
+        const secretBytes = Uint8Array.from(atob(webhookSecret.split("_")[1]), c => c.charCodeAt(0));
+
+        // Calculate expected signature using HMAC SHA256
+        const key = await crypto.subtle.importKey(
+          "raw",
+          secretBytes,
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"]
+        );
+
+        const signatureBytes = await crypto.subtle.sign(
+          "HMAC",
+          key,
+          new TextEncoder().encode(signedContent)
+        );
+
+        const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
+
+        // Extract signature from header (format: "v1,signature")
+        const providedSignature = webhookSignature.split(" ")[0].split(",")[1];
+
+        // Compare signatures
+        if (expectedSignature !== providedSignature) {
+          console.error("❌ Invalid webhook signature!");
+          return new Response(JSON.stringify({ error: "Invalid signature" }), {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        console.log("✅ Webhook signature verified");
+      } else {
+        console.warn("⚠️ YOCO_WEBHOOK_SECRET not configured - skipping signature verification");
+      }
+    } else {
+      console.warn("⚠️ Webhook signature headers missing - skipping verification");
+    }
+
+    // Parse event FIRST to get storeId
     const event = JSON.parse(body);
-    
     console.log("🔔 Webhook received:", event.type);
-    console.log("📦 Full event:", JSON.stringify(event, null, 2));
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get payment details - works for both event types
+    // Get payment details and storeId
     const paymentId = event.payload?.id || event.id;
     const metadata = event.payload?.metadata || event.metadata || {};
-    
+    const storeId = metadata?.storeId;
+
     console.log("💳 Payment ID:", paymentId);
     console.log("📋 Metadata:", JSON.stringify(metadata, null, 2));
+    console.log("🏪 Store ID:", storeId);
+
+    // If we have signature headers and storeId, verify using vendor's secret
+    if (webhookId && webhookTimestamp && webhookSignature && storeId) {
+      console.log("🔒 Looking up vendor webhook secret for store:", storeId);
+
+      // Get vendor's webhook secret
+      const { data: vendorStore } = await supabase
+        .from("tenants")
+        .select("yoco_webhook_secret, name")
+        .eq("id", storeId)
+        .single();
+
+      if (vendorStore?.yoco_webhook_secret) {
+        console.log(`🔐 Using vendor webhook secret for ${vendorStore.name}`);
+
+        // Construct signed content
+        const signedContent = `${webhookId}.${webhookTimestamp}.${body}`;
+
+        // Remove whsec_ prefix and decode secret
+        const secretBytes = Uint8Array.from(atob(vendorStore.yoco_webhook_secret.split("_")[1]), c => c.charCodeAt(0));
+
+        // Calculate expected signature using HMAC SHA256
+        const key = await crypto.subtle.importKey(
+          "raw",
+          secretBytes,
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"]
+        );
+
+        const signatureBytes = await crypto.subtle.sign(
+          "HMAC",
+          key,
+          new TextEncoder().encode(signedContent)
+        );
+
+        const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
+
+        // Extract signature from header
+        const providedSignature = webhookSignature.split(" ")[0].split(",")[1];
+
+        // Compare signatures
+        if (expectedSignature !== providedSignature) {
+          console.error("❌ Invalid vendor webhook signature!");
+          return new Response(JSON.stringify({ error: "Invalid signature" }), {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        console.log("✅ Vendor webhook signature verified");
+      } else {
+        console.log("⚠️ No vendor webhook secret found - vendor may not have registered webhook yet");
+      }
+    }
+
+    console.log("📦 Full event:", JSON.stringify(event, null, 2));
 
     // Handle product orders (works for both payment.succeeded and checkout.payment.succeeded)
-    if (metadata?.checkoutType === "product_order" && metadata?.orderNumber) {
-      console.log("🛒 Product order payment detected:", { paymentId, orderNumber: metadata.orderNumber });
+    // Handles both "product_order" and "customer_order" types
+    if ((metadata?.checkoutType === "product_order" || metadata?.checkoutType === "customer_order") && metadata?.orderNumber) {
+      console.log("🛒 Order payment detected:", { paymentId, orderNumber: metadata.orderNumber, checkoutType: metadata.checkoutType });
 
       // Find pending order by order number
       const { data: pendingOrder, error: findError } = await supabase
@@ -167,7 +285,7 @@ serve(async (req) => {
       }
 
       console.log(`✅ Upgraded store ${storeId} to ${planType} plan`);
-      
+
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -196,7 +314,7 @@ serve(async (req) => {
 
       if (error) throw error;
       console.log(`✅ Updated store ${storeId} to ${planType} plan`);
-      
+
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },

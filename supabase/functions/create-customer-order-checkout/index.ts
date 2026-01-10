@@ -85,9 +85,9 @@ serve(async (req) => {
       body: JSON.stringify({
         amount: totalInCents,
         currency: "ZAR",
-        successUrl: `${appUrl}/store/${storeSlug}/order-success?orderNumber=${orderNumber}`,
+        successUrl: `${appUrl}/payment-success?orderNumber=${orderNumber}&slug=${storeSlug}`,
         cancelUrl: `${appUrl}/store/${storeSlug}`,
-        failureUrl: `${appUrl}/store/${storeSlug}/order-failed?orderNumber=${orderNumber}`,
+        failureUrl: `${appUrl}/payment-failed?orderNumber=${orderNumber}&slug=${storeSlug}`,
         metadata: {
           storeId: storeId,
           storeName: storeName,
