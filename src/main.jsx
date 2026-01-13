@@ -15,6 +15,8 @@ import UpgradeSuccess from "./UpgradeSuccess.jsx";
 import UpgradeFailed from "./UpgradeFailed.jsx";
 import AdminLogin from "./AdminLogin.jsx";
 import AdminDashboardPage from "./AdminDashboardPage.jsx";
+import AffiliateSignup from "./AffiliateSignup.jsx";
+import AffiliateDashboard from "./AffiliateDashboard.jsx";
 import { getSubdomain } from "./utils/subdomain.js";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
@@ -161,6 +163,10 @@ function AppRouter() {
 
       {/* Admin Dashboard Page */}
       <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+
+      {/* Affiliate Program Routes */}
+      <Route path="/become-affiliate" element={<AffiliateSignup />} />
+      <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
 
       {/* Legacy landing route (redirect to home) */}
       <Route path="/landing" element={<Landing />} />

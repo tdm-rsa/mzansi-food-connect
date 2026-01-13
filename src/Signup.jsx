@@ -17,6 +17,7 @@ export default function Signup({ onBack, onSuccess }) {
   const [createdUserId, setCreatedUserId] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [paymentReference, setPaymentReference] = useState(null);
+  const [referralCode, setReferralCode] = useState(null); // Capture affiliate referral code
 
   // Use LIVE key for production signups
   const yocoPublicKey = import.meta.env.VITE_YOCO_PUBLIC_KEY; // Yoco live key from .env
@@ -35,6 +36,16 @@ export default function Signup({ onBack, onSuccess }) {
   // Load reCAPTCHA
   useEffect(() => {
     initRecaptchaBadge();
+  }, []);
+
+  // Capture referral code from URL (?ref=CODE)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+    if (ref) {
+      setReferralCode(ref);
+      console.log('Referral code captured:', ref);
+    }
   }, []);
 
   const plans = [
@@ -152,7 +163,8 @@ export default function Signup({ onBack, onSuccess }) {
             email: emailValidation.value,
             password: password,
             storeName: storeNameValidation.value,
-            plan: selectedPlan
+            plan: selectedPlan,
+            referralCode: referralCode // Pass referral code if exists
           }
         });
 
@@ -268,6 +280,7 @@ export default function Signup({ onBack, onSuccess }) {
         storeName,
         password,
         plan: selectedPlan,
+        referralCode: referralCode, // Store referral code for after payment
         timestamp: Date.now()
       };
 
@@ -297,7 +310,8 @@ export default function Signup({ onBack, onSuccess }) {
           password: password,
           storeName: storeName,
           plan: selectedPlan,
-          paymentReference: paymentId
+          paymentReference: paymentId,
+          referralCode: referralCode // Pass referral code if exists
         }
       });
 

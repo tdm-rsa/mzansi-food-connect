@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, password, storeName, plan } = await req.json();
+    const { email, password, storeName, plan, referralCode } = await req.json();
 
     // Validate inputs
     if (!email || !password || !storeName || !plan) {
@@ -63,9 +63,13 @@ serve(async (req) => {
     const userId = userData.user.id;
     console.log(`✅ User created: ${userId}`);
 
-    // Calculate plan expiration (30 days from now)
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30);
+    // Calculate plan expiration
+    // Trial = forever (null), Paid plans = 30 days from now
+    const expiresAt = plan === 'trial' ? null : (() => {
+      const date = new Date();
+      date.setDate(date.getDate() + 30);
+      return date;
+    })();
 
     // Generate slug from store name
     const slug = storeName
@@ -85,7 +89,7 @@ serve(async (req) => {
         owner_email: email,
         contact_email: email,
         plan: plan,
-        plan_expires_at: expiresAt.toISOString(),
+        plan_expires_at: expiresAt ? expiresAt.toISOString() : null,
         plan_started_at: new Date().toISOString()
       }])
       .select()
@@ -100,13 +104,55 @@ serve(async (req) => {
 
     console.log(`✅ Tenant created for ${storeName}`);
 
+    // Create affiliate referral if referralCode provided (only for Pro/Premium, not trial)
+    if (referralCode && plan !== 'trial') {
+      try {
+        console.log(`Looking up affiliate with code: ${referralCode}`);
+
+        // Find affiliate by referral code
+        const { data: affiliate, error: affiliateError } = await supabase
+          .from('affiliates')
+          .select('id')
+          .eq('referral_code', referralCode)
+          .eq('status', 'active')
+          .single();
+
+        if (affiliateError || !affiliate) {
+          console.error(`⚠️ Affiliate not found for code ${referralCode}:`, affiliateError);
+        } else {
+          // Create referral record
+          const { error: referralError } = await supabase
+            .from('referrals')
+            .insert([{
+              affiliate_id: affiliate.id,
+              store_id: tenantData.id,
+              plan: plan,
+              status: 'active', // Set to active since they just paid
+              first_payment_date: new Date().toISOString(),
+              commission_rate: 30.00, // 30%
+              commission_duration_months: 12
+            }]);
+
+          if (referralError) {
+            console.error(`⚠️ Failed to create referral record:`, referralError);
+          } else {
+            console.log(`✅ Referral record created for affiliate ${affiliate.id}`);
+          }
+        }
+      } catch (referralError) {
+        console.error('Error processing referral:', referralError);
+        // Don't fail signup if referral tracking fails
+      }
+    }
+
     // Send welcome email via Resend
     try {
       const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
       if (resendApiKey) {
         const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-        const planPrice = plan === 'pro' ? 'R149' : 'R215';
+        const planPrice = plan === 'trial' ? 'Free' : (plan === 'pro' ? 'R3' : 'R4');
+        const isTrial = plan === 'trial';
 
         const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
@@ -117,7 +163,7 @@ serve(async (req) => {
           body: JSON.stringify({
             from: "Mzansi Food Connect <noreply@mzansifoodconnect.app>",
             to: email,
-            subject: `Welcome to Mzansi Food Connect ${planName} Plan! 🎉`,
+            subject: isTrial ? `Welcome to Mzansi Food Connect! 🎉` : `Welcome to Mzansi Food Connect ${planName} Plan! 🎉`,
             html: `
               <!DOCTYPE html>
               <html>
@@ -141,14 +187,14 @@ serve(async (req) => {
                   </div>
                   <div class="content">
                     <h2>Hi ${storeName}! 👋</h2>
-                    <p>Your payment of <strong>${planPrice}/month</strong> has been successfully processed. Welcome to the Mzansi Food Connect family!</p>
+                    <p>${isTrial ? 'Welcome to your <strong>Free Trial</strong> (Training Ground)! Perfect for learning the platform.' : `Your payment of <strong>${planPrice}/month</strong> has been successfully processed.`} Welcome to the Mzansi Food Connect family!</p>
 
                     <div class="highlight">
                       <h3 style="margin-top: 0;">✅ Your Account Details</h3>
                       <p><strong>Store Name:</strong> ${storeName}</p>
                       <p><strong>Email:</strong> ${email}</p>
-                      <p><strong>Plan:</strong> ${planName} (${planPrice}/month)</p>
-                      <p><strong>Status:</strong> Active for 30 days</p>
+                      <p><strong>Plan:</strong> ${planName} ${isTrial ? '(Free Forever)' : `(${planPrice}/month)`}</p>
+                      <p><strong>Status:</strong> ${isTrial ? 'Active Forever - Training Mode' : 'Active for 30 days'}</p>
                     </div>
 
                     <h3>🚀 Get Started</h3>
@@ -175,7 +221,7 @@ serve(async (req) => {
                   </div>
                   <div class="footer">
                     <p>Mzansi Food Connect - Empowering South African Food Businesses</p>
-                    <p>Your plan will renew in 30 days for ${planPrice}</p>
+                    <p>${isTrial ? 'Trial plan never expires - Upgrade anytime!' : `Your plan will renew in 30 days for ${planPrice}`}</p>
                   </div>
                 </div>
               </body>

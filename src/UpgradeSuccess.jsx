@@ -20,36 +20,114 @@ export default function UpgradeSuccess() {
   const storeId = searchParams.get("storeId");
   const targetPlanParam = searchParams.get("plan");
   const targetPlan = targetPlanParam ? targetPlanParam.toLowerCase() : targetPlanParam;
+  const isSignup = searchParams.get("signup") === "true";
+  const urlEmail = searchParams.get("email");
+  const urlStoreName = searchParams.get("store");
 
   useEffect(() => {
     let cancelled = false;
     let pollIntervalId;
 
     async function handlePaidSignup() {
-      const pendingSignupRaw = localStorage.getItem("pendingSignup");
-      console.log("🔍 Checking for pending signup...", pendingSignupRaw ? "Found" : "Not found");
+      // First try URL params (for new flow)
+      if (urlEmail && urlStoreName && targetPlan) {
 
-      if (!pendingSignupRaw) return false;
+        // Check localStorage for password and referral code
+        const pendingSignupRaw = localStorage.getItem("pendingSignup");
+        let password = null;
+        let referralCode = null;
+
+        if (pendingSignupRaw) {
+          try {
+            const parsed = JSON.parse(pendingSignupRaw);
+            password = parsed.password;
+            referralCode = parsed.referralCode; // Get referral code from localStorage
+          } catch (err) {
+            console.error("⚠️ Could not parse localStorage, will prompt for password");
+          }
+        }
+
+        if (!password) {
+          // Prompt user for password since localStorage was cleared
+          password = prompt("Please re-enter your password to complete signup:");
+          if (!password) {
+            setErrorMessage("Password is required to complete signup. Please try again.");
+            setStatus("error");
+            return true;
+          }
+        }
+
+        setMode("signup");
+        setSignupInfo({ email: urlEmail, storeName: urlStoreName, plan: targetPlan });
+        setStatus("creating");
+
+
+        const { data, error } = await supabase.functions.invoke("complete-signup", {
+          body: {
+            email: urlEmail,
+            password: password,
+            storeName: urlStoreName,
+            plan: targetPlan,
+            referralCode: referralCode, // Pass referral code if exists
+          },
+        });
+
+
+        if (cancelled) return true;
+
+        if (error || data?.error) {
+          console.error("❌ complete-signup failed:", error || data?.error);
+          setErrorMessage(
+            data?.error ||
+            error?.message ||
+            "We could not finish creating your account. Please contact support if you were charged."
+          );
+          setStatus("error");
+          return true;
+        }
+
+        localStorage.removeItem("pendingSignup");
+
+        const now = new Date();
+        const expires = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+        setPlanData({
+          plan: targetPlan,
+          plan_started_at: data?.plan_started_at || now.toISOString(),
+          plan_expires_at: data?.plan_expires_at || expires.toISOString(),
+        });
+
+        setStatus("success");
+        return true;
+      }
+
+      // Fallback to localStorage (legacy flow)
+      const pendingSignupRaw = localStorage.getItem("pendingSignup");
+
+
+      if (!pendingSignupRaw) {
+        return false;
+      }
 
       setMode("signup");
 
       let pendingSignup;
       try {
         pendingSignup = JSON.parse(pendingSignupRaw);
-        console.log("📋 Pending signup data:", { email: pendingSignup.email, storeName: pendingSignup.storeName, plan: pendingSignup.plan });
       } catch (err) {
-        console.error("Pending signup JSON parse failed:", err);
+        console.error("❌ Failed to parse pendingSignup:", err);
         localStorage.removeItem("pendingSignup");
-        setErrorMessage("We could not read your signup details. Please start again.");
+        setErrorMessage("We could not read your signup details. Please start again and contact support if this persists.");
         setStatus("error");
         return true;
       }
 
-      const { email, password, storeName, plan, timestamp } = pendingSignup || {};
+      const { email, password, storeName, plan, referralCode, timestamp } = pendingSignup || {};
 
       if (!email || !password || !storeName || !plan) {
+        console.error("❌ Missing required fields:", { email: !!email, password: !!password, storeName: !!storeName, plan: !!plan });
         localStorage.removeItem("pendingSignup");
-        setErrorMessage("Signup details were missing. Please start again.");
+        setErrorMessage("Signup details were incomplete. Please start again and contact support if this persists.");
         setStatus("error");
         return true;
       }
@@ -65,32 +143,30 @@ export default function UpgradeSuccess() {
       setSignupInfo({ email, storeName, plan });
       setStatus("creating");
 
-      console.log("🚀 Calling complete-signup Edge Function...");
+
       const { data, error } = await supabase.functions.invoke("complete-signup", {
         body: {
           email,
           password,
           storeName,
           plan,
+          referralCode, // Pass referral code if exists
         },
       });
 
-      console.log("📥 Edge Function response:", { data, error });
 
       if (cancelled) return true;
 
       if (error || data?.error) {
-        console.error("❌ complete-signup error:", error || data?.error);
+        console.error("❌ complete-signup failed:", error || data?.error);
         setErrorMessage(
           data?.error ||
           error?.message ||
-          "We could not finish creating your account. Please contact support if you were charged."
+          "We could not finish creating your account. Please contact support if you were charged. Save this info: " + JSON.stringify({ email, storeName, plan })
         );
         setStatus("error");
         return true;
       }
-
-      console.log("✅ Account created successfully!");
 
       localStorage.removeItem("pendingSignup");
 
@@ -128,7 +204,7 @@ export default function UpgradeSuccess() {
           .single();
 
         if (error) {
-          console.error("Upgrade verification error:", error);
+          
           return null;
         }
 
@@ -170,8 +246,14 @@ export default function UpgradeSuccess() {
     }
 
     handlePaidSignup().then((handled) => {
-      if (!handled) {
+      if (!handled && !isSignup) {
+        // Only verify upgrade if this is NOT a new signup
         verifyUpgrade();
+      } else if (!handled && isSignup) {
+        // New signup but no localStorage data - something went wrong
+        console.error("❌ New signup detected but no localStorage data found");
+        setErrorMessage("Payment received but signup data was lost. Please contact support with your payment confirmation.");
+        setStatus("error");
       }
     });
 
@@ -181,7 +263,7 @@ export default function UpgradeSuccess() {
         clearInterval(pollIntervalId);
       }
     };
-  }, [storeId, targetPlan]);
+  }, [storeId, targetPlan, isSignup]);
 
   const planName = formatPlanName(signupInfo?.plan || planData?.plan || targetPlan);
   const resolvedPlanName = planName || "Pro";
