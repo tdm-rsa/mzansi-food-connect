@@ -16,7 +16,7 @@ import UpgradeFailed from "./UpgradeFailed.jsx";
 import AdminLogin from "./AdminLogin.jsx";
 import AdminDashboardPage from "./AdminDashboardPage.jsx";
 import AffiliateSignup from "./AffiliateSignup.jsx";
-import AffiliateDashboard from "./AffiliateDashboard.jsx";
+import AffiliateDashboard from "./AffiliateDashboardSecure.jsx";
 import AffiliateTerms from "./AffiliateTerms.jsx";
 import { getSubdomain } from "./utils/subdomain.js";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";

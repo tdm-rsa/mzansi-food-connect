@@ -83,16 +83,41 @@ export default function AffiliateSignup({ onSuccess }) {
         throw new Error("Please enter a valid bank account number (9-11 digits)");
       }
 
+      // STEP 1: Create Supabase Auth user with email verification
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email.toLowerCase(),
+        password: Math.random().toString(36).slice(-16), // Random password (magic link used for login)
+        options: {
+          data: {
+            full_name: formData.fullName,
+            user_type: 'affiliate'
+          },
+          emailRedirectTo: `${window.location.origin}/affiliate-dashboard`
+        }
+      });
+
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          throw new Error('This email is already registered. Please login instead.');
+        }
+        throw authError;
+      }
+
+      if (!authData.user) {
+        throw new Error('Failed to create account. Please try again.');
+      }
+
       // Generate unique referral code
       const firstName = formData.fullName.split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '');
       const baseCode = firstName.substring(0, 4).padEnd(4, 'X');
       const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
       const tempCode = baseCode + randomSuffix;
 
-      // Insert affiliate
+      // STEP 2: Create affiliate profile (linked to auth user)
       const { data: affiliate, error: insertError } = await supabase
         .from("affiliates")
         .insert([{
+          auth_user_id: authData.user.id, // Link to Supabase Auth
           full_name: formData.fullName,
           email: formData.email.toLowerCase(),
           phone: cleanPhone,
@@ -113,8 +138,10 @@ export default function AffiliateSignup({ onSuccess }) {
         .single();
 
       if (insertError) {
+        // If profile creation fails, clean up auth user
+        await supabase.auth.admin.deleteUser(authData.user.id);
+
         if (insertError.code === '23505' && insertError.message.includes('referral_code')) {
-          // Duplicate referral code, retry with new code
           throw new Error("Please try again - referral code generation issue");
         }
         throw insertError;
