@@ -42,11 +42,16 @@ export default function AffiliateSignup({ onSuccess }) {
     setLoading(true);
 
     try {
-      // Validate phone number (South African format - more flexible)
-      const cleanPhone = formData.phone.replace(/\s/g, '');
+      // Validate and normalize phone number (South African format)
+      let cleanPhone = formData.phone.replace(/\s/g, '').replace(/-/g, '');
       const phoneRegex = /^(\+27|0)[0-9]{9}$/;
       if (!phoneRegex.test(cleanPhone)) {
         throw new Error("Please enter a valid South African phone number (e.g., 0821234567 or +27821234567)");
+      }
+
+      // Convert to +27 format if starts with 0
+      if (cleanPhone.startsWith('0')) {
+        cleanPhone = '+27' + cleanPhone.substring(1);
       }
 
       // Validate email
@@ -404,7 +409,7 @@ export default function AffiliateSignup({ onSuccess }) {
                 className="form-input"
               />
               <small style={{ color: "#6b7280", fontSize: "0.85rem" }}>
-                For payout notifications
+                For payout notifications • Will be saved in +27 format
               </small>
             </div>
 
