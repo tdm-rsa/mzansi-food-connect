@@ -67,23 +67,19 @@ export default function PremiumAnalytics({ storeInfo, onBack, darkMode }) {
         .order("created_at", { ascending: false });
 
       if (ordersError) {
-        console.error("Premium Analytics - Orders error:", ordersError);
+        
         throw ordersError;
       }
 
-      console.log("Premium Analytics - ALL Orders fetched:", orders);
-
       if (orders && orders.length > 0) {
         // Log each order's status to see what we're working with
-        console.log("Premium Analytics - Order statuses:");
+        
         orders.forEach((o, idx) => {
-          console.log(`  Order ${idx + 1}: status="${o.status}", amount=${o.total}, typeof=${typeof o.status}`);
+          
         });
 
         // Accept ALL orders (don't filter by status at all for now)
         const validOrders = orders;
-        console.log("Premium Analytics - Valid orders:", validOrders);
-        console.log("Premium Analytics - Valid orders count:", validOrders.length);
 
         // Now fetch order items separately for product analytics
         const { data: orderItems, error: itemsError } = await supabase
@@ -100,7 +96,7 @@ export default function PremiumAnalytics({ storeInfo, onBack, darkMode }) {
           .in("order_id", validOrders.map(o => o.id));
 
         if (!itemsError && orderItems) {
-          console.log("Premium Analytics - Order items fetched:", orderItems);
+          
           // Attach items to orders
           const ordersWithItems = validOrders.map(order => ({
             ...order,
@@ -109,12 +105,12 @@ export default function PremiumAnalytics({ storeInfo, onBack, darkMode }) {
           calculateStats(ordersWithItems);
         } else {
           // If items fetch fails, just use orders without items
-          console.log("Premium Analytics - Using orders without items");
+          
           calculateStats(validOrders);
         }
       }
     } catch (err) {
-      console.error("Error loading analytics:", err);
+      
     }
 
     setLoading(false);

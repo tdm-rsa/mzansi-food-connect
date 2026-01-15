@@ -24,7 +24,7 @@ async function uploadImage(file, folder, storeId) {
       });
       
     if (uploadError) {
-      console.error("Upload error:", uploadError);
+      
       throw new Error(uploadError.message || "Upload failed");
     }
 
@@ -35,7 +35,7 @@ async function uploadImage(file, folder, storeId) {
 
     return publicUrl;
   } catch (err) {
-    console.error("Upload failed:", err);
+    
     alert(`Upload failed: ${err.message}\n\nPlease make sure the 'store-assets' bucket exists in Supabase Storage and has proper RLS policies.`);
     throw err;
   }
@@ -54,7 +54,7 @@ export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null
   // Sync local store when storeInfo prop changes
   useEffect(() => {
     if (storeInfo) {
-      console.log('📦 StoreDesigner received storeInfo:', storeInfo);
+      
       setLocalStore(storeInfo);
     }
   }, [storeInfo]);
@@ -69,11 +69,9 @@ export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null
   // Update function that syncs to database AND local state
   async function updateStoreData(updates) {
     if (!store?.id) {
-      console.error('❌ No store ID available');
+      
       return;
     }
-
-    console.log('💾 Saving updates:', updates);
 
     try {
       // Update database
@@ -85,17 +83,16 @@ export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null
         .single();
 
       if (error && !error.message?.includes('updated_at') && error.code !== '42703') {
-        console.error('❌ Update error:', error);
+        
         throw error;
       }
 
       // 🔥 FIX: Update local state immediately with optimistic update
       const updatedStore = { ...store, ...updates };
       setLocalStore(updatedStore);
-      console.log('✅ Store updated successfully:', updatedStore);
 
     } catch (err) {
-      console.error("Update error:", err);
+      
       throw err;
     }
   }
@@ -115,7 +112,7 @@ export default function StoreDesigner({ onBack, menuItems = [], storeInfo = null
         setSaving(true);
         await updateStoreData(updates);
       } catch (err) {
-        console.error("Save failed:", err.message);
+        
       } finally {
         setSaving(false);
       }

@@ -60,6 +60,7 @@ serve(async (req) => {
     if (updateError) throw updateError;
 
     // Create payout request record
+    const adminEmail = Deno.env.get("ADMIN_EMAIL") || 'nqubeko377@gmail.com';
     const { error: payoutError } = await supabase
       .from('commission_payouts')
       .insert([{
@@ -67,15 +68,30 @@ serve(async (req) => {
         amount: amount,
         status: 'requested',
         requested_by_affiliate: true,
-        admin_email: 'nqubeko377@gmail.com',
+        admin_email: adminEmail,
         month_for: new Date().toISOString().substring(0, 7) + '-01',
         payment_method: 'eft'
       }]);
 
     if (payoutError) throw payoutError;
 
+    // Audit log the payout request
+    await supabase.rpc('log_platform_audit', {
+      p_user_id: null,
+      p_user_email: affiliateEmail,
+      p_action: 'payout_requested',
+      p_resource_type: 'commission_payout',
+      p_resource_id: affiliate.id,
+      p_details: { amount: amount, bank: affiliate.bank_name }
+    });
+
     // Send email to admin
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
+
+    // Mask account number (show only last 4 digits for security)
+    const maskedAccountNumber = affiliate.account_number
+      ? '****' + affiliate.account_number.slice(-4)
+      : 'Not provided';
 
     if (resendApiKey) {
       const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -86,7 +102,7 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           from: "Mzansi Food Connect <noreply@mzansifoodconnect.app>",
-          to: "nqubeko377@gmail.com",
+          to: adminEmail,
           subject: `💰 Affiliate Payout Request - R${amount.toFixed(2)}`,
           html: `
             <!DOCTYPE html>
@@ -124,10 +140,13 @@ serve(async (req) => {
                   </div>
 
                   <div class="highlight">
-                    <h3 style="margin-top: 0;">Bank Details</h3>
+                    <h3 style="margin-top: 0;">🏦 Bank Details</h3>
                     <p><strong>Bank:</strong> ${affiliate.bank_name}</p>
-                    <p><strong>Account Number:</strong> ${affiliate.account_number}</p>
+                    <p><strong>Account Number:</strong> ${maskedAccountNumber}</p>
                     <p><strong>Account Type:</strong> ${affiliate.account_type}</p>
+                    <p style="color: #6b7280; font-size: 0.85rem; margin-top: 10px;">
+                      ⚠️ For security, full account number is available in the secure admin dashboard only.
+                    </p>
                   </div>
 
                   <div class="highlight">

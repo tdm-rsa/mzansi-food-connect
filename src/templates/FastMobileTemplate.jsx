@@ -42,10 +42,6 @@ export default function FastMobileTemplate(props) {
 
   // DEBUG: Log what data the template receives
   useEffect(() => {
-    console.log("🎨 FastMobileTemplate - banner.showInstructions:", banner.showInstructions);
-    console.log("🎨 FastMobileTemplate - banner.instructions:", banner.instructions);
-    console.log("🎨 FastMobileTemplate - banner.showNotes:", banner.showNotes);
-    console.log("🎨 FastMobileTemplate - banner.notes:", banner.notes);
   }, [banner]);
 
   // ✅ Cart state with localStorage persistence
@@ -69,7 +65,6 @@ export default function FastMobileTemplate(props) {
       const savedCart = localStorage.getItem(cartStorageKey);
       return savedCart ? normalizeCartItems(JSON.parse(savedCart)) : [];
     } catch (error) {
-      console.error('Failed to load cart from localStorage:', error);
       return [];
     }
   });
@@ -83,7 +78,6 @@ export default function FastMobileTemplate(props) {
         return cartItems.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
       }
     } catch (error) {
-      console.error('Failed to calculate total from localStorage:', error);
     }
     return 0;
   });
@@ -95,7 +89,6 @@ export default function FastMobileTemplate(props) {
     try {
       localStorage.setItem(cartStorageKey, JSON.stringify(cart));
     } catch (error) {
-      console.error('Failed to save cart to localStorage:', error);
     }
   }, [cart, cartStorageKey]);
   const [customerName, setCustomerName] = useState("");
@@ -200,7 +193,6 @@ export default function FastMobileTemplate(props) {
     try {
       localStorage.removeItem(cartStorageKey);
     } catch (error) {
-      console.error('Failed to clear cart from localStorage:', error);
     }
   };
 
@@ -222,18 +214,12 @@ export default function FastMobileTemplate(props) {
   // Debug: Log Yoco setup
   useEffect(() => {
     if (!yocoPublicKey) {
-      console.error('❌ YOCO PUBLIC KEY MISSING! Vendor needs to add Yoco keys in Settings');
     } else {
-      console.log('✅ Yoco public key loaded:', yocoPublicKey.substring(0, 20) + '...');
-      console.log('   Source:', yoco_public_key ? 'Database (store settings)' : 'Environment variable');
     }
 
     const secretKey = yoco_secret_key || import.meta.env.VITE_YOCO_SECRET_KEY;
     if (!secretKey) {
-      console.warn('⚠️ Yoco secret key not configured (needed for payment verification)');
     } else {
-      console.log('✅ Yoco secret key loaded:', secretKey.substring(0, 20) + '...');
-      console.log('   Source:', yoco_secret_key ? 'Database (store settings)' : 'Environment variable');
     }
   }, [yocoPublicKey, yoco_public_key, yoco_secret_key]);
 
@@ -271,7 +257,6 @@ export default function FastMobileTemplate(props) {
       setCustomerPhone("");
       setIsCartOpen(false);
     } catch (err) {
-      console.error(err.message);
       alert("⚠️ Order failed after payment: " + err.message);
     } finally {
       setProcessing(false);
@@ -309,19 +294,16 @@ export default function FastMobileTemplate(props) {
         },
         callback: async function (result) {
           if (result.error) {
-            console.error('Yoco payment error:', result.error);
             alert('❌ Payment failed: ' + result.error.message);
             setProcessing(false);
             return;
           }
 
           // Payment successful
-          console.log('💳 Yoco payment successful:', result);
           await createOrder(result.id);
         },
       });
     } catch (err) {
-      console.error('Yoco SDK error:', err);
       alert('⚠️ Payment initialization failed. Please try again.');
       setProcessing(false);
     }

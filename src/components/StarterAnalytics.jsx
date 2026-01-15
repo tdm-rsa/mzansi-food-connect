@@ -13,11 +13,10 @@ export default function StarterAnalytics({ storeInfo, onBack, darkMode }) {
   useEffect(() => {
     async function loadTodayStats() {
       if (!storeInfo?.id) {
-        console.log("Starter Analytics - No store ID found!");
+        
         return;
       }
 
-      console.log("Starter Analytics - Store ID:", storeInfo.id);
       setLoading(true);
 
       // Fetch ALL orders for this store (no date filter in query)
@@ -28,41 +27,32 @@ export default function StarterAnalytics({ storeInfo, onBack, darkMode }) {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Starter Analytics error:", error);
+        
       }
 
       if (allOrders) {
-        console.log("Starter Analytics - ALL Orders from DB:", allOrders);
-        console.log("Starter Analytics - Total orders in DB:", allOrders.length);
 
         // Get today's date at midnight in local timezone
         const now = new Date();
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
 
-        console.log("Starter Analytics - Today starts at:", todayStart);
-        console.log("Starter Analytics - Current time:", now);
-
         // Filter for today's orders
         const todaysOrders = allOrders.filter(o => {
           const orderDate = new Date(o.created_at);
-          console.log("Order date:", orderDate, "Is today?", orderDate >= todayStart);
+          
           return orderDate >= todayStart;
         });
 
-        console.log("Starter Analytics - Today's orders:", todaysOrders);
-
         // Log statuses
-        console.log("Starter Analytics - Today's order statuses:");
+        
         todaysOrders.forEach((o, idx) => {
-          console.log(`  Order ${idx + 1}: status="${o.status}", amount=${o.total}`);
+          
         });
 
         // Accept ALL of today's orders (don't filter by status)
         const validOrders = todaysOrders;
-        console.log("Starter Analytics - Valid orders count:", validOrders.length);
 
         const revenue = validOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-        console.log("Starter Analytics - Calculated revenue:", revenue);
 
         setTodayRevenue(revenue);
         setTodayOrders(validOrders.length);

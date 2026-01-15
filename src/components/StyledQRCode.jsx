@@ -28,7 +28,7 @@ export default function StyledQRCode({ storeName }) {
   useEffect(() => {
     async function loadSettings() {
       const { data, error } = await supabase.from("tenants").select("*").limit(1).single();
-      if (error) console.error("Error loading store:", error.message);
+      if (error) 
 
       if (data) {
         setColor(data.qr_color || "#ff6b35");
@@ -215,7 +215,7 @@ export default function StyledQRCode({ storeName }) {
       await new Promise((resolve, reject) => {
         logoImg.onload = resolve;
         logoImg.onerror = (err) => {
-          console.error("Logo failed to load:", err);
+          
           reject(err);
         };
         logoImg.src = logo;
@@ -244,7 +244,7 @@ export default function StyledQRCode({ storeName }) {
       await new Promise((resolve, reject) => {
         qrImage.onload = resolve;
         qrImage.onerror = (err) => {
-          console.error("QR image failed to load:", err);
+          
           reject(err);
         };
         qrImage.src = URL.createObjectURL(qrBlob);
@@ -309,7 +309,7 @@ export default function StyledQRCode({ storeName }) {
         URL.revokeObjectURL(url);
       }, "image/png", 1.0);
     } catch (error) {
-      console.error("Error creating QR poster:", error);
+      
       alert(`Failed to create QR poster: ${error.message}`);
     }
   };
@@ -407,7 +407,7 @@ export default function StyledQRCode({ storeName }) {
         URL.revokeObjectURL(url);
       }, "image/png", 1.0);
     } catch (error) {
-      console.error("Error creating Yoco payment QR:", error);
+      
       alert(`Failed to create payment QR: ${error.message}`);
     }
   };
@@ -505,7 +505,7 @@ export default function StyledQRCode({ storeName }) {
         URL.revokeObjectURL(url);
       }, "image/png", 1.0);
     } catch (error) {
-      console.error("Error creating WhatsApp group QR:", error);
+      
       alert(`Failed to create WhatsApp QR: ${error.message}`);
     }
   };

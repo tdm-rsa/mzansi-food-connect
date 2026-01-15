@@ -32,7 +32,6 @@ export default function ModernFoodTemplate(props) {
       const savedCart = localStorage.getItem(cartStorageKey);
       return savedCart ? normalizeCartItems(JSON.parse(savedCart)) : [];
     } catch (error) {
-      console.error('Failed to load cart from localStorage:', error);
       return [];
     }
   });
@@ -46,7 +45,6 @@ export default function ModernFoodTemplate(props) {
         return cartItems.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
       }
     } catch (error) {
-      console.error('Failed to calculate total from localStorage:', error);
     }
     return 0;
   });
@@ -58,7 +56,6 @@ export default function ModernFoodTemplate(props) {
     try {
       localStorage.setItem(cartStorageKey, JSON.stringify(cart));
     } catch (error) {
-      console.error('Failed to save cart to localStorage:', error);
     }
   }, [cart, cartStorageKey]);
 
@@ -166,7 +163,6 @@ export default function ModernFoodTemplate(props) {
     try {
       localStorage.removeItem(cartStorageKey);
     } catch (error) {
-      console.error('Failed to clear cart from localStorage:', error);
     }
   };
 
@@ -177,10 +173,7 @@ export default function ModernFoodTemplate(props) {
   // Debug: Log Yoco setup
   useEffect(() => {
     if (!yocoPublicKey) {
-      console.error('❌ YOCO PUBLIC KEY MISSING! Vendor needs to add Yoco keys in Settings');
     } else {
-      console.log('✅ Yoco public key loaded:', yocoPublicKey.substring(0, 20) + '...');
-      console.log('   Source:', yoco_public_key ? 'Database (store settings)' : 'Environment variable');
     }
   }, [yocoPublicKey, yoco_public_key]);
 
@@ -221,7 +214,6 @@ export default function ModernFoodTemplate(props) {
       );
 
       if (error) {
-        console.error('Checkout creation error:', error);
         throw new Error(error.message || 'Failed to create checkout session');
       }
 
@@ -230,11 +222,9 @@ export default function ModernFoodTemplate(props) {
       }
 
       // Redirect to Yoco checkout page
-      console.log('✅ Redirecting to Yoco checkout:', data.checkoutId);
       window.location.href = data.redirectUrl;
 
     } catch (err) {
-      console.error('Payment initialization error:', err);
       alert('⚠️ Payment initialization failed: ' + err.message);
       setProcessing(false);
     }
@@ -273,7 +263,6 @@ export default function ModernFoodTemplate(props) {
       setAskPhone("");
       setAskMessage("");
     } catch (err) {
-      console.error("❌ Could not send message:", err.message);
       alert("⚠️ Failed to send message. Try again later.");
     } finally {
       setAskSending(false);

@@ -6,6 +6,8 @@ import { useCart } from "./hooks/useCart";
 import { useToast } from "./hooks/useToast";
 import { getSubdomain } from "./utils/subdomain";
 import { isPlanActive } from "./utils/planFeatures";
+import { validateName, validatePhone } from "./utils/validation";
+import rateLimiter, { RATE_LIMITS } from "./utils/rateLimiter";
 import Toast from "./components/Toast";
 import "./Checkout.css";
 
@@ -86,10 +88,9 @@ export default function Checkout() {
 
   useEffect(() => {
     async function loadStore() {
-      console.log('🔍 Loading store with slug:', slug);
 
       if (!slug) {
-        console.error('❌ No slug provided');
+        
         setError("Store slug not provided");
         setStoreLoaded(true);
         return;
@@ -101,11 +102,8 @@ export default function Checkout() {
         .eq("slug", slug)
         .single();
 
-      console.log('📦 Store data:', data);
-      console.log('❌ Store error:', error);
-
       if (error || !data) {
-        console.error('Store not found for slug:', slug, error);
+        
         setError(`Store not found: ${slug}`);
         setStoreLoaded(true);
         return;
@@ -139,6 +137,44 @@ export default function Checkout() {
      Handle Yoco Payment (Checkout API)
   ------------------------------------------------------- */
   const handleYocoPayment = async () => {
+    setError("");
+
+    // Rate limiting check
+    const rateLimit = rateLimiter.checkLimit(
+      `checkout_${slug}`,
+      RATE_LIMITS.CHECKOUT.maxAttempts,
+      RATE_LIMITS.CHECKOUT.windowMs
+    );
+
+    if (!rateLimit.allowed) {
+      toast.error(rateLimit.message);
+      setError(rateLimit.message);
+      return;
+    }
+
+    // Validate customer name
+    const nameValidation = validateName(customerName, 'Customer name');
+    if (!nameValidation.valid) {
+      toast.error(nameValidation.error);
+      setError(nameValidation.error);
+      return;
+    }
+
+    // Validate phone number
+    const phoneValidation = validatePhone(customerPhone);
+    if (!phoneValidation.valid) {
+      toast.error(phoneValidation.error);
+      setError(phoneValidation.error);
+      return;
+    }
+
+    // Validate cart has items
+    if (!items || items.length === 0) {
+      toast.error('Your cart is empty');
+      setError('Your cart is empty');
+      return;
+    }
+
     setProcessingPayment(true);
     setLoading(true);
 
@@ -148,8 +184,6 @@ export default function Checkout() {
       const randomLetter = letters[Math.floor(Math.random() * letters.length)];
       const randomDigits = Math.floor(Math.random() * 900) + 100;
       const orderNumber = `${randomLetter}${randomDigits}`;
-
-      console.log('🔄 Creating Yoco checkout session...');
 
       // Call Supabase Edge Function to create checkout session
       const { data, error } = await supabase.functions.invoke('create-yoco-checkout', {
@@ -172,7 +206,7 @@ export default function Checkout() {
       });
 
       if (error) {
-        console.error('Checkout creation error:', error);
+        
         throw error;
       }
 
@@ -180,13 +214,11 @@ export default function Checkout() {
         throw new Error('No redirect URL received from payment provider');
       }
 
-      console.log('✅ Checkout session created, redirecting to Yoco...');
-
       // Redirect to Yoco hosted checkout page
       window.location.href = data.redirectUrl;
 
     } catch (err) {
-      console.error('Payment initialization error:', err);
+      
       toast.error('Failed to initialize payment. Please try again.');
       setProcessingPayment(false);
       setLoading(false);

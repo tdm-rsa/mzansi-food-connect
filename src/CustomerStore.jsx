@@ -41,7 +41,7 @@ export default function CustomerStore() {
         setError(null);
 
         // 1. Fetch store by slug
-        console.log("🔍 Looking for store with slug:", slug);
+        
         const { data: store, error: storeError } = await supabase
           .from("tenants")
           .select("*")
@@ -49,7 +49,7 @@ export default function CustomerStore() {
           .single();
 
         if (storeError) {
-          console.error("❌ Store fetch error:", storeError);
+          
           if (storeError.code === "PGRST116") {
             setError("Store not found 😢");
           } else {
@@ -59,19 +59,15 @@ export default function CustomerStore() {
           return;
         }
 
-        console.log("✅ Store found:", store.name, "| Store ID:", store.id, "| Owner ID:", store.owner_id);
         setStoreData(store);
         setIsOpen(store.is_open);
 
         // 2. Fetch menu items
-        console.log("🔍 Fetching menu items for store_id:", store.id);
-        console.log("🔍 Store plan:", store.plan);
 
         // FIRST: Check ALL menu items in database (debug)
         const { data: allMenuItems } = await supabase
           .from("menu_items")
           .select("id, name, store_id");
-        console.log("📊 ALL menu items in database:", allMenuItems);
 
         // THEN: Fetch menu items for this specific store
         const { data: menu, error: menuError } = await supabase
@@ -81,16 +77,15 @@ export default function CustomerStore() {
           .order("created_at", { ascending: true });
 
         if (menuError) {
-          console.error("❌ Menu error:", menuError);
+          
         } else {
-          console.log("✅ Menu items loaded for this store:", menu?.length || 0, "items");
-          console.log("📋 Menu data:", menu);
+
           setMenuItems(menu || []);
         }
 
         setLoading(false);
       } catch (err) {
-        console.error("Load store error:", err);
+        
         setError("Something went wrong");
         setLoading(false);
       }
@@ -119,7 +114,7 @@ export default function CustomerStore() {
         },
         (payload) => {
           const updated = payload.new;
-          console.log("✅ Store updated in realtime:", updated);
+          
           setStoreData(updated);
           setIsOpen(updated.is_open);
         }
@@ -148,7 +143,6 @@ export default function CustomerStore() {
           filter: `store_id=eq.${storeData.id}`,
         },
         async (payload) => {
-          console.log("Menu items changed in realtime:", payload);
 
           // Refetch all menu items to ensure consistency
           const { data: menu, error: menuError } = await supabase
@@ -159,7 +153,7 @@ export default function CustomerStore() {
 
           if (!menuError && menu) {
             setMenuItems(menu);
-            console.log("✅ Menu items updated:", menu.length, "items");
+            
           }
         }
       )
@@ -234,28 +228,6 @@ export default function CustomerStore() {
       slug: slug,
       isTrialAccount: storeData.plan === 'trial', // NEW: Disable checkout for trial accounts
     };
-
-    console.log("🎨 Rendering template:", storeData.active_template);
-    console.log("🍔 Menu items to render:", menuItems?.length || 0);
-    console.log("🔑 Yoco keys being passed to template:", {
-      public: storeData.yoco_public_key ? storeData.yoco_public_key.substring(0, 20) + '...' : 'MISSING',
-      secret: storeData.yoco_secret_key ? storeData.yoco_secret_key.substring(0, 20) + '...' : 'MISSING'
-    });
-    console.log("🔗 Social links debug:", {
-      socialsFromDB: storeData.socials,
-      socialsInState: state.about.socials,
-      showAbout: state.show_about,
-      hasNonEmptySocials: state.about.socials && Object.keys(state.about.socials).filter(k => state.about.socials[k]).length > 0
-    });
-    console.log("📋 Instructions debug:", {
-      show_instructions: storeData.show_instructions,
-      instructions: storeData.instructions,
-      willShowButton: state.show_instructions && state.instructions
-    });
-    console.log("📢 Announcements debug:", {
-      specials_text: storeData.specials_text,
-      willShowButton: !!storeData.specials_text
-    });
 
     const commonProps = { state, storeId: storeData.id, cart };
 

@@ -14,8 +14,6 @@ async function authenticateDomains() {
   const username = import.meta.env.VITE_DOMAINS_USERNAME;
   const password = import.meta.env.VITE_DOMAINS_API_KEY;
 
-  console.log("Authenticating with Domains.co.za:", { username, hasPassword: !!password });
-
   if (!username || !password) {
     throw new Error("Domain API credentials not configured");
   }
@@ -27,7 +25,6 @@ async function authenticateDomains() {
   });
 
   const data = await response.json();
-  console.log("Auth response:", data);
 
   if (data.intReturnCode !== 1) {
     throw new Error(data.strMessage || "Authentication failed");
@@ -48,10 +45,7 @@ export async function checkDomainAvailability(domainName) {
     const sld = parts[0];
     const tld = parts.slice(1).join("."); // "co.za"
 
-    console.log("Checking domain:", { domainName, sld, tld });
-
     const token = await authenticateDomains();
-    console.log("Got JWT token");
 
     const response = await fetch(
       `${DOMAINS_API_URL}?path=domain/check&sld=${encodeURIComponent(sld)}&tld=${encodeURIComponent(tld)}`,
@@ -64,7 +58,6 @@ export async function checkDomainAvailability(domainName) {
     );
 
     const data = await response.json();
-    console.log("Domain check response:", data);
 
     return {
       available: data.isAvailable === true,
@@ -72,7 +65,7 @@ export async function checkDomainAvailability(domainName) {
       message: data.isAvailable ? "Domain available!" : "Domain already taken",
     };
   } catch (error) {
-    console.error("Domain availability check failed:", error);
+    
     throw error;
   }
 }
@@ -89,8 +82,6 @@ export async function registerDomain(domainName, customerInfo) {
     const parts = domainName.split(".");
     const sld = parts[0];
     const tld = parts.slice(1).join("."); // "co.za"
-
-    console.log("Registering domain:", { domainName, sld, tld });
 
     const token = await authenticateDomains();
 
@@ -136,7 +127,7 @@ export async function registerDomain(domainName, customerInfo) {
       throw new Error(data.strMessage || "Domain registration failed");
     }
   } catch (error) {
-    console.error("Domain registration failed:", error);
+    
     throw error;
   }
 }
@@ -188,7 +179,7 @@ export async function configureCloudflareDNS(domainName, targetUrl) {
       throw new Error(data.errors?.[0]?.message || "DNS configuration failed");
     }
   } catch (error) {
-    console.error("Cloudflare DNS configuration failed:", error);
+    
     throw error;
   }
 }
@@ -238,7 +229,7 @@ export async function claimDomain(domainName, customerInfo, supabase) {
       .eq("id", customerInfo.storeId);
 
     if (dbError) {
-      console.error("Database update failed:", dbError);
+      
       throw new Error("Failed to save domain to database");
     }
 
@@ -249,7 +240,7 @@ export async function claimDomain(domainName, customerInfo, supabase) {
       message: `Domain ${domainName} claimed successfully! It will be live within 24 hours.`,
     };
   } catch (error) {
-    console.error("Domain claim flow failed:", error);
+    
     throw error;
   }
 }

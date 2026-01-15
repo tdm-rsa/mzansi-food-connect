@@ -66,7 +66,7 @@ export default function LiveQueue() {
         setConfirmedOrders(confirmed || []);
         setLoading(false);
       } catch (err) {
-        console.error("Error loading queue:", err);
+        
         setError("Failed to load queue");
         setLoading(false);
       }

@@ -47,19 +47,18 @@ export default function ProAnalytics({ storeInfo, onBack, darkMode }) {
       if (error) throw error;
 
       if (orders && orders.length > 0) {
-        console.log("Pro Analytics - Orders fetched:", orders);
-        console.log("Pro Analytics - Order statuses:");
+
         orders.forEach((o, idx) => {
-          console.log(`  Order ${idx + 1}: status="${o.status}", amount=${o.total}`);
+          
         });
 
         // Accept ALL orders (don't filter by status)
         const validOrders = orders;
-        console.log("Pro Analytics - Valid orders count:", validOrders.length);
+        
         calculateStats(validOrders);
       }
     } catch (err) {
-      console.error("Error loading analytics:", err);
+      
     }
 
     setLoading(false);

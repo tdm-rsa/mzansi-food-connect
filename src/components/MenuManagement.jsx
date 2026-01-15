@@ -25,7 +25,7 @@ async function uploadProductImage(file, storeId) {
 
     return publicUrl;
   } catch (err) {
-    console.error("Upload failed:", err);
+    
     throw err;
   }
 }
@@ -126,7 +126,7 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
       setShowAddModal(false);
       onRefresh();
     } catch (err) {
-      console.error("Save failed:", err);
+      
       alert(`❌ Failed to save: ${err.message}`);
     } finally {
       setSaving(false);
@@ -156,7 +156,7 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
       alert("✅ Item deleted");
       onRefresh();
     } catch (err) {
-      console.error("Delete failed:", err);
+      
       alert(`❌ Delete failed: ${err.message}`);
     }
   };

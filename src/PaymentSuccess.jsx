@@ -43,7 +43,7 @@ export default function PaymentSuccess() {
           setStatus('success');
           
           // Clear cart when order is confirmed
-          console.log("✅ Order confirmed, clearing cart for slug:", effectiveSlug);
+          
           cart.clearCart();
           
           return true;

@@ -12,10 +12,6 @@ export default function TraditionalSATemplate(props) {
 
   // DEBUG: Log what data the template receives
   useEffect(() => {
-    console.log("🎨 TraditionalSATemplate - banner.showInstructions:", banner.showInstructions);
-    console.log("🎨 TraditionalSATemplate - banner.instructions:", banner.instructions);
-    console.log("🎨 TraditionalSATemplate - banner.showNotes:", banner.showNotes);
-    console.log("🎨 TraditionalSATemplate - banner.notes:", banner.notes);
   }, [banner]);
 
   // ✅ Cart state with localStorage persistence
@@ -39,7 +35,6 @@ export default function TraditionalSATemplate(props) {
       const savedCart = localStorage.getItem(cartStorageKey);
       return savedCart ? normalizeCartItems(JSON.parse(savedCart)) : [];
     } catch (error) {
-      console.error('Failed to load cart from localStorage:', error);
       return [];
     }
   });
@@ -53,7 +48,6 @@ export default function TraditionalSATemplate(props) {
         return cartItems.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
       }
     } catch (error) {
-      console.error('Failed to calculate total from localStorage:', error);
     }
     return 0;
   });
@@ -65,7 +59,6 @@ export default function TraditionalSATemplate(props) {
     try {
       localStorage.setItem(cartStorageKey, JSON.stringify(cart));
     } catch (error) {
-      console.error('Failed to save cart to localStorage:', error);
     }
   }, [cart, cartStorageKey]);
   const [customerName, setCustomerName] = useState("");
@@ -175,7 +168,6 @@ export default function TraditionalSATemplate(props) {
     try {
       localStorage.removeItem(cartStorageKey);
     } catch (error) {
-      console.error('Failed to clear cart from localStorage:', error);
     }
   };
 
@@ -186,18 +178,12 @@ export default function TraditionalSATemplate(props) {
   // Debug: Log Yoco setup
   useEffect(() => {
     if (!yocoPublicKey) {
-      console.error('❌ YOCO PUBLIC KEY MISSING! Vendor needs to add Yoco keys in Settings');
     } else {
-      console.log('✅ Yoco public key loaded:', yocoPublicKey.substring(0, 20) + '...');
-      console.log('   Source:', yoco_public_key ? 'Database (store settings)' : 'Environment variable');
     }
   }, [yocoPublicKey, yoco_public_key]);
 
   // ✅ Handle Yoco Payment - Create checkout session via edge function
   const handleYocoPayment = async () => {
-    console.log('🔵 handleYocoPayment called');
-    console.log('🔵 yocoPublicKey:', yocoPublicKey);
-    console.log('🔵 totalInCents:', totalInCents);
 
     if (!yocoPublicKey) {
       alert('⚠️ Payment is not configured. Please contact the store.');
@@ -239,7 +225,6 @@ export default function TraditionalSATemplate(props) {
       );
 
       if (error) {
-        console.error('Checkout creation error:', error);
         throw new Error(error.message || 'Failed to create checkout session');
       }
 
@@ -248,11 +233,9 @@ export default function TraditionalSATemplate(props) {
       }
 
       // Redirect to Yoco checkout page
-      console.log('✅ Redirecting to Yoco checkout:', data.checkoutId);
       window.location.href = data.redirectUrl;
 
     } catch (err) {
-      console.error('Payment initialization error:', err);
       alert('⚠️ Payment initialization failed: ' + err.message);
       setProcessing(false);
     }
@@ -290,7 +273,6 @@ export default function TraditionalSATemplate(props) {
       setAskPhone("");
       setAskMessage("");
     } catch (err) {
-      console.error("❌ Could not send message:", err.message);
       alert("⚠️ Failed to send message. Try again later.");
     } finally {
       setAskSending(false);
@@ -591,7 +573,6 @@ export default function TraditionalSATemplate(props) {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('🔴 BUTTON CLICKED - Event fired!');
                       handleYocoPayment();
                     }}
                     className="checkout-btn"
