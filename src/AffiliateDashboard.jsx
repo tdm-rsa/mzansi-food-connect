@@ -639,6 +639,120 @@ export default function AffiliateDashboard() {
           </div>
         </div>
 
+        {/* Resources & Downloads */}
+        <div style={{
+          background: "white",
+          padding: "2rem",
+          borderRadius: "12px",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          marginBottom: "2rem"
+        }}>
+          <h2 style={{ margin: "0 0 1rem 0", fontSize: "1.25rem" }}>📚 Resources & Guides</h2>
+          <p style={{ color: "#6b7280", marginBottom: "1.5rem" }}>
+            Download these guides to help you understand the platform and grow your affiliate business
+          </p>
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "1rem"
+          }}>
+            {/* How Mzansi Works Guide */}
+            <div style={{
+              border: "2px solid #e5e7eb",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem"
+            }}>
+              <div style={{ fontSize: "2.5rem" }}>🍽️</div>
+              <div>
+                <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem" }}>
+                  How Mzansi Food Connect Works
+                </h3>
+                <p style={{ margin: 0, color: "#6b7280", fontSize: "0.9rem" }}>
+                  Complete guide explaining our platform for food vendors. Perfect for sharing with prospects!
+                </p>
+              </div>
+              <a
+                href="/how-mzansi-works.md"
+                download="How-Mzansi-Food-Connect-Works.md"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  padding: "0.75rem 1rem",
+                  background: "#667eea",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                  cursor: "pointer"
+                }}
+              >
+                <span>⬇️</span> Download Guide
+              </a>
+            </div>
+
+            {/* Affiliate Program Guide */}
+            <div style={{
+              border: "2px solid #e5e7eb",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem"
+            }}>
+              <div style={{ fontSize: "2.5rem" }}>💰</div>
+              <div>
+                <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem" }}>
+                  Affiliate Program Guide
+                </h3>
+                <p style={{ margin: 0, color: "#6b7280", fontSize: "0.9rem" }}>
+                  Everything you need to know about earning with our affiliate program. Tips, strategies & FAQs.
+                </p>
+              </div>
+              <a
+                href="/affiliate-program-guide.md"
+                download="Mzansi-Affiliate-Program-Guide.md"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  padding: "0.75rem 1rem",
+                  background: "#10b981",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                  cursor: "pointer"
+                }}
+              >
+                <span>⬇️</span> Download Guide
+              </a>
+            </div>
+          </div>
+
+          <div style={{
+            marginTop: "1.5rem",
+            padding: "1rem",
+            background: "#f0f9ff",
+            border: "1px solid #bae6fd",
+            borderRadius: "8px",
+            fontSize: "0.9rem",
+            color: "#0c4a6e"
+          }}>
+            💡 <strong>Tip:</strong> Share the "How Mzansi Works" guide with food vendors to help them understand the platform better. It makes your job easier!
+          </div>
+        </div>
+
         {/* Referrals List */}
         <div style={{
           background: "white",
