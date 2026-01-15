@@ -42,10 +42,11 @@ export default function AffiliateSignup({ onSuccess }) {
     setLoading(true);
 
     try {
-      // Validate phone number (South African format)
-      const phoneRegex = /^(\+27|0)[6-8][0-9]{8}$/;
-      if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
-        throw new Error("Please enter a valid South African phone number");
+      // Validate phone number (South African format - more flexible)
+      const cleanPhone = formData.phone.replace(/\s/g, '');
+      const phoneRegex = /^(\+27|0)[0-9]{9}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        throw new Error("Please enter a valid South African phone number (e.g., 0821234567 or +27821234567)");
       }
 
       // Validate email
@@ -62,14 +63,20 @@ export default function AffiliateSignup({ onSuccess }) {
         .single();
 
       if (existing) {
-        throw new Error("This email is already registered. Please login to your affiliate dashboard.");
+        throw new Error("This email is already registered. Please login to your affiliate dashboard instead.");
       }
 
-      // Generate referral code on client side temporarily
-      const tempCode = formData.fullName
-        .split(' ')[0]
-        .toUpperCase()
-        .substring(0, 6) + Math.floor(Math.random() * 1000);
+      // Validate account number (basic check)
+      const cleanAccountNumber = formData.accountNumber.replace(/\s/g, '');
+      if (cleanAccountNumber.length < 9 || cleanAccountNumber.length > 11) {
+        throw new Error("Please enter a valid bank account number (9-11 digits)");
+      }
+
+      // Generate unique referral code
+      const firstName = formData.fullName.split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '');
+      const baseCode = firstName.substring(0, 4).padEnd(4, 'X');
+      const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const tempCode = baseCode + randomSuffix;
 
       // Insert affiliate
       const { data: affiliate, error: insertError } = await supabase
@@ -77,17 +84,30 @@ export default function AffiliateSignup({ onSuccess }) {
         .insert([{
           full_name: formData.fullName,
           email: formData.email.toLowerCase(),
-          phone: formData.phone.replace(/\s/g, ''),
+          phone: cleanPhone,
           bank_name: formData.bankName,
-          account_number: formData.accountNumber,
+          account_number: cleanAccountNumber,
           account_type: formData.accountType,
           referral_code: tempCode,
-          status: 'active'
+          status: 'active',
+          total_referrals: 0,
+          active_referrals: 0,
+          total_earned: 0,
+          total_paid: 0,
+          pending_payout: 0,
+          available_balance: 0,
+          requested_payout: 0
         }])
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        if (insertError.code === '23505' && insertError.message.includes('referral_code')) {
+          // Duplicate referral code, retry with new code
+          throw new Error("Please try again - referral code generation issue");
+        }
+        throw insertError;
+      }
 
       setReferralCode(affiliate.referral_code);
       setSuccess(true);
