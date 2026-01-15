@@ -843,6 +843,49 @@ export default function AffiliateDashboard() {
                 <span>⬇️</span> Download Guide
               </a>
             </div>
+
+            {/* Creator Portfolio */}
+            <div style={{
+              border: "2px solid #764ba2",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+              background: "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)"
+            }}>
+              <div style={{ fontSize: "2.5rem" }}>✨</div>
+              <div>
+                <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem" }}>
+                  Meet the Creator
+                </h3>
+                <p style={{ margin: 0, color: "#6b7280", fontSize: "0.9rem" }}>
+                  Learn about Nqubeko Ngcece, the UCT Machine Learning student who built this platform. Discover his services including StemFactory tutoring & custom web development.
+                </p>
+              </div>
+              <a
+                href="/creator"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  padding: "0.75rem 1rem",
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                  cursor: "pointer"
+                }}
+              >
+                <span>👨‍💻</span> View Portfolio
+              </a>
+            </div>
           </div>
 
           <div style={{
