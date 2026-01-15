@@ -503,7 +503,8 @@ export default function AffiliateDashboard() {
             display: "flex",
             gap: "1rem",
             alignItems: "center",
-            flexWrap: "wrap"
+            flexWrap: "wrap",
+            marginBottom: "1.5rem"
           }}>
             <div style={{
               flex: 1,
@@ -536,6 +537,105 @@ export default function AffiliateDashboard() {
             >
               📋 Copy Link
             </button>
+          </div>
+
+          {/* Share Buttons */}
+          <div style={{ marginTop: "1rem", borderTop: "1px solid #e5e7eb", paddingTop: "1.5rem" }}>
+            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#6b7280" }}>📢 Share your link:</h3>
+            <div style={{
+              display: "flex",
+              gap: "0.75rem",
+              flexWrap: "wrap"
+            }}>
+              <button
+                onClick={() => {
+                  const message = `🍽️ Start your food business online with Mzansi Food Connect!\n\n✅ Free Trial • Online Orders • Payments • Analytics\n\nSign up now: ${referralLink}`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: "#25D366",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}
+              >
+                <span>💬</span> WhatsApp
+              </button>
+
+              <button
+                onClick={() => {
+                  const message = `🍽️ Start your food business online! ${referralLink}`;
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(message)}`, '_blank');
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: "#1877F2",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}
+              >
+                <span>📘</span> Facebook
+              </button>
+
+              <button
+                onClick={() => {
+                  const message = `🍽️ Start your food business online with Mzansi Food Connect! ${referralLink}`;
+                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`, '_blank');
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: "#000000",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}
+              >
+                <span>𝕏</span> Twitter
+              </button>
+
+              <button
+                onClick={() => {
+                  const message = `🍽️ Start your food business online with Mzansi Food Connect!\n\nFree Trial • Online Orders • Payments • Analytics\n\nSign up: ${referralLink}`;
+                  navigator.clipboard.writeText(message);
+                  alert("✅ Message copied! Paste it anywhere (Instagram, TikTok, SMS, etc.)");
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}
+              >
+                <span>📱</span> More...
+              </button>
+            </div>
           </div>
         </div>
 
