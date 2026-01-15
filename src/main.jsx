@@ -17,6 +17,7 @@ import AdminLogin from "./AdminLogin.jsx";
 import AdminDashboardPage from "./AdminDashboardPage.jsx";
 import AffiliateSignup from "./AffiliateSignup.jsx";
 import AffiliateDashboard from "./AffiliateDashboard.jsx";
+import AffiliateTerms from "./AffiliateTerms.jsx";
 import { getSubdomain } from "./utils/subdomain.js";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
@@ -167,6 +168,7 @@ function AppRouter() {
       {/* Affiliate Program Routes */}
       <Route path="/become-affiliate" element={<AffiliateSignup />} />
       <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
+      <Route path="/affiliate-terms" element={<AffiliateTerms />} />
 
       {/* Legacy landing route (redirect to home) */}
       <Route path="/landing" element={<Landing />} />

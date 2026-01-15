@@ -15,6 +15,7 @@ export default function AffiliateSignup({ onSuccess }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [referralCode, setReferralCode] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const bankOptions = [
     "ABSA",
@@ -42,6 +43,11 @@ export default function AffiliateSignup({ onSuccess }) {
     setLoading(true);
 
     try {
+      // Check terms acceptance
+      if (!termsAccepted) {
+        throw new Error("You must accept the Terms & Conditions to continue");
+      }
+
       // Validate and normalize phone number (South African format)
       let cleanPhone = formData.phone.replace(/\s/g, '').replace(/-/g, '');
       const phoneRegex = /^(\+27|0)[0-9]{9}$/;
@@ -477,13 +483,60 @@ export default function AffiliateSignup({ onSuccess }) {
               </div>
             )}
 
+            {/* Terms & Conditions Checkbox */}
+            <div style={{ marginTop: "1.5rem" }}>
+              <label style={{
+                display: "flex",
+                gap: "0.75rem",
+                alignItems: "flex-start",
+                cursor: "pointer",
+                padding: "1rem",
+                background: termsAccepted ? "#f0fdf4" : "#fef3c7",
+                border: `2px solid ${termsAccepted ? "#10b981" : "#f59e0b"}`,
+                borderRadius: "8px",
+                transition: "all 0.2s"
+              }}>
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  required
+                  style={{
+                    marginTop: "0.25rem",
+                    width: "18px",
+                    height: "18px",
+                    cursor: "pointer"
+                  }}
+                />
+                <span style={{ fontSize: "0.9rem", lineHeight: "1.5" }}>
+                  I have read and agree to the{" "}
+                  <a
+                    href="/affiliate-terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "#667eea",
+                      textDecoration: "underline",
+                      fontWeight: "600"
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Affiliate Program Terms & Conditions
+                  </a>
+                  {" "}*
+                </span>
+              </label>
+            </div>
+
             <button
               type="submit"
               className="login-btn"
-              disabled={loading}
+              disabled={loading || !termsAccepted}
               style={{
                 width: "100%",
-                marginTop: "1rem"
+                marginTop: "1rem",
+                opacity: !termsAccepted ? 0.5 : 1,
+                cursor: !termsAccepted ? "not-allowed" : "pointer"
               }}
             >
               {loading ? (
