@@ -313,9 +313,18 @@
   padding: clamp(var(--space-lg), 1vw + var(--space-lg), var(--space-2xl));
   gap: var(--space-md);
   min-height: 100%;
+  text-align: left;
+}
+
+.plan-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .pricing-card h3 {
+  display: block;
+  width: 100%;
   font-size: clamp(1.25rem, 1.5vw, 1.6rem);
   line-height: 1.2;
   margin-bottom: var(--space-3xs);

@@ -55,7 +55,9 @@
       "Bash(node apply-rls-fix.mjs:*)",
       "Bash(node invoke-rls-fix.mjs:*)",
       "Bash(node execute-rls-fix-via-api.mjs:*)",
-      "Bash(node deploy-platform-security.mjs:*)"
+      "Bash(node deploy-platform-security.mjs:*)",
+      "Bash(openssl rand:*)",
+      "Bash(node set-encryption-key.mjs:*)"
     ]
   }
 }
