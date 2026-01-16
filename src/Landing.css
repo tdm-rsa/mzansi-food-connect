@@ -9,12 +9,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3xl);
+  min-height: 100vh;
 }
 
 .container {
-  inline-size: min(100%, clamp(30rem, 92vw, 80rem));
+  inline-size: min(100%, clamp(30rem, 92vw, 90rem));
   margin-inline: auto;
-  padding-inline: clamp(var(--space-md), 2vw, var(--space-xl));
+  padding-inline: clamp(var(--space-sm), 3vw, var(--space-2xl));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -30,9 +31,9 @@
 }
 
 .nav-container {
-  inline-size: min(100%, clamp(30rem, 92vw, 84rem));
+  inline-size: min(100%, clamp(30rem, 92vw, 96rem));
   margin-inline: auto;
-  padding: clamp(var(--space-xs), 1vw, var(--space-md)) clamp(var(--space-md), 2vw, var(--space-xl));
+  padding: clamp(var(--space-xs), 1vw, var(--space-md)) clamp(var(--space-sm), 3vw, var(--space-2xl));
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-md);
@@ -62,6 +63,7 @@
   align-items: center;
   justify-content: flex-end;
   font-size: var(--fs-sm);
+  max-inline-size: 100%;
 }
 
 .nav-links a {
@@ -196,11 +198,12 @@
   padding: clamp(var(--space-2xl), 4vw, var(--space-3xl)) clamp(var(--space-lg), 4vw, var(--space-3xl));
   background: radial-gradient(circle at 30% 20%, rgba(255, 107, 53, 0.4), transparent),
               linear-gradient(145deg, #050505, #141416 65%);
+  align-items: center;
 }
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: var(--fs-3xl);
+  font-size: clamp(2rem, 4vw, var(--fs-3xl));
   line-height: 1.1;
   margin-bottom: var(--space-sm);
 }
@@ -211,7 +214,7 @@
 
 .hero-subtitle {
   color: rgba(255, 255, 255, 0.75);
-  font-size: var(--fs-md);
+  font-size: clamp(1rem, 1.2vw, var(--fs-md));
   margin-bottom: var(--space-md);
 }
 
@@ -240,6 +243,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(clamp(9rem, 40vw, 15rem), 1fr));
   gap: var(--space-sm);
+  align-content: start;
 }
 
 .showcase-item {
@@ -255,7 +259,7 @@
 /* Sections                                                                   */
 /* -------------------------------------------------------------------------- */
 .section-title {
-  font-size: var(--fs-2xl);
+  font-size: clamp(1.6rem, 2.6vw, var(--fs-2xl));
   font-family: var(--font-display);
   margin-bottom: var(--space-sm);
 }
@@ -510,6 +514,93 @@
   flex-wrap: wrap;
   gap: var(--space-xs);
   justify-content: space-between;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Layout helpers for consistent section spacing                              */
+/* -------------------------------------------------------------------------- */
+.hero-section,
+.benefits-section,
+.features-section,
+.pricing-section,
+.testimonials-section,
+.cta-section,
+.landing-footer {
+  padding-inline: clamp(var(--space-sm), 4vw, var(--space-3xl));
+}
+
+.hero-content,
+.hero-visual {
+  min-inline-size: 0;
+}
+
+.benefits-section,
+.features-section,
+.pricing-section {
+  padding-block: clamp(var(--space-xl), 5vw, var(--space-3xl));
+}
+
+.cta-section {
+  padding-block: clamp(var(--space-xl), 4vw, var(--space-3xl));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Wide screens                                                               */
+/* -------------------------------------------------------------------------- */
+@media (min-width: 1200px) {
+  .hero-section {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+}
+
+@media (min-width: 1600px) {
+  .landing-page {
+    gap: clamp(var(--space-2xl), 4vw, var(--space-4xl));
+  }
+
+  .hero-section {
+    padding-block: clamp(var(--space-2xl), 3vw, var(--space-4xl));
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tablet and down                                                            */
+/* -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .hero-section {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-buttons,
+  .cta-buttons {
+    justify-content: flex-start;
+  }
+
+  .nav-links {
+    gap: var(--space-xs);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-title {
+    line-height: 1.15;
+  }
+
+  .btn,
+  .btn-login,
+  .btn-become-affiliate {
+    width: 100%;
+  }
+
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 /* -------------------------------------------------------------------------- */
