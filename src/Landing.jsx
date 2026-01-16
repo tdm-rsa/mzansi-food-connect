@@ -161,8 +161,8 @@ function Landing() {
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
             <a href="/app" className="btn-login">Login</a>
             <a href="/become-affiliate" className="btn-become-affiliate" title="Become an Affiliate">Join Affiliate Program</a>
-            <a href="/admin" className="btn-admin" title="Admin Access">👑</a>
-            <a href="/affiliate-dashboard" className="btn-affiliate" title="Affiliate Login">💰</a>
+            <a href="/admin" className="btn-admin" title="Admin Access"><span>👑</span><span className="btn-label">Admin</span></a>
+            <a href="/affiliate-dashboard" className="btn-affiliate" title="Affiliate Login"><span>💰</span><span className="btn-label">Earnings</span></a>
           </div>
         </div>
       </nav>
