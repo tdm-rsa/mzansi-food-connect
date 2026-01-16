@@ -146,56 +146,55 @@ function Portfolio() {
                 </div>
               </div>
             </div>
-            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
       {/* Services Section */}
       <section id="services" className="services-section">
         <div className="section-inner">
           <h2 className="section-title">Services</h2>
-        <div className="service-tabs">
-          <button
-            className={`service-tab ${activeService === 'stemfactory' ? 'active' : ''}`}
-            onClick={() => setActiveService('stemfactory')}
-          >
-            <img src="/stemfactory-logo.png" alt="StemFactory" className="tab-icon" />
-            StemFactory
-          </button>
-          <button
-            className={`service-tab ${activeService === 'webdev' ? 'active' : ''}`}
-            onClick={() => setActiveService('webdev')}
-          >
-            <span className="tab-icon-text">ðŸ’»</span>
-            Web & App Development
-          </button>
-        </div>
-
-        <div className="service-content">
-          <div className="service-header">
-            <h3>{services[activeService].title}</h3>
-            <p className="service-tagline">{services[activeService].tagline}</p>
+          <div className="service-tabs">
+            <button
+              className={`service-tab ${activeService === 'stemfactory' ? 'active' : ''}`}
+              onClick={() => setActiveService('stemfactory')}
+            >
+              <img src="/stemfactory-logo.png" alt="StemFactory" className="tab-icon" />
+              StemFactory
+            </button>
+            <button
+              className={`service-tab ${activeService === 'webdev' ? 'active' : ''}`}
+              onClick={() => setActiveService('webdev')}
+            >
+              <span className="tab-icon-text">РY'Ї</span>
+              Web & App Development
+            </button>
           </div>
 
-          <p className="service-description">{services[activeService].description}</p>
+          <div className="service-content">
+            <div className="service-header">
+              <h3>{services[activeService].title}</h3>
+              <p className="service-tagline">{services[activeService].tagline}</p>
+            </div>
 
-          <div className="offerings-grid">
-            {services[activeService].offerings.map((offering, index) => (
-              <div key={index} className="offering-card">
-                <h4>{offering.name}</h4>
-                <p className="offering-price">{offering.price}</p>
-                <p className="offering-description">{offering.description}</p>
-              </div>
-            ))}
-          </div>
+            <p className="service-description">{services[activeService].description}</p>
 
-          <div className="commitment-box">
-            <h4>My Commitment</h4>
-            <p>{services[activeService].commitment}</p>
+            <div className="offerings-grid">
+              {services[activeService].offerings.map((offering, index) => (
+                <div key={index} className="offering-card">
+                  <h4>{offering.name}</h4>
+                  <p className="offering-price">{offering.price}</p>
+                  <p className="offering-description">{offering.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="commitment-box">
+              <h4>My Commitment</h4>
+              <p>{services[activeService].commitment}</p>
+            </div>
           </div>
         </div>
-        </div>
-      </div>
       </section>
 
       {/* Portfolio Section */}
@@ -253,23 +252,23 @@ function Portfolio() {
                 </div>
               )}
 
-              <div className="project-footer">
-                <p className="project-tech"><strong>Tech Stack:</strong> {project.tech}</p>
-                {project.link && (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="project-link"
-                  >
-                    Visit Platform â†’
-                  </a>
-                )}
+                <div className="project-footer">
+                  <p className="project-tech"><strong>Tech Stack:</strong> {project.tech}</p>
+                  {project.link && (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="project-link"
+                    >
+                      Visit Platform →
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
       </section>
 
       {/* Contact Section */}
@@ -320,6 +319,7 @@ function Portfolio() {
 }
 
 export default Portfolio;
+
 
 
 
