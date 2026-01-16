@@ -56,7 +56,7 @@ function Portfolio() {
         'Subdomain routing for each business'
       ],
       tech: 'React, Supabase, Vercel, WhatsApp API',
-      link: 'https://www.mzansifoodconnect.com',
+      link: 'https://www.mzansifoodconnect.app',
       type: 'Production SaaS Platform'
     },
     {
