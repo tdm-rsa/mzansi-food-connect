@@ -166,7 +166,7 @@ function Portfolio() {
               className={`service-tab ${activeService === 'webdev' ? 'active' : ''}`}
               onClick={() => setActiveService('webdev')}
             >
-              <span className="tab-icon-text">РY'Ї</span>
+              <span className="tab-icon-text">💻</span>
               Web & App Development
             </button>
           </div>
@@ -295,7 +295,7 @@ function Portfolio() {
                 Facebook
               </a>
               <a href="https://www.instagram.com/nqubekobhutah/" className="social-btn instagram" target="_blank" rel="noopener noreferrer">
-                <span className="social-icon">ÐY"ú</span>
+                <span className="social-icon">📷</span>
                 Instagram
               </a>
               <a href="https://www.linkedin.com/in/nqubeko-ngcece-3057b7265/?originalSubdomain=za" className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
@@ -311,7 +311,7 @@ function Portfolio() {
       <footer className="portfolio-footer">
         <p>&copy; 2026 Nqubeko Ngcece. Built with passion in Cape Town.</p>
         <button onClick={() => navigate('/')} className="back-link">
-          â† Back to Platform
+          &#8592; Back to Platform
         </button>
       </footer>
     </div>
