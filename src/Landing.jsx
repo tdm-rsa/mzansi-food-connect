@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import './Landing.css';
@@ -18,52 +18,52 @@ function Landing() {
   }, [navigate]);
   const features = [
     {
-      icon: "🏪",
+      icon: "ðŸª",
       title: "Your Own Online Store",
       description: "Get a professional storefront with your branding in minutes. No coding needed."
     },
     {
-      icon: "🛒",
+      icon: "ðŸ›’",
       title: "Customers Order Online",
       description: "Your customers browse your menu and place orders directly from your website 24/7."
     },
     {
-      icon: "💬",
+      icon: "ðŸ’¬",
       title: "Customers Send Messages",
       description: "Customers can ask questions about products right on your website. You get notifications in your dashboard."
     },
     {
-      icon: "🔔",
+      icon: "ðŸ””",
       title: "Customer Pickup Notifications",
       description: "Customers get notified when their order is ready. They just come and fetch - no waiting!"
     },
     {
-      icon: "📱",
+      icon: "ðŸ“±",
       title: "WhatsApp Integration",
       description: "Automatic order notifications sent directly to your customers' WhatsApp, they get notified instantly. Stay connected with customers."
     },
     {
-      icon: "💳",
+      icon: "ðŸ’³",
       title: "Secure Online Payments",
       description: "Accept payments instantly with simple and Easy Yoco integration. Get paid faster."
     },
     {
-      icon: "📊",
+      icon: "ðŸ“Š",
       title: "Real-time Analytics",
       description: "Track your sales, best sellers, and customer behavior with live dashboards.Track Your business Growth with live charts and reports."
     },
     {
-      icon: "🎨",
+      icon: "ðŸŽ¨",
       title: "Store Designer",
       description: "Customize your store colors, layout, and branding to match your business. Create a QR code for customers to scan and pay online."
     },
     {
-      icon: "📋",
+      icon: "ðŸ“‹",
       title: "Menu Management",
       description: "Add, edit, and manage your menu items with photos and descriptions."
     },
     {
-      icon: "🌐",
+      icon: "ðŸŒ",
       title: "Multiple Templates",
       description: "Choose from a variety of designs for your store."
     }
@@ -161,8 +161,11 @@ function Landing() {
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
             <a href="/app" className="btn-login">Login</a>
             <a href="/become-affiliate" className="btn-become-affiliate" title="Become an Affiliate">Join Affiliate Program</a>
-            <a href="/admin" className="btn-admin" title="Admin Access"><span>👑</span><span className="btn-label">Admin</span></a>
-            <a href="/affiliate-dashboard" className="btn-affiliate" title="Affiliate Login"><span>💰</span><span className="btn-label">Earnings</span></a>
+              <a href="/portfolio" className="nav-icon-link" title="Creator Portfolio">
+                <img src="/creator-badge.png" alt="Creator Portfolio" className="nav-icon" />
+              </a>
+              <a href="/admin" className="btn-admin" title="Admin Access"><span>ðŸ‘‘</span><span className="btn-label">Admin</span></a>
+            <a href="/affiliate-dashboard" className="btn-affiliate" title="Affiliate Login"><span>ðŸ’°</span><span className="btn-label">Earnings</span></a>
           </div>
         </div>
       </nav>
@@ -184,15 +187,15 @@ function Landing() {
             <a href="#pricing" className="btn btn-secondary">View Pricing</a>
           </div>
           <div className="hero-trust">
-            <p>⚡ Setup in minutes • 📱 Works on any device • 🇿🇦 Built for SA food businesses</p>
+            <p>âš¡ Setup in minutes â€¢ ðŸ“± Works on any device â€¢ ðŸ‡¿ðŸ‡¦ Built for SA food businesses</p>
           </div>
         </div>
         <div className="hero-visual">
           <div className="food-showcase">
-            <div className="showcase-item">🍗 Mobile Kitchen </div>
-            <div className="showcase-item">🥩 Shisanyama</div>
-            <div className="showcase-item">🍞 Bakery</div>
-            <div className="showcase-item">🍛 Eatery </div>
+            <div className="showcase-item">ðŸ— Mobile Kitchen </div>
+            <div className="showcase-item">ðŸ¥© Shisanyama</div>
+            <div className="showcase-item">ðŸž Bakery</div>
+            <div className="showcase-item">ðŸ› Eatery </div>
           </div>
         </div>
       </section>
@@ -203,22 +206,22 @@ function Landing() {
           <h2 className="section-title">Why Your Business Needs an Online Presence</h2>
           <div className="benefits-grid">
             <div className="benefit-card">
-              <div className="benefit-icon">📈</div>
+              <div className="benefit-icon">ðŸ“ˆ</div>
               <h3>Reach More Customers</h3>
               <p>Expand beyond walk-ins. Your customers can find and order from you anytime, anywhere.</p>
             </div>
             <div className="benefit-card">
-              <div className="benefit-icon">💰</div>
+              <div className="benefit-icon">ðŸ’°</div>
               <h3>Increase Sales</h3>
               <p>Accept online orders 24/7. More orders mean more revenue for your business.</p>
             </div>
             <div className="benefit-card">
-              <div className="benefit-icon">⭐</div>
+              <div className="benefit-icon">â­</div>
               <h3>Build Trust & Brand</h3>
               <p>A professional online store builds credibility and strengthens your brand identity.</p>
             </div>
             <div className="benefit-card">
-              <div className="benefit-icon">📲</div>
+              <div className="benefit-icon">ðŸ“²</div>
               <h3>Compete with Big Brands</h3>
               <p>Level the playing field. Look as professional as the big chains at a fraction of the cost.</p>
             </div>
@@ -266,7 +269,7 @@ function Landing() {
                 <ul className="plan-features">
                   {plan.features.map((feature, i) => (
                     <li key={i}>
-                      <span className="check-icon">✓</span>
+                      <span className="check-icon">âœ“</span>
                       {feature}
                     </li>
                   ))}
@@ -294,7 +297,7 @@ function Landing() {
             <a href="/app" className="btn btn-primary btn-large">Get Started Now</a>
             <a href="#features" className="btn btn-secondary btn-large">Explore Features</a>
           </div>
-          <p className="cta-subtext">Setup takes 5 minutes • Free forever plan available • Plans from R159/month</p>
+          <p className="cta-subtext">Setup takes 5 minutes â€¢ Free forever plan available â€¢ Plans from R159/month</p>
         </div>
       </section>
 
@@ -337,3 +340,5 @@ function Landing() {
 }
 
 export default Landing;
+
+

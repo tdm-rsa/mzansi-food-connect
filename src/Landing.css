@@ -72,6 +72,22 @@
   transition: color 150ms ease;
 }
 
+.nav-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4xs);
+  border-radius: var(--radius-md);
+  border: var(--border-hairline) solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-icon {
+  inline-size: clamp(2rem, 5vw, 2.4rem);
+  block-size: clamp(2rem, 5vw, 2.4rem);
+  object-fit: contain;
+}
+
 .nav-links a:hover {
   color: #ff6b35;
 }
