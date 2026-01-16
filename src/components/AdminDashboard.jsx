@@ -110,12 +110,16 @@ export default function AdminDashboard({ onLogout }) {
 
       const recentSignups = tenants
         .filter(t => new Date(t.created_at) >= thirtyDaysAgo)
-        .map(t => ({
-          date: new Date(t.created_at).toLocaleDateString("en-ZA"),
-          storeName: t.name,
-          plan: t.plan || "trial",
-          email: t.owner_email || "N/A"
-        }));
+        .map(t => {
+          const createdDate = new Date(t.created_at);
+          return {
+            date: createdDate.toLocaleDateString("en-ZA"),
+            time: createdDate.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" }),
+            storeName: t.name,
+            plan: t.plan || "trial",
+            email: t.owner_email || "N/A"
+          };
+        });
 
       // Fetch affiliate stats
       let affiliateStats = {
@@ -381,6 +385,7 @@ export default function AdminDashboard({ onLogout }) {
               <thead>
                 <tr>
                   <th>Date</th>
+                  <th>Time</th>
                   <th>Store Name</th>
                   <th>Plan</th>
                   <th>Email</th>
@@ -390,6 +395,7 @@ export default function AdminDashboard({ onLogout }) {
                 {stats.recentSignups.map((signup, idx) => (
                   <tr key={idx}>
                     <td>{signup.date}</td>
+                    <td>{signup.time}</td>
                     <td>{signup.storeName}</td>
                     <td>
                       <span className={`plan-badge ${signup.plan}`}>

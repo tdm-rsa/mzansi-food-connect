@@ -149,7 +149,7 @@ export default function AnalyticsView({ storeInfo, plan = 'trial', onBack }) {
                 cursor: "pointer"
               }}
             >
-              Upgrade to Premium - R25/month 🌍
+              Upgrade to Premium - R215/month 🌍
             </button>
           </div>
         </>

@@ -175,7 +175,7 @@ export default function StarterAnalytics({ storeInfo, onBack, darkMode }) {
             ✅ Remove Branding
           </p>
           <p style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "1rem" }}>
-            R25<span style={{ fontSize: "1rem", opacity: 0.8 }}>/month</span>
+            R159<span style={{ fontSize: "1rem", opacity: 0.8 }}>/month</span>
           </p>
           <button
             onClick={() => alert("Redirect to Pro upgrade payment")}
@@ -213,7 +213,7 @@ export default function StarterAnalytics({ storeInfo, onBack, darkMode }) {
             ✅ Custom Domain
           </p>
           <p style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "1rem" }}>
-            R25<span style={{ fontSize: "1rem", opacity: 0.8 }}>/month</span>
+            R215<span style={{ fontSize: "1rem", opacity: 0.8 }}>/month</span>
           </p>
           <button
             onClick={() => alert("Redirect to Premium upgrade payment")}

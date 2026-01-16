@@ -338,7 +338,7 @@ export default function ProDashboardView({
             cursor: "pointer"
           }}
         >
-          Upgrade to Premium - R25/month (Only R25 more!)
+          Upgrade to Premium - R215/month (Only R56 more!)
         </button>
       </div>
     </div>
