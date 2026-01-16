@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Portfolio.css';
 
@@ -91,47 +91,69 @@ function Portfolio() {
 
   return (
     <div className="portfolio-container">
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <div className="hero-image-wrapper">
-            <img
-              src="/nqubeko-profile.jpg"
-              alt="Nqubeko Ngcece"
-              className="hero-image"
-            />
-            <div className="hero-badge">
-              <img src="/creator-badge.png" alt="Creator" className="badge-icon" />
-            </div>
+      <nav className="portfolio-nav">
+        <div className="nav-inner">
+          <div className="nav-brand">
+            <span className="nav-kicker">Creator Portfolio</span>
+            <span className="nav-name">Nqubeko Ngcece</span>
           </div>
-          <div className="hero-text">
-            <h1 className="hero-title">Nqubeko Ngcece</h1>
-            <p className="hero-subtitle">4th Year UCT Machine Learning Student</p>
-            <p className="hero-description">
-              I am an ambitious young man coming from Umlazi Township. I have been in University for 3+ years now
-              and I am the perfect person to help you navigate the environment.
-            </p>
-            <div className="hero-stats">
-              <div className="stat-item">
-                <span className="stat-number">3+</span>
-                <span className="stat-label">Years at UCT</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">2+</span>
-                <span className="stat-label">Years Building</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">2</span>
-                <span className="stat-label">SaaS Platforms</span>
-              </div>
-            </div>
+          <div className="nav-links">
+            <a href="#services">Services</a>
+            <a href="#work">My Work</a>
+            <a href="#contact">Contact</a>
+          </div>
+          <div className="nav-actions">
+            <img src="/creator-badge.png" alt="Creator" className="nav-creator-icon" />
+            <button onClick={() => navigate('/')} className="nav-back">
+              Back to Platform
+            </button>
           </div>
         </div>
-      </section>
+      </nav>
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-inner">
+          <div className="hero-content">
+            <div className="hero-image-wrapper">
+              <img
+                src="/nqubeko-profile.jpg"
+                alt="Nqubeko Ngcece"
+                className="hero-image"
+              />
+              <div className="hero-badge">
+                <img src="/creator-badge.png" alt="Creator" className="badge-icon" />
+              </div>
+            </div>
+            <div className="hero-text">
+              <h1 className="hero-title">Nqubeko Ngcece</h1>
+              <p className="hero-subtitle">4th Year UCT Machine Learning Student</p>
+              <p className="hero-description">
+                I am an ambitious young man coming from Umlazi Township. I have been in University for 3+ years now
+                and I am the perfect person to help you navigate the environment.
+              </p>
+              <div className="hero-stats">
+                <div className="stat-item">
+                  <span className="stat-number">3+</span>
+                  <span className="stat-label">Years at UCT</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">2+</span>
+                  <span className="stat-label">Years Building</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">2</span>
+                  <span className="stat-label">SaaS Platforms</span>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </section>
 
       {/* Services Section */}
-      <section className="services-section">
-        <h2 className="section-title">Services</h2>
+      <section id="services" className="services-section">
+        <div className="section-inner">
+          <h2 className="section-title">Services</h2>
         <div className="service-tabs">
           <button
             className={`service-tab ${activeService === 'stemfactory' ? 'active' : ''}`}
@@ -144,7 +166,7 @@ function Portfolio() {
             className={`service-tab ${activeService === 'webdev' ? 'active' : ''}`}
             onClick={() => setActiveService('webdev')}
           >
-            <span className="tab-icon-text">💻</span>
+            <span className="tab-icon-text">ðŸ’»</span>
             Web & App Development
           </button>
         </div>
@@ -172,32 +194,35 @@ function Portfolio() {
             <p>{services[activeService].commitment}</p>
           </div>
         </div>
+        </div>
+      </div>
       </section>
 
       {/* Portfolio Section */}
-      <section className="portfolio-section">
-        <h2 className="section-title">My Work</h2>
-        <p className="section-subtitle">Production-ready SaaS platforms serving African entrepreneurs</p>
+      <section id="work" className="portfolio-section">
+        <div className="section-inner">
+          <h2 className="section-title">My Work</h2>
+          <p className="section-subtitle">Production-ready SaaS platforms serving African entrepreneurs</p>
 
-        <div className="projects-grid">
-          {projects.map((project, index) => (
-            <div key={index} className="project-card">
-              <div className="project-header">
-                <img src={project.logo} alt={project.name} className="project-logo" />
-                <span className="project-type">{project.type}</span>
-              </div>
+          <div className="projects-grid">
+            {projects.map((project, index) => (
+              <div key={index} className="project-card">
+                <div className="project-header">
+                  <img src={project.logo} alt={project.name} className="project-logo" />
+                  <span className="project-type">{project.type}</span>
+                </div>
 
-              <h3 className="project-name">{project.name}</h3>
-              <p className="project-description">{project.description}</p>
+                <h3 className="project-name">{project.name}</h3>
+                <p className="project-description">{project.description}</p>
 
-              <div className="project-features">
-                <h4>Key Features:</h4>
-                <ul>
-                  {project.features.map((feature, idx) => (
-                    <li key={idx}>{feature}</li>
-                  ))}
-                </ul>
-              </div>
+                <div className="project-features">
+                  <h4>Key Features:</h4>
+                  <ul>
+                    {project.features.map((feature, idx) => (
+                      <li key={idx}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
 
               {project.highlights && (
                 <div className="project-highlights">
@@ -237,45 +262,48 @@ function Portfolio() {
                     rel="noopener noreferrer"
                     className="project-link"
                   >
-                    Visit Platform →
+                    Visit Platform â†’
                   </a>
                 )}
               </div>
             </div>
           ))}
         </div>
+      </div>
       </section>
 
       {/* Contact Section */}
-      <section className="contact-section">
-        <h2 className="section-title">Let's Work Together</h2>
-        <p className="contact-description">
-          Whether you need tutoring, want to build a website, or have a project idea, I'm here to help.
-        </p>
-        <div className="contact-buttons">
-          <a href="https://wa.me/27XXXXXXXXX" className="contact-btn whatsapp" target="_blank" rel="noopener noreferrer">
-            WhatsApp Me
-          </a>
-          <a href="mailto:nqubeko@example.com" className="contact-btn email">
-            Email Me
-          </a>
-        </div>
+      <section id="contact" className="contact-section">
+        <div className="section-inner">
+          <h2 className="section-title">Let's Work Together</h2>
+          <p className="contact-description">
+            Whether you need tutoring, want to build a website, or have a project idea, I'm here to help.
+          </p>
+          <div className="contact-buttons">
+            <a href="https://wa.me/27XXXXXXXXX" className="contact-btn whatsapp" target="_blank" rel="noopener noreferrer">
+              WhatsApp Me
+            </a>
+            <a href="mailto:nqubeko@example.com" className="contact-btn email">
+              Email Me
+            </a>
+          </div>
 
-        <div className="social-links">
-          <h3>Connect with me</h3>
-          <div className="social-buttons">
-            <a href="https://www.facebook.com/nqubeko.49550/" className="social-btn facebook" target="_blank" rel="noopener noreferrer">
-              <span className="social-icon">f</span>
-              Facebook
-            </a>
-            <a href="https://www.instagram.com/nqubekobhutah/" className="social-btn instagram" target="_blank" rel="noopener noreferrer">
-              <span className="social-icon">📷</span>
-              Instagram
-            </a>
-            <a href="https://www.linkedin.com/in/nqubeko-ngcece-3057b7265/?originalSubdomain=za" className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
-              <span className="social-icon">in</span>
-              LinkedIn
-            </a>
+          <div className="social-links">
+            <h3>Connect with me</h3>
+            <div className="social-buttons">
+              <a href="https://www.facebook.com/nqubeko.49550/" className="social-btn facebook" target="_blank" rel="noopener noreferrer">
+                <span className="social-icon">f</span>
+                Facebook
+              </a>
+              <a href="https://www.instagram.com/nqubekobhutah/" className="social-btn instagram" target="_blank" rel="noopener noreferrer">
+                <span className="social-icon">ÐY"ú</span>
+                Instagram
+              </a>
+              <a href="https://www.linkedin.com/in/nqubeko-ngcece-3057b7265/?originalSubdomain=za" className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
+                <span className="social-icon">in</span>
+                LinkedIn
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -284,7 +312,7 @@ function Portfolio() {
       <footer className="portfolio-footer">
         <p>&copy; 2026 Nqubeko Ngcece. Built with passion in Cape Town.</p>
         <button onClick={() => navigate('/')} className="back-link">
-          ← Back to Platform
+          â† Back to Platform
         </button>
       </footer>
     </div>
@@ -292,3 +320,6 @@ function Portfolio() {
 }
 
 export default Portfolio;
+
+
+
