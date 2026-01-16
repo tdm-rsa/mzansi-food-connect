@@ -291,6 +291,10 @@
   font-size: var(--fs-2xl);
 }
 
+.benefits-grid {
+  grid-template-columns: repeat(auto-fit, minmax(clamp(14rem, 40vw, 22rem), 1fr));
+}
+
 .features-grid {
   grid-template-columns: repeat(auto-fit, minmax(clamp(12rem, 32vw, 20rem), 1fr));
 }
