@@ -88,10 +88,8 @@ serve(async (req) => {
     // Send email to admin
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
-    // Mask account number (show only last 4 digits for security)
-    const maskedAccountNumber = affiliate.account_number
-      ? '****' + affiliate.account_number.slice(-4)
-      : 'Not provided';
+    // Show full account number for immediate payment processing
+    const accountNumber = affiliate.account_number || 'Not provided';
 
     if (resendApiKey) {
       const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -142,11 +140,9 @@ serve(async (req) => {
                   <div class="highlight">
                     <h3 style="margin-top: 0;">🏦 Bank Details</h3>
                     <p><strong>Bank:</strong> ${affiliate.bank_name}</p>
-                    <p><strong>Account Number:</strong> ${maskedAccountNumber}</p>
+                    <p><strong>Account Number:</strong> ${accountNumber}</p>
                     <p><strong>Account Type:</strong> ${affiliate.account_type}</p>
-                    <p style="color: #6b7280; font-size: 0.85rem; margin-top: 10px;">
-                      ⚠️ For security, full account number is available in the secure admin dashboard only.
-                    </p>
+                    <p><strong>Branch Code:</strong> ${affiliate.branch_code || 'Universal'}</p>
                   </div>
 
                   <div class="highlight">
