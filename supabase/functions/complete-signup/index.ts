@@ -151,7 +151,7 @@ serve(async (req) => {
 
       if (resendApiKey) {
         const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-        const planPrice = plan === 'trial' ? 'Free' : (plan === 'pro' ? 'R3' : 'R4');
+        const planPrice = plan === 'trial' ? 'Free' : (plan === 'pro' ? 'R159' : 'R215');
         const isTrial = plan === 'trial';
 
         const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -243,6 +243,133 @@ serve(async (req) => {
     } catch (emailError) {
       console.error("Error sending welcome email:", emailError);
       // Don't fail the whole signup if email fails
+    }
+
+    // Send admin notification email
+    try {
+      const resendApiKey = Deno.env.get("RESEND_API_KEY");
+      const adminEmail = Deno.env.get("ADMIN_EMAIL") || 'nqubeko377@gmail.com';
+      const adminPhone = Deno.env.get("ADMIN_PHONE");
+
+      if (resendApiKey) {
+        const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+        const planPrice = plan === 'trial' ? 'Free' : (plan === 'pro' ? 'R159/month' : 'R215/month');
+        const signupTime = new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' });
+        const planEmoji = plan === 'trial' ? '🆓' : (plan === 'pro' ? '🚀' : '👑');
+
+        // Send admin email
+        const adminEmailResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "Mzansi Food Connect <noreply@mzansifoodconnect.app>",
+            to: adminEmail,
+            subject: `${planEmoji} New ${planName} Signup - ${storeName}`,
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <style>
+                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background: ${plan === 'premium' ? 'linear-gradient(135deg, #ffd700 0%, #ff6b35 100%)' : plan === 'pro' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)'}; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+                  .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+                  .highlight { background: #fff; padding: 20px; border-left: 4px solid ${plan === 'premium' ? '#ffd700' : plan === 'pro' ? '#667eea' : '#10b981'}; margin: 20px 0; }
+                  .stats { display: flex; gap: 20px; margin: 20px 0; }
+                  .stat { background: #fff; padding: 15px; border-radius: 8px; text-align: center; flex: 1; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h1 style="margin: 0;">${planEmoji} New ${planName} Signup!</h1>
+                    <p style="margin: 10px 0 0 0; font-size: 18px;">${storeName}</p>
+                  </div>
+                  <div class="content">
+                    <div class="highlight">
+                      <h3 style="margin-top: 0;">New Store Details</h3>
+                      <p><strong>Store Name:</strong> ${storeName}</p>
+                      <p><strong>Email:</strong> ${email}</p>
+                      <p><strong>Plan:</strong> ${planName} (${planPrice})</p>
+                      <p><strong>Signup Time:</strong> ${signupTime}</p>
+                      ${referralCode ? `<p><strong>Referral Code Used:</strong> ${referralCode}</p>` : ''}
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                      <a href="https://app.mzansifoodconnect.app/admin" style="display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px;">View in Admin Dashboard</a>
+                    </div>
+
+                    <p style="margin-top: 30px; color: #6b7280; font-size: 0.9rem; text-align: center;">
+                      This is an automated notification from Mzansi Food Connect.
+                    </p>
+                  </div>
+                </div>
+              </body>
+              </html>
+            `
+          })
+        });
+
+        if (!adminEmailResponse.ok) {
+          console.error("Failed to send admin email:", await adminEmailResponse.text());
+        } else {
+          console.log(`✅ Admin notification email sent for ${storeName}`);
+        }
+      }
+
+      // Send admin WhatsApp notification via Ultramsg
+      const instanceId = Deno.env.get("VITE_ULTRAMSG_INSTANCE_ID");
+      const token = Deno.env.get("VITE_ULTRAMSG_TOKEN");
+
+      if (instanceId && token && adminPhone) {
+        const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+        const planPrice = plan === 'trial' ? 'Free' : (plan === 'pro' ? 'R159/month' : 'R215/month');
+        const planEmoji = plan === 'trial' ? '🆓' : (plan === 'pro' ? '🚀' : '👑');
+        const signupTime = new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' });
+
+        const whatsappMessage = `${planEmoji} *NEW ${planName.toUpperCase()} SIGNUP*
+
+📍 *Store:* ${storeName}
+📧 *Email:* ${email}
+💰 *Plan:* ${planName} (${planPrice})
+🕐 *Time:* ${signupTime}
+${referralCode ? `🔗 *Referral:* ${referralCode}` : ''}
+
+🎉 Congrats! Your platform is growing!`;
+
+        const apiUrl = `https://api.ultramsg.com/${instanceId}/messages/chat`;
+        const payload = new URLSearchParams({
+          token: token,
+          to: adminPhone,
+          body: whatsappMessage,
+        });
+
+        const waResponse = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: payload,
+        });
+
+        if (waResponse.ok) {
+          console.log(`✅ Admin WhatsApp notification sent for ${storeName}`);
+        } else {
+          console.error("Failed to send admin WhatsApp:", await waResponse.text());
+        }
+      } else {
+        if (!adminPhone) {
+          console.log("⚠️ ADMIN_PHONE not configured, skipping WhatsApp notification");
+        } else {
+          console.log("⚠️ Ultramsg credentials not configured, skipping WhatsApp notification");
+        }
+      }
+
+    } catch (adminNotifError) {
+      console.error("Error sending admin notification:", adminNotifError);
+      // Don't fail signup if admin notification fails
     }
 
     return new Response(

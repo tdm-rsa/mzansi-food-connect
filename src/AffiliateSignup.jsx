@@ -148,6 +148,28 @@ export default function AffiliateSignup({ onSuccess }) {
       }
 
       setReferralCode(affiliate.referral_code);
+
+      // Notify admin about new affiliate signup (fire and forget)
+      try {
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-affiliate-signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            fullName: formData.fullName,
+            email: formData.email.toLowerCase(),
+            phone: cleanPhone,
+            bankName: formData.bankName,
+            referralCode: affiliate.referral_code
+          })
+        }).catch(err => console.log('Admin notification sent'));
+      } catch (notifErr) {
+        // Don't fail if notification fails
+        console.log('Admin notification attempted');
+      }
+
       setSuccess(true);
 
     } catch (err) {
