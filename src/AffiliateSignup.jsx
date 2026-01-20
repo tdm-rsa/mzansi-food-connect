@@ -283,15 +283,21 @@ export default function AffiliateSignup({ onSuccess }) {
             </div>
 
             <div style={{
-              background: "#fff3cd",
-              border: "1px solid #ffc107",
+              background: "#dbeafe",
+              border: "2px solid #3b82f6",
               borderRadius: "8px",
-              padding: "1rem",
+              padding: "1.5rem",
               marginBottom: "2rem"
             }}>
-              <p style={{ margin: 0, color: "#856404", fontSize: "0.9rem" }}>
-                <strong>📧 Important:</strong> We've sent your affiliate details to {formData.email}.
-                Save your referral link and start promoting!
+              <h4 style={{ margin: "0 0 0.75rem 0", color: "#1e40af", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span style={{ fontSize: "1.5rem" }}>📧</span> Confirm Your Email
+              </h4>
+              <p style={{ margin: 0, color: "#1e40af", fontSize: "0.95rem", lineHeight: "1.6" }}>
+                We've sent a confirmation link to <strong>{formData.email}</strong>.
+                <br /><br />
+                <strong>Please check your inbox and click the link to activate your account.</strong>
+                <br />
+                You'll need to confirm your email before you can access your dashboard.
               </p>
             </div>
 
@@ -309,23 +315,20 @@ export default function AffiliateSignup({ onSuccess }) {
               </ol>
             </div>
 
-            <button
-              onClick={() => window.location.href = "/affiliate-dashboard"}
-              style={{
-                width: "100%",
-                marginTop: "2rem",
-                padding: "1rem",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "1rem",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Go to Dashboard →
-            </button>
+            <p style={{
+              textAlign: "center",
+              color: "#6b7280",
+              fontSize: "0.9rem",
+              marginTop: "2rem"
+            }}>
+              After confirming your email, you can{" "}
+              <a
+                href="/affiliate-dashboard"
+                style={{ color: "#667eea", fontWeight: "600" }}
+              >
+                access your dashboard here
+              </a>
+            </p>
           </div>
         </div>
       </div>
