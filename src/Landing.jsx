@@ -95,8 +95,9 @@ function Landing() {
       name: "Pro",
       subtitle: "For Growing Businesses",
       price: "R159",
+      oldPrice: "R199",
       period: "per month",
-      description: "Everything you need to run your food business (was R199, now R159)",
+      description: "Everything you need to run your food business",
       features: [
         "Everything in Free Trial",
         "Up to 2 website templates",
@@ -116,8 +117,9 @@ function Landing() {
       name: "Premium",
       subtitle: "Custom Domain Included",
       price: "R215",
+      oldPrice: "R350",
       period: "per month",
-      description: "Enhanced Professional Features (was R350, now R215)",
+      description: "Enhanced Professional Features",
       features: [
         "Everything in Pro",
         "Custom domain support(COMING SOON)",
@@ -260,10 +262,11 @@ function Landing() {
                 <div className="plan-header">
                   <h3>{plan.name}</h3>
                   <p className="plan-subtitle">{plan.subtitle}</p>
-                  <div className="plan-price">
-                    <span className="price">{plan.price}</span>
-                    <span className="period">/{plan.period}</span>
-                  </div>
+                <div className="plan-price">
+                  {plan.oldPrice && <span className="price old">{plan.oldPrice}</span>}
+                  <span className="price">{plan.price}</span>
+                  <span className="period">/{plan.period}</span>
+                </div>
                   <p className="plan-description">{plan.description}</p>
                 </div>
                 <ul className="plan-features">
@@ -340,4 +343,3 @@ function Landing() {
 }
 
 export default Landing;
-

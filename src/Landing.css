@@ -397,6 +397,14 @@
   color: #ff6b35;
 }
 
+.plan-price .price.old {
+  font-size: clamp(1rem, 1.5vw, var(--fs-lg));
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
 .plan-price .period {
   font-size: var(--fs-sm);
   opacity: 0.7;
@@ -599,6 +607,15 @@
 @media (min-width: 1200px) {
   .hero-section {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+
+  .hero-content {
+    text-align: center;
+  }
+
+  .hero-buttons,
+  .hero-trust {
+    justify-content: center;
   }
 }
 
