@@ -1278,6 +1278,21 @@ export default function App({ user }) {
   /* -------------------------------------------------------
      Views
   ------------------------------------------------------- */
+  const getOrderItemImage = (item) => {
+    const rawName = item?.item || item?.name || "";
+    const name = rawName.trim().toLowerCase();
+    if (!name) return "";
+    const match = menuItems.find(
+      (menuItem) => (menuItem?.name || "").trim().toLowerCase() === name
+    );
+    return match?.image_url || item?.image_url || "";
+  };
+
+  const getOrderItemInitial = (item) => {
+    const label = item?.item || item?.name || "?";
+    return label.trim().charAt(0).toUpperCase() || "?";
+  };
+
   const renderView = () => {
     if (loading) {
       return (
@@ -1538,13 +1553,39 @@ export default function App({ user }) {
                     <p><strong>Phone:</strong> {o.phone || "N/A"}</p>
                     <p><strong>Total:</strong> R{o.total}</p>
                     {Array.isArray(o.items) && o.items.length > 0 && (
-                      <ul style={{ marginTop: ".3rem" }}>
-                        {o.items.map((it, idx) => (
-                          <li key={idx}>
-                            {it.qty || 1} x {it.item || it.name} - R{it.price}{Array.isArray(it.preferences) && it.preferences.length > 0 ? ` (${it.preferences.join(", ")})` : ""}
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="order-items-card">
+                        <div className="order-items">
+                          {o.items.map((it, idx) => {
+                            const itemName = it.item || it.name || "Item";
+                            const imageUrl = getOrderItemImage(it);
+                            const qty = it.qty || 1;
+                            return (
+                              <div key={idx} className="order-item">
+                                <div className="order-item-thumb">
+                                  {imageUrl ? (
+                                    <img src={imageUrl} alt={itemName} />
+                                  ) : (
+                                    <span className="order-item-placeholder">
+                                      {getOrderItemInitial(it)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="order-item-info">
+                                  <div className="order-item-name">{itemName}</div>
+                                  <div className="order-item-meta">
+                                    {qty} x R{it.price}
+                                  </div>
+                                  {Array.isArray(it.preferences) && it.preferences.length > 0 && (
+                                    <div className="order-item-preferences">
+                                      {it.preferences.join(", ")}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     )}
 
                     <div style={{ marginTop: ".75rem", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
