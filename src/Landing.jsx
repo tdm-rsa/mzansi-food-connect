@@ -96,7 +96,7 @@ function Landing() {
       subtitle: "For Growing Businesses",
       price: "R159",
       period: "per month",
-      description: "Everything you need to run your food business",
+      description: "Everything you need to run your food business (was R199, now R159)",
       features: [
         "Everything in Free Trial",
         "Up to 2 website templates",
@@ -117,7 +117,7 @@ function Landing() {
       subtitle: "Custom Domain Included",
       price: "R215",
       period: "per month",
-      description: "Enhanced Professional Features",
+      description: "Enhanced Professional Features (was R350, now R215)",
       features: [
         "Everything in Pro",
         "Custom domain support(COMING SOON)",
@@ -340,5 +340,4 @@ function Landing() {
 }
 
 export default Landing;
-
 
