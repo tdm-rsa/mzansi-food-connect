@@ -39,11 +39,11 @@ serve(async (req) => {
 
     console.log(`Creating account for ${email} with plan ${plan}...`);
 
-    // Create user with auto-confirm using Admin API
+    // Create user WITHOUT auto-confirm - requires email verification
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({
       email,
       password,
-      email_confirm: true, // Auto-confirm email
+      email_confirm: false, // Require email confirmation
       user_metadata: {
         store_name: storeName,
         plan: plan,
@@ -62,6 +62,23 @@ serve(async (req) => {
 
     const userId = userData.user.id;
     console.log(`✅ User created: ${userId}`);
+
+    // Generate email confirmation link
+    const productionUrl = Deno.env.get("PRODUCTION_URL") || "https://app.mzansifoodconnect.app";
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: 'signup',
+      email: email,
+      options: {
+        redirectTo: `${productionUrl}/app`
+      }
+    });
+
+    if (linkError) {
+      console.error('Failed to generate confirmation link:', linkError);
+    }
+
+    const confirmationLink = linkData?.properties?.action_link || `${productionUrl}/app`;
+    console.log(`✅ Confirmation link generated`);
 
     // Calculate plan expiration
     // Trial = forever (null), Paid plans = 30 days from now
@@ -197,12 +214,16 @@ serve(async (req) => {
                       <p><strong>Status:</strong> ${isTrial ? 'Active Forever - Training Mode' : 'Active for 30 days'}</p>
                     </div>
 
-                    <h3>🚀 Get Started</h3>
-                    <p>You can now log in to your dashboard and start building your online store:</p>
+                    <h3>🚀 Confirm Your Email</h3>
+                    <p>Please click the button below to confirm your email address and activate your account:</p>
 
                     <div style="text-align: center;">
-                      <a href="https://app.mzansifoodconnect.app/app" class="button">Log In to Dashboard</a>
+                      <a href="${confirmationLink}" class="button">Confirm Email & Sign In</a>
                     </div>
+
+                    <p style="font-size: 12px; color: #666; margin-top: 10px; text-align: center;">
+                      This link will expire in 24 hours. If it expires, you can request a new one from the login page.
+                    </p>
 
                     <h3>📋 Next Steps:</h3>
                     <ul>

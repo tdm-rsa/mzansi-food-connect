@@ -34,6 +34,7 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [customPreference, setCustomPreference] = useState("");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -47,11 +48,23 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
+  const [commonPreferences, setCommonPreferences] = useState([
+    "Chilli",
+    "Tomato",
+    "Salt",
+    "No Salt",
+    "Extra Sauce",
+    "Onion",
+    "No Onion",
+    "Cheese",
+  ]);
+
   const resetForm = () => {
     setFormData({ name: "", price: "", category: "", description: "", image_url: "", preferences: "" });
     setImageFile(null);
     setImagePreview(null);
     setEditingItem(null);
+    setCustomPreference("");
   };
 
   const parsePreferences = (raw) =>
@@ -59,6 +72,33 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
       .split(/[\n,]+/)
       .map((p) => p.trim())
       .filter(Boolean);
+
+  const updatePreferences = (updater) => {
+    setFormData((prev) => {
+      const current = parsePreferences(prev.preferences);
+      const next = updater(current);
+      return { ...prev, preferences: next.join(", ") };
+    });
+  };
+
+  const handleTogglePreference = (pref) => {
+    updatePreferences((current) =>
+      current.includes(pref) ? current.filter((p) => p !== pref) : [...current, pref]
+    );
+  };
+
+  const handleAddCustomPreference = () => {
+    const next = customPreference.trim();
+    if (!next) return;
+    setCommonPreferences((current) => (current.includes(next) ? current : [...current, next]));
+    updatePreferences((current) => (current.includes(next) ? current : [...current, next]));
+    setCustomPreference("");
+  };
+
+  const handleRemoveCommonPreference = (pref) => {
+    setCommonPreferences((current) => current.filter((item) => item !== pref));
+    updatePreferences((current) => current.filter((item) => item !== pref));
+  };
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -160,6 +200,8 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
       alert(`❌ Delete failed: ${err.message}`);
     }
   };
+
+  const selectedPreferences = parsePreferences(formData.preferences);
 
   return (
     <div className="menu-management">
@@ -311,13 +353,45 @@ export default function MenuManagement({ storeInfo, menuItems, onBack, onRefresh
 
               {/* Preferences */}
               <div className="form-group">
-                <label>Preferences (one per line or comma separated)</label>
-                <textarea
-                  value={formData.preferences}
-                  onChange={(e) => setFormData({ ...formData, preferences: e.target.value })}
-                  placeholder="e.g.\nHot & spicy\nExtra sauce\nNo chilli"
-                  rows={3}
-                />
+                <label>Preferences</label>
+                <div className="preference-selector">
+                  <div className="preference-options">
+                    {commonPreferences.map((pref) => (
+                      <div key={pref} className="preference-chip-group">
+                        <button
+                          type="button"
+                          className={`preference-chip ${selectedPreferences.includes(pref) ? "active" : ""}`}
+                          onClick={() => handleTogglePreference(pref)}
+                        >
+                          {pref}
+                        </button>
+                        <button
+                          type="button"
+                          className="preference-chip-remove"
+                          aria-label={`Remove ${pref}`}
+                          onClick={() => handleRemoveCommonPreference(pref)}
+                        >
+                          x
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="preference-custom">
+                    <input
+                      type="text"
+                      value={customPreference}
+                      onChange={(e) => setCustomPreference(e.target.value)}
+                      placeholder="Add custom preference"
+                    />
+                    <button
+                      type="button"
+                      className="btn-add-pref"
+                      onClick={handleAddCustomPreference}
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
                 <small style={{ opacity: 0.75 }}>
                   These show as checkboxes in the cart. Leave blank if the item has no preferences.
                 </small>
