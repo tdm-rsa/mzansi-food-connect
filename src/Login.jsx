@@ -19,6 +19,12 @@ export default function Login({ onLogin, onSwitchToSignup, signupsEnabled = true
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState("");
 
+  // Email confirmation state
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+
   // Load reCAPTCHA
   useEffect(() => {
     initRecaptchaBadge();
@@ -68,12 +74,43 @@ export default function Login({ onLogin, onSwitchToSignup, signupsEnabled = true
     setLoading(false);
 
     if (error) {
-      setError(error.message);
+      // Check if error is about email not confirmed
+      if (error.message.toLowerCase().includes('email not confirmed') ||
+          error.message.toLowerCase().includes('email is not confirmed')) {
+        setResendEmail(emailValidation.value);
+        setShowResendConfirmation(true);
+        setError("");
+      } else {
+        setError(error.message);
+      }
     } else {
       // Reset rate limit on successful login
       rateLimiter.reset(`login_${email}`);
       onLogin(data.user);
     }
+  }
+
+  async function handleResendConfirmation() {
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: resendEmail,
+      });
+
+      if (error) throw error;
+      setResendSent(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
+  function closeResendModal() {
+    setShowResendConfirmation(false);
+    setResendEmail("");
+    setResendSent(false);
   }
 
   async function handleForgotPassword(e) {
@@ -367,6 +404,101 @@ export default function Login({ onLogin, onSwitchToSignup, signupsEnabled = true
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Email Confirmation Required Modal */}
+      {showResendConfirmation && (
+        <div className="modal-overlay" onClick={closeResendModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Email Confirmation Required</h2>
+              <button
+                onClick={closeResendModal}
+                className="modal-close"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {resendSent ? (
+                <>
+                  <div className="success-message" style={{
+                    background: '#d4edda',
+                    border: '1px solid #c3e6cb',
+                    color: '#155724',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    marginBottom: '1rem'
+                  }}>
+                    <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>✅</span>
+                    <strong>Confirmation email sent!</strong>
+                    <p style={{ margin: '0.5rem 0 0 0' }}>
+                      Check your inbox at <strong>{resendEmail}</strong>
+                    </p>
+                  </div>
+                  <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+                    Click the link in the email to confirm your account, then come back and sign in.
+                  </p>
+                  <button
+                    onClick={closeResendModal}
+                    className="login-btn"
+                    style={{ width: '100%' }}
+                  >
+                    Done
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{
+                    background: '#fff3cd',
+                    border: '1px solid #ffc107',
+                    color: '#856404',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>📧</span>
+                    <strong>Please confirm your email</strong>
+                    <p style={{ margin: '0.5rem 0 0 0' }}>
+                      We sent a confirmation link to <strong>{resendEmail}</strong>.
+                      Please check your inbox and click the link to activate your account.
+                    </p>
+                  </div>
+
+                  <p style={{ color: '#666', marginBottom: '1rem' }}>
+                    Didn't receive the email? Check your spam folder or click below to resend.
+                  </p>
+
+                  <button
+                    onClick={handleResendConfirmation}
+                    className="login-btn"
+                    disabled={resendLoading}
+                    style={{ width: '100%' }}
+                  >
+                    {resendLoading ? (
+                      <span className="btn-loading">
+                        <span className="spinner"></span>
+                        Sending...
+                      </span>
+                    ) : (
+                      'Resend Confirmation Email'
+                    )}
+                  </button>
+
+                  <button
+                    onClick={closeResendModal}
+                    className="toggle-mode-btn"
+                    style={{ width: '100%', marginTop: '0.5rem' }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
