@@ -19,7 +19,7 @@ The WhatsApp messages won't work until you add these environment variables to yo
 
 ### Your Ultramsg Credentials:
 - **Instance ID**: `instance149315`
-- **Token**: `ax6ijvrx2w0cbt53`
+- **Token**: `y0de2bh0bhypai9x`
 - **API URL**: `https://api.ultramsg.com/instance149315/`
 
 ### Steps to Add Credentials to Supabase:
