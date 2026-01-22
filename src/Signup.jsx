@@ -6,7 +6,7 @@ import { executeRecaptcha, initRecaptchaBadge } from "./utils/captcha";
 import "./App.css";
 
 export default function Signup({ onBack, onSuccess }) {
-  const [step, setStep] = useState(1); // 1: Choose Plan, 2: Account Details, 3: Payment
+  const [step, setStep] = useState(1); // 1: Choose Plan, 2: Account Details, 3: Payment, 4: Success
   const [selectedPlan, setSelectedPlan] = useState("trial");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +18,7 @@ export default function Signup({ onBack, onSuccess }) {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [paymentReference, setPaymentReference] = useState(null);
   const [referralCode, setReferralCode] = useState(null); // Capture affiliate referral code
+  const [createdSlug, setCreatedSlug] = useState(null); // Store the created slug for success screen
 
   // Use LIVE key for production signups
   const yocoPublicKey = import.meta.env.VITE_YOCO_PUBLIC_KEY; // Yoco live key from .env
@@ -172,8 +173,11 @@ export default function Signup({ onBack, onSuccess }) {
           throw new Error(signupError?.message || data?.error || 'Signup failed');
         }
 
-        alert(`✅ Account created successfully!\n\n📧 We've sent a welcome email to ${email}\n\n🔐 You can now login to access your dashboard.\n\nYour Free Trial store is ready!`);
-        onBack();
+        // Store the slug for success screen
+        if (data.slug) {
+          setCreatedSlug(data.slug);
+        }
+        setStep(4); // Go to success screen
       } else {
         // For Pro/Premium - GO TO PAYMENT FIRST (don't create account yet!)
         
@@ -328,6 +332,201 @@ export default function Signup({ onBack, onSuccess }) {
       setLoading(false);
       setProcessingPayment(false);
     }
+  }
+
+  // Step 4: Success screen
+  if (step === 4) {
+    const selectedPlanData = plans.find(p => p.id === selectedPlan);
+    const storeUrl = createdSlug
+      ? `https://${createdSlug}.mzansifoodconnect.app`
+      : `https://${storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.mzansifoodconnect.app`;
+
+    return (
+      <div style={{
+        minHeight: "100vh",
+        background: selectedPlan === "trial"
+          ? "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)"
+          : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem"
+      }}>
+        <div style={{
+          background: "white",
+          borderRadius: "24px",
+          maxWidth: "500px",
+          width: "100%",
+          overflow: "hidden",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+        }}>
+          {/* Success Header */}
+          <div style={{
+            background: selectedPlan === "trial"
+              ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+              : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            padding: "2.5rem 2rem",
+            textAlign: "center"
+          }}>
+            <div style={{
+              width: "80px",
+              height: "80px",
+              background: "white",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.5rem",
+              fontSize: "2.5rem",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)"
+            }}>
+              ✓
+            </div>
+            <h1 style={{
+              color: "white",
+              margin: "0 0 0.5rem 0",
+              fontSize: "1.75rem",
+              fontWeight: "700"
+            }}>
+              Welcome to Mzansi Food Connect!
+            </h1>
+            <p style={{
+              color: "rgba(255,255,255,0.9)",
+              margin: 0,
+              fontSize: "1rem"
+            }}>
+              Your {selectedPlanData?.name || "store"} is ready
+            </p>
+          </div>
+
+          {/* Content */}
+          <div style={{ padding: "2rem" }}>
+            {/* Email Confirmation */}
+            <div style={{
+              background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+              border: "2px solid #3b82f6",
+              borderRadius: "16px",
+              padding: "1.5rem",
+              marginBottom: "1.5rem",
+              textAlign: "center"
+            }}>
+              <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📧</div>
+              <h3 style={{
+                margin: "0 0 0.5rem 0",
+                color: "#1e40af",
+                fontSize: "1rem",
+                fontWeight: "700"
+              }}>
+                Check Your Email
+              </h3>
+              <p style={{
+                margin: 0,
+                color: "#1e40af",
+                fontSize: "0.9rem"
+              }}>
+                We sent a welcome email to<br />
+                <strong>{email}</strong>
+              </p>
+            </div>
+
+            {/* Store Info */}
+            <div style={{
+              background: "#f8fafc",
+              borderRadius: "16px",
+              padding: "1.5rem",
+              marginBottom: "1.5rem"
+            }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem"
+              }}>
+                <div style={{
+                  width: "50px",
+                  height: "50px",
+                  background: selectedPlan === "trial" ? "#10b981" : "#667eea",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.5rem"
+                }}>
+                  🏪
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontWeight: "700", color: "#1e293b", fontSize: "1.1rem" }}>
+                    {storeName}
+                  </p>
+                  <p style={{ margin: 0, color: "#64748b", fontSize: "0.85rem" }}>
+                    {selectedPlanData?.name} Plan
+                  </p>
+                </div>
+              </div>
+              <div style={{
+                background: "white",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0",
+                fontSize: "0.85rem",
+                color: "#64748b",
+                wordBreak: "break-all"
+              }}>
+                {storeUrl}
+              </div>
+            </div>
+
+            {/* What's Next */}
+            <div style={{
+              background: "#f0fdf4",
+              borderRadius: "12px",
+              padding: "1.25rem",
+              marginBottom: "1.5rem"
+            }}>
+              <h4 style={{ margin: "0 0 0.75rem 0", color: "#166534", fontSize: "0.95rem" }}>
+                What's Next?
+              </h4>
+              <ul style={{
+                margin: 0,
+                paddingLeft: "1.25rem",
+                color: "#15803d",
+                fontSize: "0.9rem",
+                lineHeight: "1.8"
+              }}>
+                <li>Login to your dashboard</li>
+                <li>Add your menu items</li>
+                <li>Customize your store design</li>
+                <li>Start taking orders!</li>
+              </ul>
+            </div>
+
+            {/* Login Button */}
+            <button
+              onClick={onBack}
+              style={{
+                width: "100%",
+                padding: "1rem",
+                background: selectedPlan === "trial"
+                  ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                  : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                color: "white",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "1rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem"
+              }}
+            >
+              Go to Login →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Step 3: Payment page

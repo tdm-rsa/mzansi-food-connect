@@ -297,36 +297,217 @@ export default function UpgradeSuccess() {
   if (status === "success") {
     const startedAt = planData?.plan_started_at ? new Date(planData.plan_started_at).toLocaleDateString() : null;
     const expiresAt = planData?.plan_expires_at ? new Date(planData.plan_expires_at).toLocaleDateString() : null;
+    const isPremium = resolvedPlanName?.toLowerCase() === "premium";
 
     return (
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <div style={styles.successIcon}>�o"</div>
-          <h1 style={styles.title}>{mode === "signup" ? "Account Created!" : "Upgrade Successful!"}</h1>
-          <p style={styles.text}>
-            {mode === "signup"
-              ? `Your ${resolvedPlanName} account is ready. We've sent a confirmation/welcome email to ${signupInfo?.email || "your email"}. You can log in now.`
-              : `Your store has been upgraded to ${resolvedPlanName} plan!`}
-          </p>
-          <div style={styles.upgradeDetails}>
-            {signupInfo?.storeName && (
-              <p><strong>Store:</strong> {signupInfo.storeName}</p>
-            )}
-            <p><strong>Plan:</strong> {resolvedPlanName}</p>
-            {startedAt && <p><strong>Started:</strong> {startedAt}</p>}
-            {expiresAt && <p><strong>Renews:</strong> {expiresAt}</p>}
+      <div style={{
+        minHeight: "100vh",
+        background: isPremium
+          ? "linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #6d28d9 100%)"
+          : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem"
+      }}>
+        <div style={{
+          background: "white",
+          borderRadius: "24px",
+          maxWidth: "500px",
+          width: "100%",
+          overflow: "hidden",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+        }}>
+          {/* Success Header */}
+          <div style={{
+            background: isPremium
+              ? "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)"
+              : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            padding: "2.5rem 2rem",
+            textAlign: "center"
+          }}>
+            <div style={{
+              width: "80px",
+              height: "80px",
+              background: "white",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.5rem",
+              fontSize: "2.5rem",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              color: "#10b981"
+            }}>
+              ✓
+            </div>
+            <h1 style={{
+              color: "white",
+              margin: "0 0 0.5rem 0",
+              fontSize: "1.75rem",
+              fontWeight: "700"
+            }}>
+              {mode === "signup" ? "Welcome Aboard!" : "Upgrade Complete!"}
+            </h1>
+            <p style={{
+              color: "rgba(255,255,255,0.9)",
+              margin: 0,
+              fontSize: "1rem"
+            }}>
+              {mode === "signup"
+                ? `Your ${resolvedPlanName} account is ready`
+                : `You're now on ${resolvedPlanName}`}
+            </p>
           </div>
-          <p style={styles.notification}>
-            {mode === "signup"
-              ? "We finished your payment and triggered your confirmation email. Sign in with your new credentials to start building your store."
-              : "All plan features are now active! Enjoy your upgraded experience."}
-          </p>
-          <button
-            onClick={() => navigate('/app')}
-            style={styles.button}
-          >
-            {mode === "signup" ? "Go to Login" : "Go to Dashboard"}
-          </button>
+
+          {/* Content */}
+          <div style={{ padding: "2rem" }}>
+            {/* Email Notice for Signup */}
+            {mode === "signup" && (
+              <div style={{
+                background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+                border: "2px solid #3b82f6",
+                borderRadius: "16px",
+                padding: "1.5rem",
+                marginBottom: "1.5rem",
+                textAlign: "center"
+              }}>
+                <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📧</div>
+                <h3 style={{
+                  margin: "0 0 0.5rem 0",
+                  color: "#1e40af",
+                  fontSize: "1rem",
+                  fontWeight: "700"
+                }}>
+                  Check Your Email
+                </h3>
+                <p style={{
+                  margin: 0,
+                  color: "#1e40af",
+                  fontSize: "0.9rem"
+                }}>
+                  We sent a welcome email to<br />
+                  <strong>{signupInfo?.email || "your email"}</strong>
+                </p>
+              </div>
+            )}
+
+            {/* Plan Details */}
+            <div style={{
+              background: "#f8fafc",
+              borderRadius: "16px",
+              padding: "1.5rem",
+              marginBottom: "1.5rem"
+            }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "1rem"
+              }}>
+                <div style={{
+                  width: "50px",
+                  height: "50px",
+                  background: isPremium ? "#9333ea" : "#667eea",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.5rem"
+                }}>
+                  {isPremium ? "👑" : "⭐"}
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontWeight: "700", color: "#1e293b", fontSize: "1.1rem" }}>
+                    {resolvedPlanName} Plan
+                  </p>
+                  {signupInfo?.storeName && (
+                    <p style={{ margin: 0, color: "#64748b", fontSize: "0.85rem" }}>
+                      {signupInfo.storeName}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "0.75rem"
+              }}>
+                {startedAt && (
+                  <div style={{
+                    background: "white",
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0"
+                  }}>
+                    <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Started</p>
+                    <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: "600", color: "#1e293b" }}>{startedAt}</p>
+                  </div>
+                )}
+                {expiresAt && (
+                  <div style={{
+                    background: "white",
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0"
+                  }}>
+                    <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Renews</p>
+                    <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: "600", color: "#1e293b" }}>{expiresAt}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Features Unlocked */}
+            <div style={{
+              background: "#f0fdf4",
+              borderRadius: "12px",
+              padding: "1.25rem",
+              marginBottom: "1.5rem"
+            }}>
+              <h4 style={{ margin: "0 0 0.75rem 0", color: "#166534", fontSize: "0.95rem" }}>
+                {mode === "signup" ? "What's Included" : "Features Unlocked"}
+              </h4>
+              <ul style={{
+                margin: 0,
+                paddingLeft: "1.25rem",
+                color: "#15803d",
+                fontSize: "0.9rem",
+                lineHeight: "1.8"
+              }}>
+                <li>Unlimited products</li>
+                <li>WhatsApp notifications</li>
+                <li>Remove branding</li>
+                {isPremium && <li>Custom domain included</li>}
+                {isPremium && <li>Advanced analytics</li>}
+              </ul>
+            </div>
+
+            {/* Action Button */}
+            <button
+              onClick={() => navigate('/app')}
+              style={{
+                width: "100%",
+                padding: "1rem",
+                background: isPremium
+                  ? "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)"
+                  : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                color: "white",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "1rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem"
+              }}
+            >
+              {mode === "signup" ? "Go to Login →" : "Go to Dashboard →"}
+            </button>
+          </div>
         </div>
       </div>
     );

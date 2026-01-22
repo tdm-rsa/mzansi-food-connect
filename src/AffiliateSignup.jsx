@@ -180,155 +180,242 @@ export default function AffiliateSignup({ onSuccess }) {
   }
 
   // Success screen
+  const [copied, setCopied] = useState(false);
+
   if (success) {
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
 
+    const handleCopy = () => {
+      navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
-      <div className="modern-login-page">
-        <div className="login-left" style={{
-          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+      <div style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem"
+      }}>
+        <div style={{
+          background: "white",
+          borderRadius: "24px",
+          maxWidth: "500px",
+          width: "100%",
+          overflow: "hidden",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
         }}>
-          <div className="login-brand">
-            <div className="brand-icon" style={{ fontSize: "4rem" }}>🎉</div>
-            <h1 style={{ color: "white" }}>Welcome Aboard!</h1>
-            <p className="brand-tagline" style={{ color: "rgba(255,255,255,0.9)" }}>
-              You're now an official Mzansi Food Connect affiliate
+          {/* Success Header */}
+          <div style={{
+            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            padding: "2.5rem 2rem",
+            textAlign: "center"
+          }}>
+            <div style={{
+              width: "80px",
+              height: "80px",
+              background: "white",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.5rem",
+              fontSize: "2.5rem",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)"
+            }}>
+              ✓
+            </div>
+            <h1 style={{
+              color: "white",
+              margin: "0 0 0.5rem 0",
+              fontSize: "1.75rem",
+              fontWeight: "700"
+            }}>
+              You're In!
+            </h1>
+            <p style={{
+              color: "rgba(255,255,255,0.9)",
+              margin: 0,
+              fontSize: "1rem"
+            }}>
+              Welcome to the Mzansi Food Connect Affiliate Program
             </p>
           </div>
 
-          <div style={{
-            background: "rgba(255,255,255,0.1)",
-            padding: "2rem",
-            borderRadius: "15px",
-            marginTop: "2rem",
-            backdropFilter: "blur(10px)"
-          }}>
-            <h3 style={{ color: "white", marginBottom: "1rem" }}>💰 Your Earnings Potential</h3>
-            <div style={{ color: "white", fontSize: "0.95rem", lineHeight: "1.8" }}>
-              <p><strong>Pro referrals:</strong> R572/year each</p>
-              <p><strong>Premium referrals:</strong> R774/year each</p>
-              <p style={{ marginTop: "1rem", fontSize: "1.1rem", fontWeight: "bold" }}>
-                10 Premium clients = R7,740/year passive income
+          {/* Content */}
+          <div style={{ padding: "2rem" }}>
+            {/* Email Confirmation - Priority */}
+            <div style={{
+              background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+              border: "2px solid #f59e0b",
+              borderRadius: "16px",
+              padding: "1.5rem",
+              marginBottom: "1.5rem",
+              textAlign: "center"
+            }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>📧</div>
+              <h3 style={{
+                margin: "0 0 0.75rem 0",
+                color: "#92400e",
+                fontSize: "1.1rem",
+                fontWeight: "700"
+              }}>
+                Check Your Inbox
+              </h3>
+              <p style={{
+                margin: 0,
+                color: "#a16207",
+                fontSize: "0.95rem",
+                lineHeight: "1.6"
+              }}>
+                We sent a confirmation link to<br />
+                <strong style={{ color: "#92400e" }}>{formData.email}</strong>
+              </p>
+              <p style={{
+                margin: "1rem 0 0 0",
+                padding: "0.75rem",
+                background: "rgba(255,255,255,0.5)",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                color: "#92400e"
+              }}>
+                Click the link to activate your account
               </p>
             </div>
-          </div>
-        </div>
 
-        <div className="login-right">
-          <div className="login-form-container">
-            <div className="form-header">
-              <h2>Your Affiliate Dashboard</h2>
-              <p>Start sharing and earning today</p>
-            </div>
-
+            {/* Referral Code */}
             <div style={{
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              padding: "2rem",
-              borderRadius: "12px",
-              marginBottom: "2rem",
-              color: "white"
+              borderRadius: "16px",
+              padding: "1.5rem",
+              marginBottom: "1.5rem",
+              textAlign: "center"
             }}>
-              <h3 style={{ margin: "0 0 1rem 0", color: "white" }}>Your Referral Code</h3>
+              <p style={{
+                color: "rgba(255,255,255,0.9)",
+                margin: "0 0 0.5rem 0",
+                fontSize: "0.9rem",
+                textTransform: "uppercase",
+                letterSpacing: "1px"
+              }}>
+                Your Referral Code
+              </p>
               <div style={{
                 background: "rgba(255,255,255,0.2)",
-                padding: "1rem",
-                borderRadius: "8px",
-                fontSize: "1.5rem",
-                fontWeight: "bold",
-                textAlign: "center",
+                padding: "1rem 1.5rem",
+                borderRadius: "12px",
+                fontSize: "1.75rem",
+                fontWeight: "800",
+                color: "white",
                 fontFamily: "monospace",
-                letterSpacing: "2px"
+                letterSpacing: "3px"
               }}>
                 {referralCode}
               </div>
             </div>
 
+            {/* Referral Link */}
             <div style={{
-              background: "#f8f9fa",
+              background: "#f8fafc",
+              borderRadius: "16px",
               padding: "1.5rem",
-              borderRadius: "12px",
-              marginBottom: "2rem"
+              marginBottom: "1.5rem"
             }}>
-              <h3 style={{ marginBottom: "1rem", fontSize: "1rem" }}>📎 Your Referral Link</h3>
+              <p style={{
+                margin: "0 0 0.75rem 0",
+                fontSize: "0.9rem",
+                fontWeight: "600",
+                color: "#475569"
+              }}>
+                Your Referral Link
+              </p>
               <div style={{
                 background: "white",
-                padding: "1rem",
-                borderRadius: "8px",
-                border: "2px solid #e5e7eb",
+                padding: "0.875rem 1rem",
+                borderRadius: "10px",
+                border: "2px solid #e2e8f0",
+                fontSize: "0.8rem",
+                color: "#64748b",
                 wordBreak: "break-all",
-                fontSize: "0.9rem",
                 marginBottom: "1rem"
               }}>
                 {referralLink}
               </div>
               <button
-                onClick={() => {
-                  navigator.clipboard.writeText(referralLink);
-                  alert("✅ Link copied to clipboard!");
-                }}
+                onClick={handleCopy}
                 style={{
                   width: "100%",
-                  padding: "0.75rem",
-                  background: "#10b981",
+                  padding: "1rem",
+                  background: copied ? "#10b981" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                   color: "white",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   fontSize: "1rem",
-                  fontWeight: "600",
-                  cursor: "pointer"
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  transition: "all 0.2s ease"
                 }}
               >
-                📋 Copy Link
+                {copied ? (
+                  <>✓ Copied!</>
+                ) : (
+                  <>📋 Copy Referral Link</>
+                )}
               </button>
             </div>
 
+            {/* Earnings Info */}
             <div style={{
-              background: "#dbeafe",
-              border: "2px solid #3b82f6",
-              borderRadius: "8px",
-              padding: "1.5rem",
-              marginBottom: "2rem"
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+              marginBottom: "1.5rem"
             }}>
-              <h4 style={{ margin: "0 0 0.75rem 0", color: "#1e40af", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <span style={{ fontSize: "1.5rem" }}>📧</span> Confirm Your Email
-              </h4>
-              <p style={{ margin: 0, color: "#1e40af", fontSize: "0.95rem", lineHeight: "1.6" }}>
-                We've sent a confirmation link to <strong>{formData.email}</strong>.
-                <br /><br />
-                <strong>Please check your inbox and click the link to activate your account.</strong>
-                <br />
-                You'll need to confirm your email before you can access your dashboard.
-              </p>
+              <div style={{
+                background: "#f0fdf4",
+                borderRadius: "12px",
+                padding: "1rem",
+                textAlign: "center"
+              }}>
+                <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "#166534" }}>Pro Referral</p>
+                <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700", color: "#15803d" }}>R572/yr</p>
+              </div>
+              <div style={{
+                background: "#faf5ff",
+                borderRadius: "12px",
+                padding: "1rem",
+                textAlign: "center"
+              }}>
+                <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "#7e22ce" }}>Premium Referral</p>
+                <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700", color: "#9333ea" }}>R774/yr</p>
+              </div>
             </div>
 
-            <div style={{
-              background: "#f8f9fa",
-              padding: "1.5rem",
-              borderRadius: "12px"
-            }}>
-              <h3 style={{ marginBottom: "1rem", fontSize: "1rem" }}>🚀 How to Get Started</h3>
-              <ol style={{ margin: 0, paddingLeft: "1.5rem", color: "#4b5563" }}>
-                <li style={{ marginBottom: "0.5rem" }}>Share your referral link with food vendors</li>
-                <li style={{ marginBottom: "0.5rem" }}>They sign up and choose Pro or Premium</li>
-                <li style={{ marginBottom: "0.5rem" }}>Earn 30% monthly for 12 months per client</li>
-                <li>Get paid via EFT to your bank account</li>
-              </ol>
-            </div>
-
-            <p style={{
-              textAlign: "center",
-              color: "#6b7280",
-              fontSize: "0.9rem",
-              marginTop: "2rem"
-            }}>
-              After confirming your email, you can{" "}
-              <a
-                href="/affiliate-dashboard"
-                style={{ color: "#667eea", fontWeight: "600" }}
-              >
-                access your dashboard here
-              </a>
-            </p>
+            {/* Dashboard Link */}
+            <a
+              href="/affiliate-dashboard"
+              style={{
+                display: "block",
+                textAlign: "center",
+                padding: "1rem",
+                background: "#f1f5f9",
+                borderRadius: "12px",
+                color: "#475569",
+                textDecoration: "none",
+                fontSize: "0.95rem",
+                fontWeight: "600",
+                transition: "all 0.2s ease"
+              }}
+            >
+              Go to Dashboard →
+            </a>
           </div>
         </div>
       </div>
