@@ -595,6 +595,341 @@ export default function AffiliateDashboard() {
           </div>
         </div>
 
+        {/* Promoter Journey Roadmap */}
+        {(() => {
+          const totalReferrals = referrals.length;
+          const milestones = [
+            { target: 3, reward: "Branded T-Shirt", emoji: "👕", color: "#10b981" },
+            { target: 7, reward: "Branded Hoodie", emoji: "🧥", color: "#3b82f6" },
+            { target: 12, reward: "R300 Voucher + Jacket", emoji: "🎁", color: "#8b5cf6" },
+            { target: 15, reward: "+10% Commission Boost", emoji: "📈", color: "#f59e0b" },
+            { target: 20, reward: "Soccer Jersey + Air Force", emoji: "👟", color: "#ef4444" }
+          ];
+
+          // Determine current level
+          let currentLevel = 0;
+          let currentTitle = "Starter";
+          let currentEmoji = "🌱";
+
+          if (totalReferrals >= 20) { currentLevel = 5; currentTitle = "Legend"; currentEmoji = "👑"; }
+          else if (totalReferrals >= 15) { currentLevel = 4; currentTitle = "Elite Promoter"; currentEmoji = "💎"; }
+          else if (totalReferrals >= 12) { currentLevel = 3; currentTitle = "Pro Promoter"; currentEmoji = "🔥"; }
+          else if (totalReferrals >= 7) { currentLevel = 2; currentTitle = "Rising Star"; currentEmoji = "⭐"; }
+          else if (totalReferrals >= 3) { currentLevel = 1; currentTitle = "Rookie"; currentEmoji = "🚀"; }
+
+          // Find next milestone
+          const nextMilestone = milestones.find(m => totalReferrals < m.target);
+          const prevMilestoneTarget = currentLevel > 0 ? milestones[currentLevel - 1].target : 0;
+          const progressToNext = nextMilestone
+            ? ((totalReferrals - prevMilestoneTarget) / (nextMilestone.target - prevMilestoneTarget)) * 100
+            : 100;
+
+          return (
+            <div style={{
+              background: "white",
+              borderRadius: "16px",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
+              marginBottom: "2rem",
+              overflow: "hidden"
+            }}>
+              {/* Header with Current Level */}
+              <div style={{
+                background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)",
+                padding: "2rem",
+                color: "white",
+                position: "relative",
+                overflow: "hidden"
+              }}>
+                <div style={{
+                  position: "absolute",
+                  top: "-20px",
+                  right: "-20px",
+                  width: "150px",
+                  height: "150px",
+                  background: "rgba(255,255,255,0.05)",
+                  borderRadius: "50%"
+                }}></div>
+                <div style={{
+                  position: "absolute",
+                  bottom: "-40px",
+                  left: "20%",
+                  width: "100px",
+                  height: "100px",
+                  background: "rgba(255,255,255,0.03)",
+                  borderRadius: "50%"
+                }}></div>
+
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+                    <div style={{
+                      width: "70px",
+                      height: "70px",
+                      background: "rgba(255,255,255,0.15)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "2.5rem",
+                      border: "3px solid rgba(255,255,255,0.3)"
+                    }}>
+                      {currentEmoji}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.9rem", opacity: 0.8, marginBottom: "0.25rem" }}>
+                        YOUR PROMOTER LEVEL
+                      </div>
+                      <h2 style={{ margin: 0, fontSize: "1.75rem", fontWeight: "700" }}>
+                        {currentTitle}
+                      </h2>
+                      <div style={{ fontSize: "0.95rem", opacity: 0.9, marginTop: "0.25rem" }}>
+                        {totalReferrals} referral{totalReferrals !== 1 ? 's' : ''} completed
+                      </div>
+                    </div>
+                  </div>
+
+                  {nextMilestone && (
+                    <div style={{ marginTop: "1.5rem" }}>
+                      <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "0.5rem",
+                        fontSize: "0.9rem"
+                      }}>
+                        <span>Progress to {nextMilestone.emoji} {nextMilestone.reward}</span>
+                        <span style={{ fontWeight: "600" }}>
+                          {totalReferrals}/{nextMilestone.target}
+                        </span>
+                      </div>
+                      <div style={{
+                        height: "12px",
+                        background: "rgba(255,255,255,0.2)",
+                        borderRadius: "6px",
+                        overflow: "hidden"
+                      }}>
+                        <div style={{
+                          width: `${progressToNext}%`,
+                          height: "100%",
+                          background: "linear-gradient(90deg, #10b981, #34d399)",
+                          borderRadius: "6px",
+                          transition: "width 0.5s ease"
+                        }}></div>
+                      </div>
+                      <div style={{
+                        fontSize: "0.85rem",
+                        opacity: 0.8,
+                        marginTop: "0.5rem",
+                        textAlign: "center"
+                      }}>
+                        {nextMilestone.target - totalReferrals} more referral{nextMilestone.target - totalReferrals !== 1 ? 's' : ''} to unlock!
+                      </div>
+                    </div>
+                  )}
+
+                  {!nextMilestone && (
+                    <div style={{
+                      marginTop: "1rem",
+                      padding: "1rem",
+                      background: "rgba(255,255,255,0.1)",
+                      borderRadius: "8px",
+                      textAlign: "center"
+                    }}>
+                      🎉 You've unlocked ALL rewards! You're a true Legend!
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Roadmap Section */}
+              <div style={{ padding: "2rem" }}>
+                <h3 style={{
+                  margin: "0 0 1.5rem 0",
+                  fontSize: "1.1rem",
+                  color: "#374151",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}>
+                  <span>🗺️</span> Your Promoter Journey
+                </h3>
+
+                {/* Visual Roadmap */}
+                <div style={{ position: "relative" }}>
+                  {/* Progress Line */}
+                  <div style={{
+                    position: "absolute",
+                    top: "35px",
+                    left: "35px",
+                    right: "35px",
+                    height: "4px",
+                    background: "#e5e7eb",
+                    borderRadius: "2px",
+                    zIndex: 0
+                  }}>
+                    <div style={{
+                      width: `${Math.min((totalReferrals / 20) * 100, 100)}%`,
+                      height: "100%",
+                      background: "linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6, #f59e0b, #ef4444)",
+                      borderRadius: "2px",
+                      transition: "width 0.5s ease"
+                    }}></div>
+                  </div>
+
+                  {/* Milestone Cards */}
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(5, 1fr)",
+                    gap: "0.5rem",
+                    position: "relative",
+                    zIndex: 1
+                  }}>
+                    {milestones.map((milestone, index) => {
+                      const isUnlocked = totalReferrals >= milestone.target;
+                      const isCurrent = currentLevel === index + 1;
+                      const isNext = !isUnlocked && (index === 0 || totalReferrals >= milestones[index - 1].target);
+
+                      return (
+                        <div key={milestone.target} style={{ textAlign: "center" }}>
+                          {/* Milestone Circle */}
+                          <div style={{
+                            width: "70px",
+                            height: "70px",
+                            borderRadius: "50%",
+                            background: isUnlocked
+                              ? `linear-gradient(135deg, ${milestone.color}, ${milestone.color}dd)`
+                              : isNext
+                                ? "white"
+                                : "#f3f4f6",
+                            border: isNext
+                              ? `3px dashed ${milestone.color}`
+                              : isUnlocked
+                                ? "3px solid white"
+                                : "3px solid #e5e7eb",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: isUnlocked ? "1.75rem" : "1.5rem",
+                            margin: "0 auto 0.75rem auto",
+                            boxShadow: isUnlocked
+                              ? `0 4px 15px ${milestone.color}40`
+                              : isCurrent
+                                ? `0 0 0 4px ${milestone.color}30`
+                                : "none",
+                            transition: "all 0.3s ease",
+                            position: "relative"
+                          }}>
+                            {isUnlocked ? (
+                              <span>{milestone.emoji}</span>
+                            ) : (
+                              <span style={{
+                                color: isNext ? milestone.color : "#9ca3af",
+                                fontWeight: "700",
+                                fontSize: "1.1rem"
+                              }}>
+                                {milestone.target}
+                              </span>
+                            )}
+                            {isUnlocked && (
+                              <div style={{
+                                position: "absolute",
+                                bottom: "-5px",
+                                right: "-5px",
+                                width: "24px",
+                                height: "24px",
+                                background: "#10b981",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.75rem",
+                                color: "white",
+                                border: "2px solid white"
+                              }}>
+                                ✓
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Reward Label */}
+                          <div style={{
+                            fontSize: "0.75rem",
+                            fontWeight: "600",
+                            color: isUnlocked ? milestone.color : isNext ? "#374151" : "#9ca3af",
+                            marginBottom: "0.25rem",
+                            minHeight: "2.5rem",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            lineHeight: "1.3"
+                          }}>
+                            {milestone.reward}
+                          </div>
+
+                          {/* Status Badge */}
+                          <div style={{
+                            fontSize: "0.7rem",
+                            padding: "0.25rem 0.5rem",
+                            borderRadius: "999px",
+                            background: isUnlocked
+                              ? "#d1fae5"
+                              : isNext
+                                ? "#fef3c7"
+                                : "#f3f4f6",
+                            color: isUnlocked
+                              ? "#065f46"
+                              : isNext
+                                ? "#92400e"
+                                : "#6b7280",
+                            fontWeight: "600",
+                            display: "inline-block"
+                          }}>
+                            {isUnlocked ? "✓ Unlocked" : isNext ? "Next up" : `${milestone.target} refs`}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Motivational Message */}
+                <div style={{
+                  marginTop: "2rem",
+                  padding: "1.25rem",
+                  background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
+                  border: "1px solid #bbf7d0",
+                  borderRadius: "12px",
+                  textAlign: "center"
+                }}>
+                  <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
+                    {totalReferrals === 0 ? "🎯" : totalReferrals < 3 ? "💪" : totalReferrals < 7 ? "🔥" : totalReferrals < 12 ? "⚡" : totalReferrals < 20 ? "🚀" : "👑"}
+                  </div>
+                  <p style={{
+                    margin: 0,
+                    color: "#065f46",
+                    fontSize: "0.95rem",
+                    fontWeight: "500"
+                  }}>
+                    {totalReferrals === 0
+                      ? "Share your link and get your first referral to start your journey!"
+                      : totalReferrals < 3
+                        ? `Just ${3 - totalReferrals} more to earn your first reward - a Branded T-Shirt!`
+                        : totalReferrals < 7
+                          ? "Great work! Keep pushing to unlock the Hoodie!"
+                          : totalReferrals < 12
+                            ? "You're on fire! The R300 Voucher + Jacket awaits!"
+                            : totalReferrals < 15
+                              ? "Almost Elite status! +10% commission boost is within reach!"
+                              : totalReferrals < 20
+                                ? "So close to Legend! The Soccer Jersey + Air Force combo is calling!"
+                                : "You've made it to the top! You're a Mzansi Food Connect Legend!"
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Referral Link Card */}
         <div style={{
           background: "white",
